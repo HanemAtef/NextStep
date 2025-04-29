@@ -1,0 +1,70 @@
+.timeContainer {
+  display: flex;
+  flex-direction: column;
+  padding: 25px;
+  background-color: #fff;
+}
+
+.timeContainer h3 {
+  font-size: 27px;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-weight: 700;
+  color: #1a3a5f !important;
+
+}
+
+.timeIcon {
+  font-size: 20px;
+  font-style: normal;
+  padding-left: 5px;
+}
+
+.timeline {
+  display: flex;
+  align-items: center;
+  margin-top: 20px;
+}
+
+.step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: #0a162b;
+}
+
+.circle {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: #bbcde0;
+  border: 2px solid #bbcde0;
+  z-index: 1;
+}
+
+.circle.active {
+  background-color: #3470db;
+  border-color: #3470db;
+}
+
+.line {
+  width: 100px;
+  height: 2px;
+  background-color: #bbcde0;
+  z-index: 0;
+  border-radius: 50px;
+}
+
+.line.active {
+  background-color: #3470db;
+}
+
+.stepLabel {
+  margin-top: 8px;
+  font-size: 20px;
+  text-align: center;
+  width: 200px;
+
+}

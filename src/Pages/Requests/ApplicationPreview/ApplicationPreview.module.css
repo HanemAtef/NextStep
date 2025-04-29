@@ -1,0 +1,224 @@
+.line {
+    height: 1px;
+    background: linear-gradient(to right, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0));
+    border: none;
+    margin: 30px 0;
+    width: 100%;
+}
+
+.applicationPreview {
+    justify-self: center;
+    background-color: white;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    direction: rtl;
+    text-align: right;
+    transition: all 0.3s ease-in-out;
+    overflow: hidden;
+    width: 95%;
+}
+
+.header {
+    font-size: 27px;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-weight: 700;
+    color: #1a3a5f !important;
+}
+
+.iconReview {
+    font-size: 20px;
+    font-style: normal;
+}
+
+.actions {
+    margin: 20px 10px;
+}
+
+.upIcon {
+    margin-left: 7px;
+}
+
+.upload,
+.notes {
+    font-size: 20px;
+    margin: 30px 0px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-weight: 700;
+    color: #1a3a5f !important;
+}
+
+.upload label,
+.notes label {
+    font-size: 25px;
+}
+
+.inputtt {
+    width: 50%;
+    padding: 8px;
+    border-top: 0px;
+    border-left: 0px;
+    border-right: 0px;
+    border-bottom: 1px solid #ccc;
+    text-align: right;
+    outline: none;
+}
+
+input[type="file"] {
+    width: 50%;
+    padding: 8px;
+    border-bottom: 1px solid #ccc;
+    outline: none;
+}
+
+.buttons {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+    gap: 30px;
+}
+
+/* button {
+    padding: 10px 10px;
+    cursor: pointer;
+    width: 15%;
+    margin-top: 20px;
+    margin-bottom: 10px;
+} */
+
+.approve {
+    background-color: #e6f9f0;
+    color: #015b45;
+    padding: 8px 12px;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 15px;
+    display: inline-block;
+    box-shadow: 0 2px 4px rgba(0, 127, 95, 0.15);
+    border: 1px solid rgba(5, 120, 92, 0.2);
+    min-width: 150px;
+}
+
+.approve:hover {
+    background-color: #4b876a;
+    color: white;
+    transition: all .3s ease-in-out;
+}
+
+.reject {
+    background-color: #ffebee;
+    color: #c9184a;
+    padding: 8px 12px;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 15px;
+    display: inline-block;
+    box-shadow: 0 2px 4px rgba(201, 24, 74, 0.15);
+    border: 1px solid rgba(201, 24, 74, 0.2);
+    min-width: 150px;
+}
+
+.reject:hover {
+    color: white;
+    background: #a71e45;
+    transition: all .3s ease-in-out;
+}
+
+.backButton {
+    padding: 8px 14px;
+    border-radius: 8px;
+    background-color: #3470db;
+    box-shadow: 0 2px 5px rgba(52, 112, 219, 0.3);
+    color: white;
+    border: none;
+    font-weight: 500;
+    font-size: 15px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    width: 170px;
+    /* margin: 0 auto; */
+}
+
+.backButton:hover {
+    background-color: #265bbc;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(52, 112, 219, 0.4);
+}
+
+.loadingContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 300px;
+    gap: 20px;
+}
+
+.loader {
+    border: 5px solid #f3f3f3;
+    border-top: 5px solid #3470db;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.errorContainer {
+    background-color: #fff5f5;
+    border: 1px solid #ffcccc;
+    border-radius: 16px;
+    padding: 30px;
+    text-align: center;
+    margin: 30px 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+}
+
+.errorContainer p {
+    color: #e53e3e;
+    font-size: 16px;
+    margin: 0;
+    line-height: 1.5;
+}
+
+.errorActions {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    margin-top: 10px;
+}
+
+.retryButton {
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 15px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.retryButton:hover {
+    background-color: #3d8b40;
+    transform: translateY(-2px);
+}
+
+/**********************************************************/

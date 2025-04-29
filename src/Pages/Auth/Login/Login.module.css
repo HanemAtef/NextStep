@@ -1,0 +1,132 @@
+.loginPage {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    margin: 0;
+    background-color: #f5f5f5;
+    background-image: radial-gradient(#e0e0e0 1px, transparent 1px);
+    background-size: 20px 20px;
+}
+
+.loginCard {
+    background-color: #fff;
+    border-radius: 12px;
+    overflow: hidden;
+    width: 90%;
+    max-width: 900px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+}
+
+.cardContent {
+    display: flex;
+    flex-direction: row;
+    height: 550px;
+}
+
+.loginImage {
+    flex: 1;
+    background-color: #fff;
+    display: flex;
+}
+
+.loginLogo {
+    width: 93%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.loginForm {
+    flex: 1;
+    padding: 40px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    background-color: #ffffff;
+    direction: rtl;
+}
+
+.title {
+    text-align: center;
+    margin-bottom: 30px;
+    font-size: 26px;
+    color: #731755;
+    font-weight: bold;
+}
+
+.formGroup {
+    margin-bottom: 22px;
+    display: flex;
+    flex-direction: column;
+}
+
+.label {
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: #555;
+    font-size: 14px;
+}
+
+.inputt {
+    padding: 12px 15px;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+    font-size: 15px;
+    transition: all 0.25s ease;
+}
+
+.inputt:focus {
+    outline: none;
+    border-color: #731755;
+    box-shadow: 0 0 0 2px rgba(115, 23, 85, 0.1);
+}
+
+.invalid {
+    border-color: #f44336;
+}
+
+.error {
+    color: #f44336;
+    font-size: 13px;
+    margin-top: 5px;
+}
+
+.submitButton {
+    width: 100%;
+    padding: 12px;
+    background-color: #731755;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: 15px;
+    text-align: center;
+    justify-content: center;
+    box-shadow: 0 2px 6px rgba(115, 23, 85, 0.2);
+}
+
+.submitButton:hover {
+    background-color: #5e1346;
+    box-shadow: 0 4px 8px rgba(115, 23, 85, 0.3);
+}
+
+@media (max-width: 768px) {
+    .cardContent {
+        flex-direction: column;
+        height: auto;
+    }
+
+    .loginImage {
+        height: 200px;
+        padding: 20px;
+    }
+
+    .loginForm {
+        padding: 25px 20px;
+    }
+}

@@ -1,0 +1,196 @@
+import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+
+const BASE_URL = 'https://nextstep.runasp.net'; 
+
+const getHeaders = () => {
+    const token = sessionStorage.getItem('token'); 
+    return {
+        'Authorization': token ? `Bearer ${token}` : '',
+        'Content-Type': 'application/json',
+    };
+};
+
+export const fetchOutboxRequests = createAsyncThunk(
+    "outbox/fetchOutboxRequests",
+    async ({ page, pageSize, searchID, status, type }, { rejectWithValue }) => {
+        try {
+            let url = `${BASE_URL}/api/Applications/outbox?page=${page}&limit=${pageSize}`;
+
+            if (searchID) url += `&search=${searchID}`;
+            if (status) url += `&status=${status}`;
+            if (type) url += `&requestType=${type}`;
+            // if (department) url += `&department=${department}`;
+
+            const response = await fetch(
+                url,
+                { headers: getHeaders() }
+            );
+
+            if (!response.ok) {
+                throw new Error("فشل في جلب الطلبات الصادرة");
+            }
+
+            const data = await response.json();
+            return data;
+        } catch (error) {
+            return rejectWithValue(error.message || "فشل في جلب الطلبات الصادرة");
+        }
+    }
+);
+
+export const getOutboxRequestDetails = createAsyncThunk(
+    "outbox/getOutboxRequestDetails",
+    async (requestId, { rejectWithValue }) => {
+        try {
+            const response = await fetch(
+                `${BASE_URL}/api/Applications/outbox/${requestId}`,
+                { headers: getHeaders() } 
+            );
+
+
+            if (!response.ok) {
+                throw new Error("فشل في جلب تفاصيل الطلب");
+            }
+
+            const data = await response.json();
+            return data;
+        } catch (error) {
+            return rejectWithValue(error.message || "فشل في جلب تفاصيل الطلب");
+        }
+    }
+);
+
+const outboxSlice = createSlice({
+    name: "outbox",
+    initialState: {
+        requests: [],
+        loading: false,
+        error: null,
+        requestDetailsLoading: false,
+        requestDetailsError: null,
+        page: 1,
+        pageSize: 10,
+        totalCount: 0,
+        currentRequest: null,
+        stats: {
+            total: 0,
+            new: 0,
+            inProgress: 0,
+            approved: 0,
+            rejected: 0
+        },
+        lastUpdated: null,
+    },
+    reducers: {
+        setPage: (state, action) => {
+            state.page = action.payload;
+        },
+        setPageSize: (state, action) => {
+            state.pageSize = action.payload;
+        },
+        setCurrentOutboxRequest: (state, action) => {
+            state.currentRequest = action.payload;
+        },
+        clearCurrentOutboxRequest: (state) => {
+            state.currentRequest = null;
+        },
+    },
+    extraReducers: (builder) => {
+        builder
+            // Handle fetchOutboxRequests
+            .addCase(fetchOutboxRequests.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(fetchOutboxRequests.fulfilled, (state, action) => {
+                state.loading = false;
+
+             
+                if (action.payload.applications) {
+                    
+                    state.requests = action.payload.applications.map(app => ({
+                        id: app.applicationId,
+                        type: app.applicationType,
+                        to: app.targetDepartment,
+                        sentDate: app.sentDate,
+                        status: app.status,
+                    }));
+
+                  
+                    if (action.payload.summary) {
+                        state.stats.total = action.payload.summary.totalApplications || 0;
+                        state.stats.new = action.payload.summary.newApplications || 0;
+                        state.stats.inProgress = action.payload.summary.inProgressApplications || 0;
+                        state.stats.approved = action.payload.summary.approvedApplications || 0;
+                        state.stats.rejected = action.payload.summary.rejectedApplications || 0;
+                    }
+
+               
+                    if (action.payload.pagination) {
+                        state.totalCount = action.payload.pagination.totalCount || action.payload.pagination.total || state.requests.length;
+                    } else if (action.payload.summary) {
+                        state.totalCount = action.payload.summary.totalApplications || state.requests.length;
+                    } else {
+                        state.totalCount = state.requests.length;
+                    }
+                } else {
+                   
+                    state.requests = Array.isArray(action.payload.data) ? action.payload.data :
+                        Array.isArray(action.payload) ? action.payload : [];
+
+                    if (action.payload.pagination) {
+                        state.totalCount = action.payload.pagination.totalCount || action.payload.pagination.total || state.requests.length;
+                    } else {
+                        state.totalCount = state.requests.length;
+                    }
+
+                    state.stats.total = state.requests.length;
+                    state.stats.new = state.requests.filter(req =>
+                        req && (req.status === "New" || req.status === "طلب جديد")
+                    ).length;
+                    state.stats.inProgress = state.requests.filter(req =>
+                        req && (req.status === "قيد_التنفيذ" ||
+                            req.status === "قيد المراجعة" ||
+                            req.status === "قيد التنفيذ" ||
+                            req.status === "InProgress")
+                    ).length;
+                    state.stats.approved = state.requests.filter(req =>
+                        req && (req.status === "Accepted" || req.status === "مقبول")
+                    ).length;
+                    state.stats.rejected = state.requests.filter(req =>
+                        req && (req.status === "Rejected" || req.status === "مرفوض")
+                    ).length;
+                }
+
+                state.lastUpdated = new Date().toISOString();
+            })
+            .addCase(fetchOutboxRequests.rejected, (state, action) => {
+                state.loading = false;
+                state.error = action.payload || action.error.message;
+            })
+
+
+    }
+});
+
+export const {
+    setPage,
+    setPageSize,
+    setCurrentOutboxRequest,
+    clearCurrentOutboxRequest,
+} = outboxSlice.actions;
+
+export default outboxSlice.reducer;
+
+// Selectors
+export const selectOutboxRequests = (state) => state.outbox.requests;
+export const selectOutboxLoading = (state) => state.outbox.loading;
+export const selectOutboxError = (state) => state.outbox.error;
+export const selectOutboxStats = (state) => state.outbox.stats;
+export const selectCurrentOutboxRequest = (state) => state.outbox.currentRequest;
+export const selectRequestDetailsLoading = (state) => state.outbox.requestDetailsLoading;
+export const selectRequestDetailsError = (state) => state.outbox.requestDetailsError;
+export const selectOutboxPage = (state) => state.outbox.page;
+export const selectOutboxPageSize = (state) => state.outbox.pageSize;
+export const selectOutboxTotalCount = (state) => state.outbox.totalCount;
+export const selectLastUpdatedOutbox = (state) => state.outbox.lastUpdated;

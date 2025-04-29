@@ -1,0 +1,129 @@
+.line {
+    height: 1px;
+    background: linear-gradient(to right, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0));
+    border: none;
+    margin: 30px 0;
+    width: 100%;
+}
+
+.applicationHistory {
+    justify-self: center;
+    background-color: white;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    direction: rtl;
+    text-align: right;
+    transition: all 0.3s ease-in-out;
+    overflow: hidden;
+    width: 95%;
+}
+
+.header {
+    font-size: 20px;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-weight: 700;
+    color: #1a3a5f !important;
+}
+
+.iconHistory {
+    font-size: 24px;
+}
+
+.backButton {
+    padding: 8px 14px;
+    border-radius: 8px;
+    background-color: #3470db;
+    box-shadow: 0 2px 5px rgba(52, 112, 219, 0.3);
+    color: white;
+    border: none;
+    font-weight: 500;
+    font-size: 15px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    width: 200px;
+}
+
+.backButton:hover {
+    background-color: #265bbc;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(52, 112, 219, 0.4);
+}
+
+.loadingContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 300px;
+    gap: 20px;
+}
+
+.loader {
+    border: 5px solid #f3f3f3;
+    border-top: 5px solid #3470db;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.errorContainer {
+    background-color: #fff5f5;
+    border: 1px solid #ffcccc;
+    border-radius: 16px;
+    padding: 30px;
+    text-align: center;
+    margin: 30px 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+}
+
+.errorContainer p {
+    color: #e53e3e;
+    font-size: 16px;
+    margin: 0;
+    line-height: 1.5;
+}
+
+.errorActions {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    margin-top: 10px;
+}
+
+.retryButton {
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 15px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.retryButton:hover {
+    background-color: #3d8b40;
+    transform: translateY(-2px);
+}
+
+.iconReview {
+    font-size: 1.5rem;
+}

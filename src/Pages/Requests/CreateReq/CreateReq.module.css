@@ -1,0 +1,160 @@
+.createPageWrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 6px;
+}
+
+.mainContent {
+    background-color: #fff;
+    width: 90%;
+    max-width: 950px;
+    max-height: 90vh;
+    padding: 2rem;
+    border-radius: 12px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    direction: rtl;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+}
+
+.title {
+    font-size: 27px;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 600;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #f0f0f0;
+    color: #1a3a5f !important;
+}
+
+.iconn {
+    color: #3470db;
+    font-size: 24px;
+}
+
+.form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.formRow {
+    display: flex;
+    flex-direction: row;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.formGroup {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+
+.formLabel {
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+    color: #444;
+    font-size: 14px;
+}
+
+.formControl,
+.formSelect,
+.formTextarea {
+    padding: 0.75rem 1rem;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+    font-size: 17px;
+    background-color: #f9f9f9;
+    transition: all 0.25s ease;
+}
+
+.formControl:focus,
+.formSelect:focus,
+.formTextarea:focus {
+    outline: none;
+    border-color: rgb(169, 162, 231);
+    background-color: #fff;
+}
+
+.formFileInput {
+    padding: 0.75rem 0;
+    font-size: 15px;
+}
+
+.errorText {
+    color: #f44336;
+    font-size: 13px;
+    margin-top: 5px;
+}
+
+.successText {
+    color: #4caf50;
+    font-size: 13px;
+    margin-top: 5px;
+}
+
+.buttonGroup {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.btnCreate {
+    padding: 0.7rem 1.8rem;
+    font-size: 1rem;
+    font-weight: 600;
+    border-radius: 6px;
+    background-color: #3470db;
+    color: #fff;
+    border: none;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.btnCreate:hover {
+    background-color: #1c4b9e;
+
+}
+
+.btnCancel {
+    padding: 0.7rem 1.8rem;
+    font-size: 1rem;
+    font-weight: 600;
+    border-radius: 6px;
+    background-color: #f1f1f1;
+    color: #333;
+    border: none;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.btnCancel:hover {
+    background-color: #e0e0e0;
+}
+
+.formTextarea {
+    resize: vertical;
+    min-height: 80px;
+}
+
+@media (max-width: 768px) {
+    .formRow {
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .mainContent {
+        padding: 1.5rem;
+    }
+
+    .btnCreate,
+    .btnCancel {
+        padding: 0.6rem 1.5rem;
+    }
+}

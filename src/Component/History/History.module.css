@@ -1,0 +1,135 @@
+  .historyy {
+    margin-top: 50px;
+    margin-bottom: 35px;
+    position: relative;
+    padding: 10px 5px;
+  }
+
+  .historyy h3 {
+    font-size: 27px;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-weight: 700;
+    color: #1a3a5f !important;
+  }
+
+  .penIcon {
+    font-size: 20px;
+  }
+
+  .historyCardd {
+    display: flex;
+    transition: all .5s ease-in;
+    transition: transform 0.3s ease;
+    transform: translateZ(0);
+    backface-visibility: hidden;
+    will-change: transform;
+
+  }
+
+  .cardBody {
+    padding: 0;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .historyItem {
+    min-width: 250px;
+    padding: 22px 25px;
+    border-radius: 0 0 12px 12px;
+    margin-top: 0;
+    gap: 12px;
+    display: flex;
+    flex-direction: column;
+    background-color: #fff;
+    position: relative;
+
+  }
+
+
+
+  .cardTitlee {
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    color: #fff;
+    font-size: large;
+    font-weight: 700;
+    font-size: 14px;
+    background-color: #3470db;
+    padding: 1px;
+
+  }
+
+  .cardItem {
+    font-size: 18px;
+
+  }
+
+  .cardItem strong {
+    margin: 5px;
+    color: #0a162b;
+  }
+
+  .cardItem {
+    font-size: 16px;
+    line-height: 1.6;
+    padding: 10px 12px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+    transition: all 0.25s ease;
+    border-radius: 8px;
+  }
+
+  .cardItem:last-child {
+    border-bottom: none;
+  }
+
+  .cardItem strong {
+    margin-right: 10px;
+    color: #0a162b;
+    font-weight: 600;
+    display: inline-block;
+    position: relative;
+  }
+
+  @media (max-width: 768px) {
+    .history h3 {
+      font-size: 24px;
+    }
+
+    .historyItem {
+      padding: 18px;
+    }
+
+    .cardItem {
+      font-size: 16px;
+    }
+
+    .historyCard:hover {
+      transform: translateY(-5px);
+    }
+  }
+
+  @media (max-width: 480px) {
+    .history h3 {
+      font-size: 22px;
+      gap: 10px;
+    }
+
+    .cardTitle {
+      font-size: 17px;
+      padding: 15px;
+    }
+
+    .cardItem {
+      padding: 8px 10px;
+    }
+
+    .cardItem:hover {
+      transform: translateX(-3px);
+      padding-left: 14px;
+    }
+  }
