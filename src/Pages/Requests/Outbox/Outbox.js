@@ -7,6 +7,8 @@ import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
 import { useNavigate } from "react-router-dom";
 import ApplicationHistory from "../ApplicationHistory/ApplicationHistory";
 import styles from "./Outbox.module.css";
+import axios from 'axios';
+import CustomSelect from '../../../Component/CustomSelect/CustomSelect';
 
 import {
   fetchOutboxRequests,
@@ -20,6 +22,48 @@ import {
   selectOutboxPageSize,
   selectOutboxTotalCount
 } from "../../../Redux/slices/outboxSlice";
+
+const APPLICATION_TYPES = [
+  { id: 2, name: "طلب الالتحاق الخاص بقسم نظم المعلومات" },
+  { id: 3, name: "طلب الالتحاق الخاص بقسم حسابات علميه" },
+  { id: 4, name: "طلب الالتحاق الخاص بقسم ذكاء اصطناعي" },
+  { id: 5, name: "طلب مد الخاص بقسم علوم حاسب" },
+  { id: 6, name: "طلب مد الخاص بقسم نظم المعلومات" },
+  { id: 8, name: "طلب مد الخاص بقسم ذكاء اصطناعي" },
+  { id: 9, name: "ايقاف قيد الخاص بقسم علوم حاسب" },
+  { id: 10, name: "ايقاف قيد الخاص بقسم نظم المعلومات" },
+  { id: 11, name: "ايقاف قيد الخاص بقسم حسابات علميه" },
+  { id: 12, name: "ايقاف قيد الخاص بقسم ذكاء اصطناعي" },
+  { id: 13, name: "الغاء تسجيل الخاص بقسم علوم حاسب" },
+  { id: 14, name: "الغاء تسجيل الخاص بقسم نظم المعلومات" },
+  { id: 15, name: "الغاء تسجيل الخاص بقسم حسابات علميه" },
+  { id: 16, name: "الغاء تسجيل الخاص بقسم ذكاء اصطناعي" },
+  { id: 17, name: "سيمنار 1 تعيين لجنة الاشراف والخطه البحثيه الخاص بقسم علوم حاسب" },
+  { id: 18, name: "سيمنار 1 تعيين لجنة الاشراف والخطه البحثيه الخاص بقسم نظم المعلومات" },
+  { id: 19, name: "سيمنار 1 تعيين لجنة الاشراف والخطه البحثيه الخاص بقسم حسابات علميه" },
+  { id: 20, name: "سيمنار 1 تعيين لجنة الاشراف والخطه البحثيه الخاص بقسم ذكاء اصطناعي" },
+  { id: 21, name: "سيمنار 2 صلاحية الخاص بقسم علوم حاسب" },
+  { id: 22, name: "سيمنار 2 صلاحية الخاص بقسم نظم المعلومات" },
+  { id: 23, name: "سيمنار 2 صلاحية الخاص بقسم حسابات علميه" },
+  { id: 24, name: "سيمنار 2 صلاحية الخاص بقسم ذكاء اصطناعي" },
+  { id: 25, name: "تشكيل لجنة حكم الخاص بقسم علوم حاسب" },
+  { id: 26, name: "تشكيل لجنة حكم الخاص بقسم نظم المعلومات" },
+  { id: 27, name: "تشكيل لجنة حكم الخاص بقسم حسابات علميه" },
+  { id: 28, name: "تشكيل لجنة حكم الخاص بقسم ذكاء اصطناعي" },
+  { id: 29, name: "سيمنار مناقشة الخاص بقسم علوم حاسب" },
+  { id: 30, name: "سيمنار مناقشة الخاص بقسم نظم المعلومات" },
+  { id: 31, name: "سيمنار مناقشة الخاص بقسم حسابات علميه" },
+  { id: 32, name: "سيمنار مناقشة الخاص بقسم ذكاء اصطناعي" },
+  { id: 33, name: "منح الخاص بقسم علوم حاسب" },
+  { id: 34, name: "منح الخاص بقسم نظم المعلومات" },
+  { id: 35, name: "منح الخاص بقسم حسابات علميه" },
+  { id: 36, name: "منح الخاص بقسم ذكاء اصطناعي" },
+  { id: 39, name: "الغاء تسجيل الخاص بقسم علوم حاسب" },
+  { id: 40, name: "الغاء تسجيل الخاص بقسم حسابات علميه" },
+  { id: 41, name: "الغاء تسجيل الخاص بقسم نظم المعلومات" },
+  { id: 42, name: "الغاء تسجيل الخاص بقسم ذكاء اصطناعي" },
+  { id: 92, name: "طلب الالتحاق الخلص بقسم علوم الحاسب" }
+];
 
 export default function Outbox() {
   const dispatch = useDispatch();
@@ -50,8 +94,6 @@ export default function Outbox() {
   const [statusFilter, setStatusFilter] = useState("");
   const [typeFilter, setTypeFilter] = useState("");
 
-  const requestTypes = [...new Set(requests.map(req => req.type))];
-
   const totalPages = Math.ceil(totalCount / pageSize);
 
   useEffect(() => {
@@ -70,7 +112,6 @@ export default function Outbox() {
       dispatch(setPage(1));
     }
   }, [searchID, statusFilter, typeFilter, dispatch]);
-
 
   const formatDate = (dateString) => {
     if (!dateString) return "غير معروف";
@@ -193,30 +234,33 @@ export default function Outbox() {
             />
           </div>
           <div className={styles.filters}>
-            <select
-              className={styles.selectBox}
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-            >
-              <option value="">كل الحالات</option>
-              <option value="قيد_التنفيذ">قيد التنفيذ</option>
-              <option value="مقبول">مقبول</option>
-              <option value="مرفوض">مرفوض</option>
-              <option value="طلب_جديد">طلب جديد</option>
-            </select>
-
-            <select
-              className={styles.selectBox}
-              value={typeFilter}
-              onChange={(e) => setTypeFilter(e.target.value)}
-            >
-              <option value="">كل أنواع الطلبات</option>
-              {requestTypes.map((type) => (
-                <option key={type} value={type}>
-                  {type}
-                </option>
-              ))}
-            </select>
+            <div className={styles.selectBox}>
+              <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+              >
+                <option value="">كل الحالات</option>
+                <option value="قيد_التنفيذ">قيد التنفيذ</option>
+                <option value="مقبول">مقبول</option>
+                <option value="مرفوض">مرفوض</option>
+                <option value="طلب_جديد">طلب جديد</option>
+              </select>
+            </div>
+            <div className={styles.selectBox}>
+              <CustomSelect
+                options={APPLICATION_TYPES.map(type => ({
+                  value: type.id,
+                  label: type.name
+                }))}
+                value={typeFilter}
+                onChange={(value) => {
+                  setTypeFilter(value);
+                  dispatch(setPage(1));
+                }}
+                placeholder="اختر نوع الطلب"
+                searchable={true}
+              />
+            </div>
           </div>
           {(searchID || statusFilter || typeFilter) && (
             <button className={styles.clearFiltersBtn} onClick={handleClearFilters}>

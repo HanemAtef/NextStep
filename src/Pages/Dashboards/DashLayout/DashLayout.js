@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import Sidebar from "../../../Component/Sidebar/Sidebar";
 import Nav from "../../../Component/Nav/Nav";
-import { Outlet, Link, useNavigate } from "react-router-dom";  // سيظهر المحتوى الداخلي هنا
+import { Outlet, Link, useNavigate } from "react-router-dom";  
 import styles from "./DashLayout.module.css";
 import { FiMail, FiSend, FiUser, FiPlus } from "react-icons/fi";
 

@@ -1,5 +1,4 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import axios from 'axios';
 
 const BASE_URL = 'https://nextstep.runasp.net';
 
@@ -11,6 +10,48 @@ const getHeaders = () => {
     };
 };
 
+const APPLICATION_TYPE_MAPPING = {
+    'طلب الالتحاق الخاص بقسم نظم المعلومات': 2,
+    'طلب الالتحاق الخاص بقسم حسابات علميه': 3,
+    'طلب الالتحاق الخاص بقسم ذكاء اصطناعي': 4,
+    'طلب مد الخاص بقسم علوم حاسب': 5,
+    'طلب مد الخاص بقسم نظم المعلومات': 6,
+    'طلب مد الخاص بقسم ذكاء اصطناعي': 8,
+    'ايقاف قيد الخاص بقسم علوم حاسب': 9,
+    'ايقاف قيد الخاص بقسم نظم المعلومات': 10,
+    'ايقاف قيد الخاص بقسم حسابات علميه': 11,
+    'ايقاف قيد الخاص بقسم ذكاء اصطناعي': 12,
+    'الغاء تسجيل الخاص بقسم علوم حاسب': 13,
+    'الغاء تسجيل الخاص بقسم نظم المعلومات': 14,
+    'الغاء تسجيل الخاص بقسم حسابات علميه': 15,
+    'الغاء تسجيل الخاص بقسم ذكاء اصطناعي': 16,
+    'سيمنار 1 تعيين لجنة الاشراف والخطه البحثيه الخاص بقسم علوم حاسب': 17,
+    'سيمنار 1 تعيين لجنة الاشراف والخطه البحثيه الخاص بقسم نظم المعلومات': 18,
+    'سيمنار 1 تعيين لجنة الاشراف والخطه البحثيه الخاص بقسم حسابات علميه': 19,
+    'سيمنار 1 تعيين لجنة الاشراف والخطه البحثيه الخاص بقسم ذكاء اصطناعي': 20,
+    'سيمنار 2 صلاحية الخاص بقسم علوم حاسب': 21,
+    'سيمنار 2 صلاحية الخاص بقسم نظم المعلومات': 22,
+    'سيمنار 2 صلاحية الخاص بقسم حسابات علميه': 23,
+    'سيمنار 2 صلاحية الخاص بقسم ذكاء اصطناعي': 24,
+    'تشكيل لجنة حكم الخاص بقسم علوم حاسب': 25,
+    'تشكيل لجنة حكم الخاص بقسم نظم المعلومات': 26,
+    'تشكيل لجنة حكم الخاص بقسم حسابات علميه': 27,
+    'تشكيل لجنة حكم الخاص بقسم ذكاء اصطناعي': 28,
+    'سيمنار مناقشة الخاص بقسم علوم حاسب': 29,
+    'سيمنار مناقشة الخاص بقسم نظم المعلومات': 30,
+    'سيمنار مناقشة الخاص بقسم حسابات علميه': 31,
+    'سيمنار مناقشة الخاص بقسم ذكاء اصطناعي': 32,
+    'منح الخاص بقسم علوم حاسب': 33,
+    'منح الخاص بقسم نظم المعلومات': 34,
+    'منح الخاص بقسم حسابات علميه': 35,
+    'منح الخاص بقسم ذكاء اصطناعي': 36,
+    'الغاء تسجيل الخاص بقسم علوم حاسب': 39,
+    'الغاء تسجيل الخاص بقسم حسابات علميه': 40,
+    'الغاء تسجيل الخاص بقسم نظم المعلومات': 41,
+    'الغاء تسجيل الخاص بقسم ذكاء اصطناعي': 42,
+    'طلب الالتحاق الخلص بقسم علوم الحاسب': 92
+};
+
 export const fetchInboxRequests = createAsyncThunk(
     "inbox/fetchRequests",
     async ({ page, pageSize, searchID, status, type, department }, { rejectWithValue }) => {
@@ -20,23 +61,23 @@ export const fetchInboxRequests = createAsyncThunk(
             if (searchID) url += `&search=${searchID}`;
             if (status) url += `&status=${status}`;
             if (type) url += `&requestType=${type}`;
-            // if (department) url += `&department=${department}`;
-            console.log("Inbox API Request URL:", url);
-            console.log("Inbox Filter Parameters:", { page, pageSize, searchID, status, type });
-            // console.log("Department filter provided but not supported by the API:", department);
+            if (department) url += `&department=${department}`;
 
-            const response = await axios.get(url, {
-                headers: getHeaders(),
-            });
+            console.log("Inbox API URL:", url);
 
-            console.log("Inbox API Response:", response.data);
+            const response = await fetch(url, { headers: getHeaders() });
 
-            return response.data;
+            if (!response.ok) {
+                throw new Error("فشل في جلب الطلبات الواردة");
+            }
+
+            const data = await response.json();
+            console.log("Raw API Response:", data);
+            console.log("First application details:", data.applications?.[0]);
+            return data;
         } catch (error) {
-            console.error("Inbox API Error:", error.response?.data || error.message);
-            return rejectWithValue(
-                error.response?.data?.message || "Failed to fetch inbox requests"
-            );
+            console.error("Inbox API Error:", error);
+            return rejectWithValue(error.message || "فشل في جلب الطلبات الواردة");
         }
     }
 );
@@ -45,7 +86,7 @@ export const getInboxRequestDetails = createAsyncThunk(
     "inbox/getInboxRequestDetails",
     async (requestId, { rejectWithValue }) => {
         try {
-            const response = await fetch(`https://nextstep.runasp.net/api/Applications/inbox/${requestId}`, { headers: getHeaders() });
+            const response = await fetch(`${BASE_URL}/api/Applications/inbox/${requestId}`, { headers: getHeaders() });
             if (!response.ok) throw new Error("فشل في جلب تفاصيل الطلب");
             const data = await response.json();
             return data;
@@ -96,54 +137,56 @@ const inboxSlice = createSlice({
             })
             .addCase(fetchInboxRequests.fulfilled, (state, action) => {
                 state.loading = false;
+                console.log("Redux Action Payload:", action.payload);
 
-                if (action.payload.applications) {
-                    state.requests = action.payload.applications.map(app => ({
-                        id: app.applicationId,
-                        type: app.applicationType,
-                        from: app.sendingDepartment,
-                        receivedDate: app.sentDate,
-                        status: app.status,
-                        finalDesicion: app.status !== "طلب_جديد" ? app.status : null
-                    }));
+                if (action.payload && action.payload.applications) {
+                    console.log("Processing applications:", action.payload.applications);
+                    state.requests = action.payload.applications.map(app => {
+                        console.log("Mapping application:", app);
+                        const mappedApp = {
+                            id: app.applicationId,
+                            type: app.applicationType,
+                            from: app.sendingDepartment,
+                            receivedDate: app.sentDate,
+                            status: app.status,
+                            finalDesicion: app.status !== "طلب_جديد" ? app.status : null,
+                            applicationTypeId: APPLICATION_TYPE_MAPPING[app.applicationType] || app.applicationTypeId || app.typeId
+                        };
+                        console.log("Mapped application:", mappedApp);
+                        return mappedApp;
+                    });
+
+                    console.log("Mapped requests:", state.requests);
 
                     if (action.payload.summary) {
-                        state.stats.total = action.payload.summary.totalApplications;
-                        state.stats.new = action.payload.summary.newApplications;
+                        state.stats.total = action.payload.summary.totalApplications || 0;
+                        state.stats.new = action.payload.summary.newApplications || 0;
                         state.stats.inProgress = action.payload.summary.totalApplications -
                             action.payload.summary.newApplications -
-                            action.payload.summary.answeredApplications;
+                            action.payload.summary.answeredApplications || 0;
+                    }
+
+                    if (action.payload.pagination) {
+                        state.totalCount = action.payload.pagination.totalCount || action.payload.pagination.total || state.requests.length;
+                    } else if (action.payload.summary) {
+                        state.totalCount = action.payload.summary.totalApplications || state.requests.length;
+                    } else {
+                        state.totalCount = state.requests.length;
                     }
                 } else {
-                    state.requests = action.payload.data || action.payload;
+                    console.log("No applications in payload");
+                    state.requests = [];
+                    state.totalCount = 0;
+                    state.stats.total = 0;
+                    state.stats.new = 0;
+                    state.stats.inProgress = 0;
                 }
 
                 state.lastUpdated = new Date().toISOString();
-
-                if (action.payload.pagination) {
-                    state.totalCount = action.payload.pagination.totalCount || action.payload.pagination.total;
-                } else if (action.payload.summary) {
-                    state.totalCount = action.payload.summary.totalApplications;
-                }
-
-                if (!action.payload.summary) {
-                    const requests = state.requests;
-                    state.stats.total = requests.length;
-                    state.stats.new = requests.filter((r) =>
-                        r.status === "New" ||
-                        r.status === "طلب_جديد" ||
-                        r.status === "طلب جديد"
-                    ).length;
-                    state.stats.inProgress = requests.filter((r) =>
-                        r.status === "InProgress" ||
-                        r.status === "قيد التنفيذ" ||
-                        r.status === "قيد المراجعة"
-                    ).length;
-                }
             })
             .addCase(fetchInboxRequests.rejected, (state, action) => {
                 state.loading = false;
-                state.error = action.payload || 'حدث خطأ أثناء تحميل الطلبات';
+                state.error = action.payload || action.error.message;
             })
 
             .addCase(getInboxRequestDetails.pending, (state) => {
