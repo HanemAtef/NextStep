@@ -53,7 +53,6 @@ export const getOutboxRequestDetails = createAsyncThunk(
 
             const data = await response.json();
 
-            // Transform the API response to match our application's data structure
             const transformedData = {
                 id: data.applicationId,
                 type: data.applicationName,
@@ -76,7 +75,7 @@ export const getOutboxRequestDetails = createAsyncThunk(
                     isCompleted: step.isCompleted,
                     isCurrent: step.isCurrent
                 })) || [],
-                requestType: data.applicationContext // Use the applicationContext from API
+                requestType: data.applicationContext 
             };
 
             return transformedData;
@@ -123,7 +122,6 @@ const outboxSlice = createSlice({
     },
     extraReducers: (builder) => {
         builder
-            // Handle fetchOutboxRequests
             .addCase(fetchOutboxRequests.pending, (state) => {
                 state.loading = true;
                 state.error = null;

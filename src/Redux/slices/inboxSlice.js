@@ -89,7 +89,6 @@ export const getInboxRequestDetails = createAsyncThunk(
             const response = await fetch(`${BASE_URL}/api/Applications/${requestId}/details`, { headers: getHeaders() });
             if (!response.ok) throw new Error("فشل في جلب تفاصيل الطلب");
             const data = await response.json();
-            // Transform the API response to match our application's data structure
             const transformedData = {
                 id: data.applicationId,
                 type: data.applicationName,
@@ -112,7 +111,7 @@ export const getInboxRequestDetails = createAsyncThunk(
                     isCompleted: step.isCompleted,
                     isCurrent: step.isCurrent
                 })) || [],
-                requestType: data.applicationContext // Use the applicationContext from API
+                requestType: data.applicationContext 
             };
             return transformedData;
         } catch (error) {
@@ -162,12 +161,12 @@ const inboxSlice = createSlice({
             })
             .addCase(fetchInboxRequests.fulfilled, (state, action) => {
                 state.loading = false;
-                console.log("Redux Action Payload:", action.payload);
+                // console.log("Redux Action Payload:", action.payload);
 
                 if (action.payload && action.payload.applications) {
-                    console.log("Processing applications:", action.payload.applications);
+                    // console.log("Processing applications:", action.payload.applications);
                     state.requests = action.payload.applications.map(app => {
-                        console.log("Mapping application:", app);
+                        // console.log("Mapping application:", app);
                         const mappedApp = {
                             id: app.applicationId,
                             type: app.applicationType,
@@ -177,11 +176,11 @@ const inboxSlice = createSlice({
                             finalDesicion: app.status !== "طلب_جديد" ? app.status : null,
                             applicationTypeId: APPLICATION_TYPE_MAPPING[app.applicationType] || app.applicationTypeId || app.typeId
                         };
-                        console.log("Mapped application:", mappedApp);
+                        // console.log("Mapped application:", mappedApp);
                         return mappedApp;
                     });
 
-                    console.log("Mapped requests:", state.requests);
+                    // console.log("Mapped requests:", state.requests);
 
                     if (action.payload.summary) {
                         state.stats.total = action.payload.summary.totalApplications || 0;
@@ -199,7 +198,7 @@ const inboxSlice = createSlice({
                         state.totalCount = state.requests.length;
                     }
                 } else {
-                    console.log("No applications in payload");
+                    // console.log("No applications in payload");
                     state.requests = [];
                     state.totalCount = 0;
                     state.stats.total = 0;
