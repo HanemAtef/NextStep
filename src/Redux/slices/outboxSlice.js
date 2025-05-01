@@ -1,9 +1,9 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 
-const BASE_URL = 'https://nextstep.runasp.net'; 
+const BASE_URL = 'https://nextstep.runasp.net';
 
 const getHeaders = () => {
-    const token = sessionStorage.getItem('token'); 
+    const token = sessionStorage.getItem('token');
     return {
         'Authorization': token ? `Bearer ${token}` : '',
         'Content-Type': 'application/json',
@@ -43,17 +43,43 @@ export const getOutboxRequestDetails = createAsyncThunk(
     async (requestId, { rejectWithValue }) => {
         try {
             const response = await fetch(
-                `${BASE_URL}/api/Applications/outbox/${requestId}`,
-                { headers: getHeaders() } 
+                `${BASE_URL}/api/Applications/${requestId}/details`,
+                { headers: getHeaders() }
             );
-
 
             if (!response.ok) {
                 throw new Error("فشل في جلب تفاصيل الطلب");
             }
 
             const data = await response.json();
-            return data;
+
+            // Transform the API response to match our application's data structure
+            const transformedData = {
+                id: data.applicationId,
+                type: data.applicationName,
+                status: data.statue,
+                studentName: data.studentName,
+                nationalId: data.studentNId,
+                from: data.createdDepartment,
+                date: data.createdDate,
+                notes: data.notes,
+                fileUrl: data.fileUrl,
+                history: data.history?.map(item => ({
+                    date: item.actionDate,
+                    action: item.action,
+                    department: item.department,
+                    notes: item.notes
+                })) || [],
+                steps: data.steps?.map(step => ({
+                    department: step.departmentName,
+                    order: step.stepOrder,
+                    isCompleted: step.isCompleted,
+                    isCurrent: step.isCurrent
+                })) || [],
+                requestType: data.applicationContext // Use the applicationContext from API
+            };
+
+            return transformedData;
         } catch (error) {
             return rejectWithValue(error.message || "فشل في جلب تفاصيل الطلب");
         }
@@ -105,9 +131,9 @@ const outboxSlice = createSlice({
             .addCase(fetchOutboxRequests.fulfilled, (state, action) => {
                 state.loading = false;
 
-             
+
                 if (action.payload.applications) {
-                    
+
                     state.requests = action.payload.applications.map(app => ({
                         id: app.applicationId,
                         type: app.applicationType,
@@ -116,7 +142,7 @@ const outboxSlice = createSlice({
                         status: app.status,
                     }));
 
-                  
+
                     if (action.payload.summary) {
                         state.stats.total = action.payload.summary.totalApplications || 0;
                         state.stats.new = action.payload.summary.newApplications || 0;
@@ -125,7 +151,7 @@ const outboxSlice = createSlice({
                         state.stats.rejected = action.payload.summary.rejectedApplications || 0;
                     }
 
-               
+
                     if (action.payload.pagination) {
                         state.totalCount = action.payload.pagination.totalCount || action.payload.pagination.total || state.requests.length;
                     } else if (action.payload.summary) {
@@ -134,7 +160,7 @@ const outboxSlice = createSlice({
                         state.totalCount = state.requests.length;
                     }
                 } else {
-                   
+
                     state.requests = Array.isArray(action.payload.data) ? action.payload.data :
                         Array.isArray(action.payload) ? action.payload : [];
 

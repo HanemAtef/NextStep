@@ -1,25 +1,46 @@
 import React, { useState, useEffect } from 'react';
 import Details from "../../../Component/Details/Details";
 import History from "../../../Component/History/History";
+import { useParams, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { approveApplication, rejectApplication } from '../../../Redux/slices/previewSlice';
+import { getInboxRequestDetails } from '../../../Redux/slices/inboxSlice';
 import styles from './ApplicationPreview.module.css';
 
-const ApplicationPreview = ({ request, onBack }) => {
+const ApplicationPreview = () => {
+  const { id } = useParams();
+  const navigate = useNavigate();
   const dispatch = useDispatch();
+  const [request, setRequest] = useState(null);
   const [notes, setNotes] = useState("");
   const [file, setFile] = useState(null);
   const [showMessage, setShowMessage] = useState(false);
   const [isActionInProgress, setIsActionInProgress] = useState(false);
   const [formError, setFormError] = useState("");
+  const [loading, setLoading] = useState(true);
 
   const { successMessage, error } = useSelector(state => state.preview);
 
   useEffect(() => {
-    if (request) {
-      console.log("Request data received:", request);
-    }
-  }, [request]);
+    const fetchRequest = async () => {
+      try {
+        setLoading(true);
+        const result = await dispatch(getInboxRequestDetails(id));
+
+        if (result.payload) {
+          setRequest(result.payload);
+        } else {
+          throw new Error('فشل في جلب بيانات الطلب');
+        }
+      } catch (error) {
+        console.error('Error fetching request:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchRequest();
+  }, [dispatch, id]);
 
   const handleFileChange = (e) => {
     setFile(e.target.files[0]);
@@ -73,9 +94,10 @@ const ApplicationPreview = ({ request, onBack }) => {
       setShowMessage(true);
       setTimeout(() => {
         setShowMessage(false);
+        navigate('/inbox');
       }, 2000);
     }
-  }, [successMessage]);
+  }, [successMessage, navigate]);
 
   useEffect(() => {
     if (error) {
@@ -86,10 +108,26 @@ const ApplicationPreview = ({ request, onBack }) => {
     }
   }, [error]);
 
-  if (!request) {
+  const handleBack = () => {
+    navigate('/inbox');
+  };
+
+  if (loading) {
     return (
       <div className={styles.loadingContainer}>
+        <div className={styles.spinner}></div>
         <p>جاري تحميل بيانات الطلب...</p>
+      </div>
+    );
+  }
+
+  if (!request) {
+    return (
+      <div className={styles.errorContainer}>
+        <p>لم يتم العثور على بيانات الطلب</p>
+        <button onClick={handleBack} className={styles.backButton}>
+          العودة إلى قائمة الطلبات
+        </button>
       </div>
     );
   }
@@ -101,7 +139,7 @@ const ApplicationPreview = ({ request, onBack }) => {
         <h2 className={styles.header}>مراجعة الطلب رقم {request.id}</h2>
       </div>
 
-      <Details id={request.id} />
+      <Details request={request} />
       <div className={styles.line}></div>
       <History request={request} />
       <div className={styles.line}></div>
@@ -142,7 +180,7 @@ const ApplicationPreview = ({ request, onBack }) => {
           </button>
         </div>
       </div>
-      <button className={styles.backButton} onClick={onBack}>🔙 العودة إلى الطلبات</button>
+      <button className={styles.backButton} onClick={handleBack}>🔙 العودة إلى الطلبات</button>
 
       {showMessage && (
         <div className={styles.messagePopup}>

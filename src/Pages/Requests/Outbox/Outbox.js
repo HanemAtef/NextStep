@@ -97,21 +97,22 @@ export default function Outbox() {
   const totalPages = Math.ceil(totalCount / pageSize);
 
   useEffect(() => {
-    dispatch(fetchOutboxRequests({
-      page: currentPage,
-      pageSize,
-      searchID,
-      status: statusFilter,
-      type: typeFilter,
-      department: departmentName
-    }));
+    const loadData = async () => {
+      try {
+        await dispatch(fetchOutboxRequests({
+          page: currentPage,
+          pageSize,
+          searchID,
+          status: statusFilter,
+          type: typeFilter,
+          department: departmentName
+        }));
+      } catch (error) {
+        console.error('Error loading outbox data:', error);
+      }
+    };
+    loadData();
   }, [dispatch, currentPage, pageSize, searchID, statusFilter, typeFilter, departmentName]);
-
-  useEffect(() => {
-    if (currentPage !== 1) {
-      dispatch(setPage(1));
-    }
-  }, [searchID, statusFilter, typeFilter, dispatch]);
 
   const formatDate = (dateString) => {
     if (!dateString) return "غير معروف";

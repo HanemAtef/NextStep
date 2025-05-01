@@ -213,6 +213,18 @@ const Details = ({ id }) => {
             </div>
           </ListGroup.Item>
           <ListGroup.Item className={DetailsCSS.infoRow}>
+            <div className={DetailsCSS.infolabel}>اسم الطالب</div>
+            <div className={DetailsCSS.infovalue}>
+              {request.studentName || "غير محدد"}
+            </div>
+          </ListGroup.Item>
+          <ListGroup.Item className={DetailsCSS.infoRow}>
+            <div className={DetailsCSS.infolabel}>الرقم القومي</div>
+            <div className={DetailsCSS.infovalue}>
+              {request.studentNId || "غير محدد"}
+            </div>
+          </ListGroup.Item>
+          <ListGroup.Item className={DetailsCSS.infoRow}>
             <div className={DetailsCSS.infolabel}>الادارة المرسل منها</div>
             <div className={DetailsCSS.infovalue}>
               {request.createdDepartment || "غير محدد"}

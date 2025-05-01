@@ -127,18 +127,9 @@ export default function Inbox() {
   }, [requests, searchID, statusFilter, typeFilter]);
 
   useEffect(() => {
-    const fetchData = async () => {
+    const loadData = async () => {
       try {
-        console.log("Fetching data with params:", {
-          page: currentPage,
-          pageSize,
-          searchID,
-          status: statusFilter,
-          type: typeFilter,
-          department: departmentName
-        });
-
-        const result = await dispatch(fetchInboxRequests({
+        await dispatch(fetchInboxRequests({
           page: currentPage,
           pageSize,
           searchID,
@@ -146,21 +137,12 @@ export default function Inbox() {
           type: typeFilter,
           department: departmentName
         }));
-
-        console.log("Fetch result:", result);
       } catch (error) {
-        console.error('Error fetching inbox requests:', error);
+        console.error('Error loading inbox data:', error);
       }
     };
-
-    fetchData();
+    loadData();
   }, [dispatch, currentPage, pageSize, searchID, statusFilter, typeFilter, departmentName]);
-
-  useEffect(() => {
-    if (currentPage !== 1) {
-      dispatch(setPage(1));
-    }
-  }, [searchID, statusFilter, typeFilter, dispatch]);
 
   const formatDate = (dateString) => {
     if (!dateString) return "غير معروف";
@@ -177,10 +159,10 @@ export default function Inbox() {
   const handleSelectRequest = (req) => {
     dispatch(setCurrentInboxRequest(req));
 
-    if (req.finalDesicion) {
-      navigate(`/inbox/response/${req.id}`);
-    } else {
+    if (req.status === "طلب_جديد") {
       navigate(`/inbox/new/${req.id}`);
+    } else if (req.status === "مقبول" || req.status === "مرفوض") {
+      navigate(`/inbox/response/${req.id}`);
     }
   };
 

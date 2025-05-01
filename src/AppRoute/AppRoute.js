@@ -76,10 +76,7 @@ export default function AppRoutes() {
                 <Route element={<DashLayout title={userRole} />}>
                     <Route path="/inbox" element={<Inbox />} />
                     <Route path="/outbox" element={<Outbox />} />
-                    <Route
-                        path="/inbox/new/:id"
-                        element={<ApplicationPreview request={currentRequest} onBack={() => navigate('/inbox')} />}
-                    />
+                    <Route path="/inbox/new/:id" element={<ApplicationPreview />} />
                     <Route path="/inbox/response/:id" element={<ApplicationHistory />} />
                     <Route path="/outbox/:id" element={<ApplicationHistory />} />
                     <Route path="/user" element={<UserInfo />} />

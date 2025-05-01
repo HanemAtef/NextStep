@@ -86,10 +86,35 @@ export const getInboxRequestDetails = createAsyncThunk(
     "inbox/getInboxRequestDetails",
     async (requestId, { rejectWithValue }) => {
         try {
-            const response = await fetch(`${BASE_URL}/api/Applications/inbox/${requestId}`, { headers: getHeaders() });
+            const response = await fetch(`${BASE_URL}/api/Applications/${requestId}/details`, { headers: getHeaders() });
             if (!response.ok) throw new Error("فشل في جلب تفاصيل الطلب");
             const data = await response.json();
-            return data;
+            // Transform the API response to match our application's data structure
+            const transformedData = {
+                id: data.applicationId,
+                type: data.applicationName,
+                status: data.statue,
+                studentName: data.studentName,
+                nationalId: data.studentNId,
+                from: data.createdDepartment,
+                date: data.createdDate,
+                notes: data.notes,
+                fileUrl: data.fileUrl,
+                history: data.history?.map(item => ({
+                    date: item.actionDate,
+                    action: item.action,
+                    department: item.department,
+                    notes: item.notes
+                })) || [],
+                steps: data.steps?.map(step => ({
+                    department: step.departmentName,
+                    order: step.stepOrder,
+                    isCompleted: step.isCompleted,
+                    isCurrent: step.isCurrent
+                })) || [],
+                requestType: data.applicationContext // Use the applicationContext from API
+            };
+            return transformedData;
         } catch (error) {
             return rejectWithValue(error.message || "فشل في جلب تفاصيل الطلب");
         }

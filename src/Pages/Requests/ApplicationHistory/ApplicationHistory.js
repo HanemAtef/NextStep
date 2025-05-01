@@ -80,9 +80,11 @@ const ApplicationHistory = () => {
   useEffect(() => {
     setIsLoading(true);
     setError(null);
+    console.log("Starting request details fetch...");
 
     const fetchRequest = async () => {
       try {
+        console.log("Checking Redux store for request...");
         // First check if we already have the request in the Redux store
         let existingRequest;
         if (isInbox) {
@@ -102,48 +104,50 @@ const ApplicationHistory = () => {
           return;
         }
 
+        console.log("Request not found in Redux store, fetching from API...");
         // If not found in Redux store, fetch it directly from the API
-        console.log("Fetching request details from API...");
         const resultAction = await dispatch(
           isInbox ? getInboxRequestDetails(requestId) : getOutboxRequestDetails(requestId)
         );
 
+        console.log("API response received:", resultAction);
         if (getInboxRequestDetails.fulfilled.match(resultAction) ||
           getOutboxRequestDetails.fulfilled.match(resultAction)) {
           console.log("Request details fetched successfully:", resultAction.payload);
 
           // Check if the result is an error object
           if (resultAction.payload && typeof resultAction.payload === 'object' && resultAction.payload.errors) {
+            console.error("API returned error object:", resultAction.payload);
             throw new Error(`خطأ من الخادم: ${JSON.stringify(resultAction.payload.title || resultAction.payload.errors)}`);
           } else {
             // Process and format the data if needed
-            // Ensure it has the expected structure for the Details and History components
             const processedData = resultAction.payload;
+            console.log("Processing API response data:", processedData);
 
             // Add default values for required fields if they don't exist
             const safeData = {
               id: processedData.id || processedData.applicationId || requestId,
               type: processedData.type || processedData.applicationType || 'نوع الطلب غير معروف',
               status: processedData.status || 'الحالة غير معروفة',
-              // Add other fields that Details and History components expect
               from: processedData.from || processedData.sendingDepartment || 'غير معروف',
               receivedDate: processedData.receivedDate || processedData.sentDate || 'غير معروف',
-              ...processedData // Spread the rest of the properties
+              ...processedData
             };
 
+            console.log("Setting processed request data:", safeData);
             setRequestData(safeData);
           }
         } else {
-          console.error("Failed to fetch request details:", resultAction.error);
+          console.error("API request failed:", resultAction.error);
           throw new Error(resultAction.error?.message || 'فشل في جلب تفاصيل الطلب');
         }
       } catch (error) {
-        console.error("Error fetching request details:", error);
+        console.error("Error in fetchRequest:", error);
 
         // If this is our first attempt and we got a 404 error, try fetching the list instead
         if (retryCount === 0) {
+          console.log("First attempt failed, trying fallback method...");
           setRetryCount(1);
-          console.log("First fetch attempt failed, trying to fetch from the main list...");
           const fallbackSuccess = await fetchRequestsList();
 
           if (fallbackSuccess) {
@@ -153,7 +157,7 @@ const ApplicationHistory = () => {
           }
         }
 
-        // Both direct fetch and fallback failed
+        console.error("All fetch attempts failed");
         const errorMessage = error.message || 'حدث خطأ أثناء جلب البيانات';
         setError(
           isInbox
@@ -161,6 +165,7 @@ const ApplicationHistory = () => {
             : `فشل في جلب تفاصيل طلب صادر (${requestId}): ${errorMessage}`
         );
       } finally {
+        console.log("Setting loading to false");
         setIsLoading(false);
       }
     };
