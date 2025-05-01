@@ -13,11 +13,10 @@ export const downloadApplicationFile = createAsyncThunk(
                         Authorization: `Bearer ${token}`,
                         "Content-Type": "application/json",
                     },
-                    responseType: 'blob' // هذا مهم لتحميل الملفات
+                    responseType: 'blob' 
                 }
             );
 
-            // الحصول على اسم الملف من رأس الاستجابة أو استخدام معرف افتراضي
             const contentDisposition = response.headers['content-disposition'];
             let filename = `application-${id}-file.pdf`;
 
@@ -28,7 +27,6 @@ export const downloadApplicationFile = createAsyncThunk(
                 }
             }
 
-            // إنشاء رابط لتحميل الملف
             const url = window.URL.createObjectURL(new Blob([response.data]));
             const link = document.createElement("a");
             link.href = url;
