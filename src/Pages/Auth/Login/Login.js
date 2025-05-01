@@ -5,14 +5,15 @@ import { useDispatch, useSelector } from "react-redux";
 import { updateField, setErrors } from "../../../Redux/slices/applicationSlice";
 import { useNavigate } from "react-router-dom";
 import apiService from "../../../utils/api";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
 
 const Login = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { email, password } = useSelector((state) => state.application.formData);
   const { errors } = useSelector((state) => state.application);
+  const [showPassword, setShowPassword] = useState(false);
 
-  // Check if user is already logged in
   useEffect(() => {
     const token = sessionStorage.getItem("token");
     const role = sessionStorage.getItem("role");
@@ -102,14 +103,23 @@ const Login = () => {
 
               <div className={styles.formGroup}>
                 <label htmlFor="password" className={styles.label}>كلمة المرور</label>
-                <input
-                  type="password"
-                  id="password"
-                  className={`${styles.inputt} ${errors.password ? styles.invalid : ""}`}
-                  placeholder="*********"
-                  value={password || ""}
-                  onChange={handleChange}
-                />
+                <div className={styles.passwordInputContainer}>
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    id="password"
+                    className={`${styles.inputt} ${styles.passwordInput} ${errors.password ? styles.invalid : ""}`}
+                    placeholder="*********"
+                    value={password || ""}
+                    onChange={handleChange}
+                  />
+                  <button
+                    type="button"
+                    className={styles.togglePassword}
+                    onClick={() => setShowPassword(!showPassword)}
+                  >
+                    {showPassword ? <FaEyeSlash /> : <FaEye />}
+                  </button>
+                </div>
                 {errors.password && <div className={styles.error}>{errors.password}</div>}
               </div>
 

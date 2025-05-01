@@ -160,9 +160,9 @@ export default function Inbox() {
     dispatch(setCurrentInboxRequest(req));
 
     if (req.status === "طلب_جديد") {
-      navigate(`/inbox/new/${req.id}`);
+      navigate(`/inbox/new/${req.id}`, { replace: true });
     } else if (req.status === "مقبول" || req.status === "مرفوض") {
-      navigate(`/inbox/response/${req.id}`);
+      navigate(`/inbox/response/${req.id}`, { replace: true });
     }
   };
 

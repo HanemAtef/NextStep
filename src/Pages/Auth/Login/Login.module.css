@@ -115,6 +115,39 @@
     box-shadow: 0 4px 8px rgba(115, 23, 85, 0.3);
 }
 
+.passwordInputContainer {
+    position: relative;
+    width: 100%;
+    display: flex;
+    align-items: center;
+}
+
+.passwordInput {
+    flex: 1;
+    padding-right: 40px;
+}
+
+.togglePassword {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #666;
+    padding: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.3s ease;
+    z-index: 1;
+}
+
+.togglePassword:hover {
+    color: #731755;
+}
+
 @media (max-width: 768px) {
     .cardContent {
         flex-direction: column;

@@ -99,6 +99,7 @@ const ApplicationHistory = () => {
           setRequestData(resultAction.payload);
           setIsLoading(false);
         } else {
+          // Try to fetch from the requests list as a fallback
           const foundInList = await fetchRequestsList();
           if (!foundInList && isMounted) {
             setError("لم يتم العثور على الطلب");
@@ -125,9 +126,9 @@ const ApplicationHistory = () => {
   // Handle back button
   const handleBack = () => {
     if (isInbox) {
-      navigate('/inbox');
+      navigate('/inbox', { replace: true });
     } else {
-      navigate('/outbox');
+      navigate('/outbox', { replace: true });
     }
   };
 
@@ -140,7 +141,7 @@ const ApplicationHistory = () => {
     return (
       <div className={styles.loadingContainer}>
         <div className={styles.loader}></div>
-        <p>جاري تحميل بيانات الطلب...</p>
+        <p>جاري تحميل البيانات...</p>
       </div>
     );
   }
@@ -148,15 +149,10 @@ const ApplicationHistory = () => {
   if (error) {
     return (
       <div className={styles.errorContainer}>
-        <p>حدث خطأ: {error}</p>
-        <div className={styles.errorActions}>
-          <button className={styles.retryButton} onClick={handleRetry}>
-            إعادة المحاولة
-          </button>
-          <button className={styles.backButton} onClick={handleBack}>
-            العودة إلى قائمة الطلبات
-          </button>
-        </div>
+        <p>{error}</p>
+        <button className={styles.backButton} onClick={handleBack}>
+          العودة إلى قائمة الطلبات
+        </button>
       </div>
     );
   }
@@ -164,7 +160,7 @@ const ApplicationHistory = () => {
   if (!requestData) {
     return (
       <div className={styles.errorContainer}>
-        <p>تعذر العثور على بيانات الطلب. الرجاء التحقق من الرابط والمحاولة مرة أخرى.</p>
+        <p>لم يتم العثور على الطلب</p>
         <button className={styles.backButton} onClick={handleBack}>
           العودة إلى قائمة الطلبات
         </button>

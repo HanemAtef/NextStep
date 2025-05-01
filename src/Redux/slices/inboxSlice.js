@@ -111,7 +111,7 @@ export const getInboxRequestDetails = createAsyncThunk(
                     isCompleted: step.isCompleted,
                     isCurrent: step.isCurrent
                 })) || [],
-                requestType: data.applicationContext 
+                requestType: data.applicationContext
             };
             return transformedData;
         } catch (error) {
