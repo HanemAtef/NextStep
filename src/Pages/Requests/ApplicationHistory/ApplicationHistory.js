@@ -40,36 +40,22 @@ const ApplicationHistory = () => {
   // Convert ID to string for reliable comparison
   const requestId = String(id);
 
-  // Debug logs to help diagnose the issue
-  console.log("ApplicationHistory - Request ID from URL:", requestId);
-  console.log("ApplicationHistory - Current request:", isInbox ? inboxCurrentRequest : outboxCurrentRequest);
-  console.log("ApplicationHistory - Requests list:", isInbox ? inboxRequests : outboxRequests);
-
   // Function to retry fetching the main requests list as a fallback
   const fetchRequestsList = async () => {
-    console.log("Attempting to fetch from main requests list as fallback");
     try {
-      // Dispatch action to fetch all requests first
       await dispatch(isInbox ? fetchInboxRequests({}) : fetchOutboxRequests({}));
-
-      // After fetching, get the updated requests list
       const state = await dispatch((_, getState) => getState());
       const updatedRequests = isInbox ?
         selectInboxRequests(state) :
         selectOutboxRequests(state);
 
-      // Try to find the request in the updated list
       const foundRequest = updatedRequests.find(req => String(req.id) === requestId);
-
       if (foundRequest) {
-        console.log("Request found in the main list:", foundRequest);
         setRequestData(foundRequest);
         setError(null);
         return true;
-      } else {
-        console.log("Request not found in the main list either");
-        return false;
       }
+      return false;
     } catch (error) {
       console.error("Error fetching requests list:", error);
       return false;
@@ -78,13 +64,12 @@ const ApplicationHistory = () => {
 
   // Fetch the specific request directly by ID
   useEffect(() => {
+    let isMounted = true;
     setIsLoading(true);
     setError(null);
-    console.log("Starting request details fetch...");
 
     const fetchRequest = async () => {
       try {
-        console.log("Checking Redux store for request...");
         // First check if we already have the request in the Redux store
         let existingRequest;
         if (isInbox) {
@@ -98,80 +83,44 @@ const ApplicationHistory = () => {
         }
 
         if (existingRequest) {
-          console.log("Found request in Redux store:", existingRequest);
-          setRequestData(existingRequest);
-          setIsLoading(false);
+          if (isMounted) {
+            setRequestData(existingRequest);
+            setIsLoading(false);
+          }
           return;
         }
 
-        console.log("Request not found in Redux store, fetching from API...");
         // If not found in Redux store, fetch it directly from the API
         const resultAction = await dispatch(
           isInbox ? getInboxRequestDetails(requestId) : getOutboxRequestDetails(requestId)
         );
 
-        console.log("API response received:", resultAction);
-        if (getInboxRequestDetails.fulfilled.match(resultAction) ||
-          getOutboxRequestDetails.fulfilled.match(resultAction)) {
-          console.log("Request details fetched successfully:", resultAction.payload);
-
-          // Check if the result is an error object
-          if (resultAction.payload && typeof resultAction.payload === 'object' && resultAction.payload.errors) {
-            console.error("API returned error object:", resultAction.payload);
-            throw new Error(`خطأ من الخادم: ${JSON.stringify(resultAction.payload.title || resultAction.payload.errors)}`);
-          } else {
-            // Process and format the data if needed
-            const processedData = resultAction.payload;
-            console.log("Processing API response data:", processedData);
-
-            // Add default values for required fields if they don't exist
-            const safeData = {
-              id: processedData.id || processedData.applicationId || requestId,
-              type: processedData.type || processedData.applicationType || 'نوع الطلب غير معروف',
-              status: processedData.status || 'الحالة غير معروفة',
-              from: processedData.from || processedData.sendingDepartment || 'غير معروف',
-              receivedDate: processedData.receivedDate || processedData.sentDate || 'غير معروف',
-              ...processedData
-            };
-
-            console.log("Setting processed request data:", safeData);
-            setRequestData(safeData);
-          }
+        if (resultAction.payload && isMounted) {
+          setRequestData(resultAction.payload);
+          setIsLoading(false);
         } else {
-          console.error("API request failed:", resultAction.error);
-          throw new Error(resultAction.error?.message || 'فشل في جلب تفاصيل الطلب');
+          const foundInList = await fetchRequestsList();
+          if (!foundInList && isMounted) {
+            setError("لم يتم العثور على الطلب");
+          }
         }
       } catch (error) {
-        console.error("Error in fetchRequest:", error);
-
-        // If this is our first attempt and we got a 404 error, try fetching the list instead
-        if (retryCount === 0) {
-          console.log("First attempt failed, trying fallback method...");
-          setRetryCount(1);
-          const fallbackSuccess = await fetchRequestsList();
-
-          if (fallbackSuccess) {
-            console.log("Fallback fetch successful");
-            setIsLoading(false);
-            return;
-          }
+        if (isMounted) {
+          setError(error.message || "حدث خطأ أثناء جلب تفاصيل الطلب");
         }
-
-        console.error("All fetch attempts failed");
-        const errorMessage = error.message || 'حدث خطأ أثناء جلب البيانات';
-        setError(
-          isInbox
-            ? `فشل في جلب تفاصيل طلب وارد (${requestId}): ${errorMessage}`
-            : `فشل في جلب تفاصيل طلب صادر (${requestId}): ${errorMessage}`
-        );
       } finally {
-        console.log("Setting loading to false");
-        setIsLoading(false);
+        if (isMounted) {
+          setIsLoading(false);
+        }
       }
     };
 
     fetchRequest();
-  }, [dispatch, requestId, isInbox, inboxCurrentRequest, outboxCurrentRequest, inboxRequests, outboxRequests, retryCount]);
+
+    return () => {
+      isMounted = false;
+    };
+  }, [dispatch, requestId, isInbox, inboxCurrentRequest, outboxCurrentRequest, inboxRequests, outboxRequests]);
 
   // Handle back button
   const handleBack = () => {
@@ -191,7 +140,7 @@ const ApplicationHistory = () => {
     return (
       <div className={styles.loadingContainer}>
         <div className={styles.loader}></div>
-        <p>جاري تحميل بيانات الطلب... (ID: {requestId})</p>
+        <p>جاري تحميل بيانات الطلب...</p>
       </div>
     );
   }
@@ -239,4 +188,5 @@ const ApplicationHistory = () => {
     </div>
   );
 }
-export default ApplicationHistory
+
+export default ApplicationHistory;
