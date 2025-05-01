@@ -2,10 +2,11 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import styles from './Nav.module.css';
 import navlogo from './navLogo.png';
-import user from './image.png'; // Assuming you have a user image
+import logo from './logoCollage.jpg';
+import logo2 from './logoUnivercity.png';
+import user from './image.png';
 
 export default function Nav() {
-  // Get user role from sessionStorage
   const userRole = sessionStorage.getItem("role");
 
   const userProfilePath = userRole === "ادمن" ? "/admin/user" : "/user";
@@ -13,7 +14,7 @@ export default function Nav() {
   return (
     <div className={styles.navbar}>
       <div className={styles.brandSection}>
-        <img src={navlogo} alt='logo' className={styles.logo} />
+        <img src={logo2} alt='logo' className={styles.logo} />
         <h2 className={styles.title}>نظام رابط</h2>
       </div>
       <div className={styles.userSection}>
@@ -24,7 +25,10 @@ export default function Nav() {
             className={styles.avatar}
           />
         </Link>
+        <img src={logo} alt='logo' className={styles.logo} />
+
       </div>
+
     </div>
   );
 }
