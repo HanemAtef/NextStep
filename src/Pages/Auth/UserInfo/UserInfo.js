@@ -1,24 +1,18 @@
 import React, { useState, useEffect, useMemo } from "react";
 import defaultAvatar from "../../../assets/avatar.jpg";
-import Logo from "../../../assets/Logo.jpg";
 import styles from './UserInfo.module.css';
 import { useDispatch, useSelector } from "react-redux";
 import { updateField, resetForm } from "../../../Redux/slices/applicationSlice";
 import { useNavigate } from "react-router-dom";
 import { FaUser, FaEnvelope, FaBuilding, FaSignOutAlt, FaCamera } from "react-icons/fa";
 
-// Function to decode JWT token
 const decodeToken = (token) => {
   try {
-    // JWT tokens are three parts split by dots (header.payload.signature)
-    // We're interested in the payload which is the second part
     const base64Url = token.split('.')[1];
     if (!base64Url) return null;
 
-    // Convert base64url to base64
     const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
 
-    // Decode the base64 string
     const jsonPayload = decodeURIComponent(
       atob(base64)
         .split('')
@@ -43,13 +37,11 @@ function UserInfo() {
     return sessionStorage.getItem("userAvatar") || defaultAvatar;
   });
 
-  // Get individual fields from state instead of creating a new object each time
   const userName = useSelector(state => state.application.formData.name);
   const userId = useSelector(state => state.application.formData.id);
   const userDepartment = useSelector(state => state.application.formData.department);
   const userEmail = useSelector(state => state.application.formData.email);
 
-  // Use useMemo to create the object only when dependencies change
   const userData = useMemo(() => ({
     name: userName,
     id: userId,
@@ -81,7 +73,6 @@ function UserInfo() {
   useEffect(() => {
     setLoading(true);
     try {
-      // Get the token from session storage
       const token = sessionStorage.getItem('token');
       if (!token) {
         setError("لم يتم العثور على بيانات المستخدم. الرجاء تسجيل الدخول مرة أخرى.");
@@ -89,7 +80,6 @@ function UserInfo() {
         return;
       }
 
-      // Decode the token to get user data
       const decodedToken = decodeToken(token);
       if (!decodedToken) {
         setError("فشل في تحليل بيانات المستخدم من التوكن.");
@@ -97,20 +87,16 @@ function UserInfo() {
         return;
       }
 
-      // Extract user data from the decoded token
-      // The structure of your token may vary, adjust these fields accordingly
       const name = decodedToken.name || decodedToken.sub || decodedToken.username || "مستخدم";
       const email = decodedToken.email || "";
       const department = decodedToken.department || sessionStorage.getItem("role") || "";
       const id = decodedToken.id || decodedToken.sub || "";
 
-      // Update Redux store with user data
       dispatch(updateField({ field: "name", value: name }));
       dispatch(updateField({ field: "id", value: id }));
       dispatch(updateField({ field: "department", value: department }));
       dispatch(updateField({ field: "email", value: email }));
 
-      // If name is not available in token, fallback to the role
       if (!name || name === "مستخدم") {
         const role = sessionStorage.getItem("role");
         if (role) {
@@ -128,12 +114,10 @@ function UserInfo() {
 
   const handleLogout = () => {
     if (window.confirm("هل أنت متأكد أنك تريد تسجيل الخروج؟")) {
-      // Clear user data
       dispatch(resetForm());
       sessionStorage.removeItem("userAvatar");
       sessionStorage.removeItem('token');
       sessionStorage.removeItem('role');
-      // Navigate to login
       navigate('/login');
     }
   };

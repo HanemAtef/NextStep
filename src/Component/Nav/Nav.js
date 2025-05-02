@@ -14,7 +14,7 @@ export default function Nav() {
   return (
     <div className={styles.navbar}>
       <div className={styles.brandSection}>
-        <img src={logo2} alt='logo' className={styles.logo} />
+        <img src={navlogo} alt='logo' className={styles.logo} />
         <h2 className={styles.title}>نظام رابط</h2>
       </div>
       <div className={styles.userSection}>

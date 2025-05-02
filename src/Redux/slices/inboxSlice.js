@@ -63,7 +63,7 @@ export const fetchInboxRequests = createAsyncThunk(
             if (type) url += `&requestType=${type}`;
             if (department) url += `&department=${department}`;
 
-            console.log("Inbox API URL:", url);
+            // console.log("Inbox API URL:", url);
 
             const response = await fetch(url, { headers: getHeaders() });
 
@@ -72,11 +72,11 @@ export const fetchInboxRequests = createAsyncThunk(
             }
 
             const data = await response.json();
-            console.log("Raw API Response:", data);
-            console.log("First application details:", data.applications?.[0]);
+            // console.log("Raw API Response:", data);
+            // console.log("First application details:", data.applications?.[0]);
             return data;
         } catch (error) {
-            console.error("Inbox API Error:", error);
+            // console.error("Inbox API Error:", error);
             return rejectWithValue(error.message || "فشل في جلب الطلبات الواردة");
         }
     }

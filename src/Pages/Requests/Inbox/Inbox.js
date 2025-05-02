@@ -99,8 +99,8 @@ export default function Inbox() {
 
   useEffect(() => {
     let filtered = [...requests];
-    console.log("Current requests:", requests);
-    console.log("Current filters:", { statusFilter, searchID, typeFilter });
+    // console.log("Current requests:", requests);
+    // console.log("Current filters:", { statusFilter, searchID, typeFilter });
 
     if (statusFilter) {
       filtered = filtered.filter(req => req.status === statusFilter);
@@ -115,14 +115,14 @@ export default function Inbox() {
     }
 
     if (typeFilter) {
-      console.log("Filtering by type:", typeFilter);
+      // console.log("Filtering by type:", typeFilter);
       filtered = filtered.filter(req => {
-        console.log("Request type:", req.type, "ApplicationTypeId:", req.applicationTypeId);
+        // console.log("Request type:", req.type, "ApplicationTypeId:", req.applicationTypeId);
         return req.applicationTypeId === parseInt(typeFilter);
       });
     }
 
-    console.log("Filtered requests:", filtered);
+    // console.log("Filtered requests:", filtered);
     setFilteredRequests(filtered);
   }, [requests, searchID, statusFilter, typeFilter]);
 
@@ -138,7 +138,7 @@ export default function Inbox() {
           department: departmentName
         }));
       } catch (error) {
-        console.error('Error loading inbox data:', error);
+        // console.error('Error loading inbox data:', error);
       }
     };
     loadData();
