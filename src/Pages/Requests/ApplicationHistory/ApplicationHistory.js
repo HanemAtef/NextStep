@@ -27,6 +27,7 @@ const ApplicationHistory = () => {
   const [requestData, setRequestData] = useState(null);
   const [error, setError] = useState(null);
   const [retryCount, setRetryCount] = useState(0);
+  const [dataLoaded, setDataLoaded] = useState(false);
 
   // Determine if we're in inbox or outbox based on the URL
   const isInbox = location.pathname.includes('/inbox');
@@ -53,6 +54,7 @@ const ApplicationHistory = () => {
       if (foundRequest) {
         setRequestData(foundRequest);
         setError(null);
+        setDataLoaded(true);
         return true;
       }
       return false;
@@ -67,6 +69,7 @@ const ApplicationHistory = () => {
     let isMounted = true;
     setIsLoading(true);
     setError(null);
+    setDataLoaded(false);
 
     const fetchRequest = async () => {
       try {
@@ -85,6 +88,7 @@ const ApplicationHistory = () => {
         if (existingRequest) {
           if (isMounted) {
             setRequestData(existingRequest);
+            setDataLoaded(true);
             setIsLoading(false);
           }
           return;
@@ -97,6 +101,7 @@ const ApplicationHistory = () => {
 
         if (resultAction.payload && isMounted) {
           setRequestData(resultAction.payload);
+          setDataLoaded(true);
           setIsLoading(false);
         } else {
           // Try to fetch from the requests list as a fallback
@@ -116,19 +121,21 @@ const ApplicationHistory = () => {
       }
     };
 
-    fetchRequest();
+    if (id) {
+      fetchRequest();
+    }
 
     return () => {
       isMounted = false;
     };
-  }, [dispatch, requestId, isInbox, inboxCurrentRequest, outboxCurrentRequest, inboxRequests, outboxRequests]);
+  }, [dispatch, requestId, isInbox, inboxCurrentRequest, outboxCurrentRequest, inboxRequests, outboxRequests, retryCount]);
 
   // Handle back button
   const handleBack = () => {
     if (isInbox) {
-      navigate('/inbox', { replace: true });
+      navigate('/inbox');
     } else {
-      navigate('/outbox', { replace: true });
+      navigate('/outbox');
     }
   };
 
@@ -137,7 +144,7 @@ const ApplicationHistory = () => {
     setRetryCount(prev => prev + 1);
   };
 
-  if (isLoading) {
+  if (isLoading && !dataLoaded) {
     return (
       <div className={styles.loadingContainer}>
         <div className={styles.loader}></div>
@@ -157,7 +164,7 @@ const ApplicationHistory = () => {
     );
   }
 
-  if (!requestData) {
+  if (!requestData && !isLoading) {
     return (
       <div className={styles.errorContainer}>
         <p>لم يتم العثور على الطلب</p>

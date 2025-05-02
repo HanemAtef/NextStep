@@ -4,26 +4,35 @@ import axios from "axios";
 // الدالة الخاصة بالموافقة
 export const approveApplication = createAsyncThunk(
     "preview/approveApplication",
-    async (applicationData, thunkAPI) => {
+    async (formData, thunkAPI) => {
         try {
             const token = sessionStorage.getItem("token");
-            console.log("Sending data:", applicationData); // عرض البيانات المرسلة للـ API
+
+            // التحقق من وجود البيانات المطلوبة
+            if (!formData.get("ApplicationID")) {
+                throw new Error("رقم الطلب مطلوب");
+            }
+            if (!formData.get("Attachment")) {
+                throw new Error("الملف مطلوب");
+            }
+            if (!formData.get("Notes")) {
+                throw new Error("الملاحظات مطلوبة");
+            }
+
             const response = await axios.post(
                 "https://nextstep.runasp.net/api/Applications/approve",
-                applicationData,
+                formData,
                 {
                     headers: {
                         Authorization: `Bearer ${token}`,
                         "Content-Type": "multipart/form-data",
                     },
-                });
+                }
+            );
             return response.data;
         } catch (error) {
-            console.error("Error details:", error.response ? error.response.data : error.message); // إضافة log للتفاصيل
-            if (error.response && error.response.data.errors) {
-                console.error("Validation errors:", error.response.data.errors); // طباعة الأخطاء الخاصة بالتحقق
-            }
-            return thunkAPI.rejectWithValue(error.response?.data?.title || "حدث خطأ أثناء الموافقة");
+            console.error("Error in approveApplication:", error);
+            return thunkAPI.rejectWithValue(error.response?.data?.title || error.message || "حدث خطأ أثناء الموافقة");
         }
     }
 );
@@ -31,22 +40,35 @@ export const approveApplication = createAsyncThunk(
 // الدالة الخاصة بالرفض
 export const rejectApplication = createAsyncThunk(
     "preview/rejectApplication",
-    async (applicationData, thunkAPI) => {
+    async (formData, thunkAPI) => {
         try {
             const token = sessionStorage.getItem("token");
+
+            // التحقق من وجود البيانات المطلوبة
+            if (!formData.get("ApplicationID")) {
+                throw new Error("رقم الطلب مطلوب");
+            }
+            if (!formData.get("Attachment")) {
+                throw new Error("الملف مطلوب");
+            }
+            if (!formData.get("Notes")) {
+                throw new Error("الملاحظات مطلوبة");
+            }
+
             const response = await axios.post(
                 "https://nextstep.runasp.net/api/Applications/reject",
-                applicationData,
+                formData,
                 {
                     headers: {
                         Authorization: `Bearer ${token}`,
                         "Content-Type": "multipart/form-data",
                     },
-                });
+                }
+            );
             return response.data;
         } catch (error) {
-            console.error("Error details:", error.response); // إضافة log للتفاصيل
-            return thunkAPI.rejectWithValue(error.response?.data?.title || "حدث خطأ أثناء الرفض");
+            console.error("Error in rejectApplication:", error);
+            return thunkAPI.rejectWithValue(error.response?.data?.title || error.message || "حدث خطأ أثناء الرفض");
         }
     }
 );
@@ -58,7 +80,14 @@ const previewSlice = createSlice({
         error: null,
         successMessage: null,
     },
-    reducers: {},
+    reducers: {
+        clearError: (state) => {
+            state.error = null;
+        },
+        clearSuccessMessage: (state) => {
+            state.successMessage = null;
+        }
+    },
     extraReducers: (builder) => {
         builder
             // حالة الموافقة
@@ -93,4 +122,5 @@ const previewSlice = createSlice({
     },
 });
 
+export const { clearError, clearSuccessMessage } = previewSlice.actions;
 export default previewSlice.reducer;

@@ -13,17 +13,28 @@ export const downloadApplicationFile = createAsyncThunk(
                         Authorization: `Bearer ${token}`,
                         "Content-Type": "application/json",
                     },
-                    responseType: 'blob' 
+                    responseType: 'blob'
                 }
             );
 
             const contentDisposition = response.headers['content-disposition'];
-            let filename = `application-${id}-file.pdf`;
+            const contentType = response.headers['content-type'];
+            let filename = `application-${id}-file`;
 
             if (contentDisposition) {
                 const filenameMatch = contentDisposition.match(/filename="(.+)"/);
                 if (filenameMatch && filenameMatch[1]) {
                     filename = filenameMatch[1];
+                }
+            }
+
+            // تحديد امتداد الملف بناءً على نوع المحتوى
+            if (contentType) {
+                if (contentType.includes('pdf')) {
+                    filename += '.pdf';
+                } else if (contentType.includes('image')) {
+                    const imageType = contentType.split('/')[1];
+                    filename += `.${imageType}`;
                 }
             }
 

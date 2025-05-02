@@ -17,33 +17,51 @@ const ApplicationPreview = () => {
   const [showMessage, setShowMessage] = useState(false);
   const [isActionInProgress, setIsActionInProgress] = useState(false);
   const [formError, setFormError] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
   const [loading, setLoading] = useState(true);
+  const [dataLoaded, setDataLoaded] = useState(false);
 
-  const { successMessage, error } = useSelector(state => state.preview);
+  const { error } = useSelector(state => state.preview);
 
   useEffect(() => {
     const fetchRequest = async () => {
       try {
         setLoading(true);
+        setDataLoaded(false);
         const result = await dispatch(getInboxRequestDetails(id));
 
         if (result.payload) {
           setRequest(result.payload);
+          setDataLoaded(true);
         } else {
           throw new Error('فشل في جلب بيانات الطلب');
         }
       } catch (error) {
         console.error('Error fetching request:', error);
+        setFormError('فشل في جلب بيانات الطلب');
       } finally {
         setLoading(false);
       }
     };
 
-    fetchRequest();
+    if (id) {
+      fetchRequest();
+    }
   }, [dispatch, id]);
 
   const handleFileChange = (e) => {
-    setFile(e.target.files[0]);
+    const selectedFile = e.target.files[0];
+    if (selectedFile) {
+      const fileType = selectedFile.type;
+      if (!fileType.includes('pdf') && !fileType.includes('image')) {
+        setFormError("يرجى اختيار ملف PDF أو صورة فقط");
+        e.target.value = null; // Clear the file input
+        setFile(null);
+      } else {
+        setFile(selectedFile);
+        setFormError("");
+      }
+    }
   };
 
   const validateForm = () => {
@@ -69,11 +87,21 @@ const ApplicationPreview = () => {
     setIsActionInProgress(true);
 
     const formData = new FormData();
-    formData.append("applicationId", request.id);
-    formData.append("file", file);
-    formData.append("notes", notes);
+    formData.append("ApplicationID", request.id);
+    formData.append("Attachment", file);
+    formData.append("Notes", notes);
 
-    dispatch(approveApplication(formData));
+    dispatch(approveApplication(formData))
+      .then(() => {
+        setShowMessage(true);
+        setSuccessMessage("تمت الموافقة على الطلب بنجاح!");
+      })
+      .catch((error) => {
+        setFormError(error.message || "حدث خطأ أثناء الموافقة على الطلب");
+      })
+      .finally(() => {
+        setIsActionInProgress(false);
+      });
   };
 
   const handleReject = () => {
@@ -82,22 +110,28 @@ const ApplicationPreview = () => {
     setIsActionInProgress(true);
 
     const formData = new FormData();
-    formData.append("applicationId", request.id);
-    formData.append("file", file);
-    formData.append("notes", notes);
+    formData.append("ApplicationID", request.id);
+    formData.append("Attachment", file);
+    formData.append("Notes", notes);
 
-    dispatch(rejectApplication(formData));
+    dispatch(rejectApplication(formData))
+      .then(() => {
+        setShowMessage(true);
+        setSuccessMessage("تم رفض الطلب بنجاح!");
+      })
+      .catch((error) => {
+        setFormError(error.message || "حدث خطأ أثناء رفض الطلب");
+      })
+      .finally(() => {
+        setIsActionInProgress(false);
+      });
   };
 
   useEffect(() => {
     if (successMessage) {
       setShowMessage(true);
-      setTimeout(() => {
-        setShowMessage(false);
-        navigate('/inbox');
-      }, 2000);
     }
-  }, [successMessage, navigate]);
+  }, [successMessage]);
 
   useEffect(() => {
     if (error) {
@@ -112,7 +146,11 @@ const ApplicationPreview = () => {
     navigate('/inbox');
   };
 
-  if (loading) {
+  const handleCloseMessage = () => {
+    setShowMessage(false);
+  };
+
+  if (loading && !dataLoaded) {
     return (
       <div className={styles.loadingContainer}>
         <div className={styles.spinner}></div>
@@ -121,7 +159,7 @@ const ApplicationPreview = () => {
     );
   }
 
-  if (!request) {
+  if (!request && !loading) {
     return (
       <div className={styles.errorContainer}>
         <p>لم يتم العثور على بيانات الطلب</p>
@@ -147,9 +185,14 @@ const ApplicationPreview = () => {
       <div className={styles.actions}>
         <div className={styles.upload}>
           <label htmlFor="file-upload">
-            <span className={styles.upIcon}>📤</span>ارفاق ملف
+            <span className={styles.upIcon}>📤</span>ارفاق ملف (PDF أو صورة)
           </label>
-          <input type="file" id="file-upload" onChange={handleFileChange} />
+          <input
+            type="file"
+            id="file-upload"
+            onChange={handleFileChange}
+            accept=".pdf,image/*"
+          />
         </div>
         <div className={styles.notes}>
           <label htmlFor="notes">
