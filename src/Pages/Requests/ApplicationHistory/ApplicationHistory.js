@@ -29,19 +29,15 @@ const ApplicationHistory = () => {
   const [retryCount, setRetryCount] = useState(0);
   const [dataLoaded, setDataLoaded] = useState(false);
 
-  // Determine if we're in inbox or outbox based on the URL
   const isInbox = location.pathname.includes('/inbox');
 
-  // Get the current request from the appropriate Redux store
   const inboxCurrentRequest = useSelector(selectCurrentInboxRequest);
   const outboxCurrentRequest = useSelector(selectCurrentOutboxRequest);
   const inboxRequests = useSelector(selectInboxRequests);
   const outboxRequests = useSelector(selectOutboxRequests);
 
-  // Convert ID to string for reliable comparison
   const requestId = String(id);
 
-  // Function to retry fetching the main requests list as a fallback
   const fetchRequestsList = async () => {
     try {
       await dispatch(isInbox ? fetchInboxRequests({}) : fetchOutboxRequests({}));
@@ -64,7 +60,6 @@ const ApplicationHistory = () => {
     }
   };
 
-  // Fetch the specific request directly by ID
   useEffect(() => {
     let isMounted = true;
     setIsLoading(true);
@@ -73,7 +68,6 @@ const ApplicationHistory = () => {
 
     const fetchRequest = async () => {
       try {
-        // First check if we already have the request in the Redux store
         let existingRequest;
         if (isInbox) {
           existingRequest = inboxCurrentRequest?.id && String(inboxCurrentRequest.id) === requestId
@@ -94,7 +88,6 @@ const ApplicationHistory = () => {
           return;
         }
 
-        // If not found in Redux store, fetch it directly from the API
         const resultAction = await dispatch(
           isInbox ? getInboxRequestDetails(requestId) : getOutboxRequestDetails(requestId)
         );
@@ -104,7 +97,6 @@ const ApplicationHistory = () => {
           setDataLoaded(true);
           setIsLoading(false);
         } else {
-          // Try to fetch from the requests list as a fallback
           const foundInList = await fetchRequestsList();
           if (!foundInList && isMounted) {
             setError("لم يتم العثور على الطلب");
@@ -130,7 +122,6 @@ const ApplicationHistory = () => {
     };
   }, [dispatch, requestId, isInbox, inboxCurrentRequest, outboxCurrentRequest, inboxRequests, outboxRequests, retryCount]);
 
-  // Handle back button
   const handleBack = () => {
     if (isInbox) {
       navigate('/inbox');
@@ -139,7 +130,6 @@ const ApplicationHistory = () => {
     }
   };
 
-  // Handle retry button
   const handleRetry = () => {
     setRetryCount(prev => prev + 1);
   };

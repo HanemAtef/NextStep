@@ -1,14 +1,12 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 
-// الدالة الخاصة بالموافقة
 export const approveApplication = createAsyncThunk(
     "preview/approveApplication",
     async (formData, thunkAPI) => {
         try {
             const token = sessionStorage.getItem("token");
 
-            // التحقق من وجود البيانات المطلوبة
             if (!formData.get("ApplicationID")) {
                 throw new Error("رقم الطلب مطلوب");
             }
@@ -37,14 +35,12 @@ export const approveApplication = createAsyncThunk(
     }
 );
 
-// الدالة الخاصة بالرفض
 export const rejectApplication = createAsyncThunk(
     "preview/rejectApplication",
     async (formData, thunkAPI) => {
         try {
             const token = sessionStorage.getItem("token");
 
-            // التحقق من وجود البيانات المطلوبة
             if (!formData.get("ApplicationID")) {
                 throw new Error("رقم الطلب مطلوب");
             }

@@ -28,7 +28,7 @@ export const downloadApplicationFile = createAsyncThunk(
                 }
             }
 
-            // تحديد امتداد الملف بناءً على نوع المحتوى
+          
             if (contentType) {
                 if (contentType.includes('pdf')) {
                     filename += '.pdf';
@@ -45,7 +45,7 @@ export const downloadApplicationFile = createAsyncThunk(
             document.body.appendChild(link);
             link.click();
 
-            // تنظيف
+            
             setTimeout(() => {
                 window.URL.revokeObjectURL(url);
                 document.body.removeChild(link);

@@ -11,6 +11,7 @@ import detailsSlice from "./slices/detailsSlice";
 import downloadSlice from "./slices/downloadSlice";
 import timelineReducer from "./slices/timelineSlice";
 import previewSlice from "./slices/previewSlice";
+import createReqReducer from "./slices/createReqSlice";
 
 const store = configureStore({
     reducer: {
@@ -26,6 +27,7 @@ const store = configureStore({
         download: downloadSlice,
         timeline: timelineReducer,
         preview: previewSlice,
+        createReq: createReqReducer,
     },
 });
 

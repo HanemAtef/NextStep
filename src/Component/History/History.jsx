@@ -1,63 +1,3 @@
-// import React from "react";
-// import Card from "react-bootstrap/Card";
-// import ListGroup from "react-bootstrap/ListGroup";
-// import HistoryCSS from "./History.module.css";
-// const History = ({ request, onBack }) => {
-//   const applicationData = {
-//     description: "طلب الالتحاق",
-//     document: "Document.pdf",
-//     history: [
-//       {
-//         department: "ادارة الدراسات العليا",
-//         action: "انشات الطلب",
-//         date: "فبراير",
-//         note: "طلب الالتحاق مستوفي الشروط",
-//       },
-//       {
-//         department: "القسم العلمي",
-//         action: "وافقت علي الطلب",
-//         date: "فبراير",
-//         note: "طلب الالتحاق مستوفي الشروط",
-//       },
-//     ],
-//   };
-
-//   return (
-//     <div>
-//       <div className={HistoryCSS.historyy}>
-//         <h3 className={HistoryCSS.histTitle}>
-//           <span className={HistoryCSS.penIcon}>🖊️</span> تاريخ مسار الطلب
-//         </h3>
-//         <div className={HistoryCSS.historyCardd}>
-//           {applicationData.history.map((item, index) => (
-//             <div key={index} className={HistoryCSS.historyItem}>
-//               <Card >
-//                 <Card.Header className={HistoryCSS.cardTitlee}>
-//                   <h4>{item.department}</h4>
-//                 </Card.Header>
-//                 <ListGroup variant="flush">
-//                   <ListGroup.Item className={HistoryCSS.cardItem}>
-//                     <strong>الإجراء:</strong>
-//                     {item.action}
-//                   </ListGroup.Item>
-//                   <ListGroup.Item className={HistoryCSS.cardItem}>
-//                     <strong>التاريخ:</strong> {item.date}
-//                   </ListGroup.Item>
-//                   <ListGroup.Item className={HistoryCSS.cardItem}>
-//                     <strong>ملاحظات:</strong>
-//                     {item.note}
-//                   </ListGroup.Item>
-//                 </ListGroup>
-//               </Card>
-//             </div>
-//           ))}
-//         </div>
-//       </div>
-//     </div>
-//   );
-// };
-
-// export default History;
 
 import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";

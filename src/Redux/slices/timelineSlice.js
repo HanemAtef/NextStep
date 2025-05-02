@@ -15,7 +15,6 @@ export const fetchTimeline = createAsyncThunk(
                     },
                 }
             );
-            // Return the steps array from the response
             return response.data.steps || [];
         } catch (error) {
             return thunkAPI.rejectWithValue(

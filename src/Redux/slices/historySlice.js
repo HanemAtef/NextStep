@@ -2,7 +2,6 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 
-// Action to fetch the history data from the API
 export const fetchHistory = createAsyncThunk(
     "history/fetchHistory",
     async (id, thunkAPI) => {
@@ -16,7 +15,7 @@ export const fetchHistory = createAsyncThunk(
                     },
                 }
             );
-            return response.data.history || []; // إرجاع مصفوفة فارغة إذا لم يكن هناك تاريخ
+            return response.data.history || []; 
         } catch (error) {
             let errorMessage = "حدث خطأ أثناء جلب البيانات";
 

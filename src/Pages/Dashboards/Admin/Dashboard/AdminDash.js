@@ -2,7 +2,7 @@
 import React from "react";
 import SideAdmin from "../component/SideAdmin/SideAdmin"
 import Nav from "../../../../Component/Nav/Nav";
-import { Outlet } from "react-router-dom";  // سيظهر المحتوى الداخلي هنا
+import { Outlet } from "react-router-dom";  
 import styles from "./AdminDash.module.css";
 export default function AdminDash({ title }) {
     // console.log("AdminDash Rendered with title: ", title);

@@ -3,13 +3,7 @@ import axios from "axios";
 
 
 
-// const getHeaders = () => {
-//     const token = sessionStorage.getItem('token'); // افترض أنك خزنت التوكين في localStorage
-//     return {
-//         'Authorization': token ? `Bearer ${token}` : '', // إذا كان التوكين موجودًا
-//         'Content-Type': 'application/json',
-//     };
-// };
+
 
 export const fetchSteps = createAsyncThunk(
     "steps/fetchSteps",
@@ -30,13 +24,11 @@ export const fetchSteps = createAsyncThunk(
                 }
             );
 
-            // تحقق من وجود البيانات وتنسيقها
             const steps = response.data?.steps || [];
             if (!Array.isArray(steps)) {
                 return [];
             }
 
-            // تحويل البيانات إلى الشكل المطلوب
             const formattedSteps = steps.map(step => ({
                 departmentName: step.departmentName || 'قسم غير محدد',
                 status: step.status || 'غير محدد',
@@ -89,7 +81,6 @@ const stepsSlice = createSlice({
             .addCase(fetchSteps.fulfilled, (state, action) => {
                 state.loading = false;
                 state.steps = action.payload;
-                // تحديث الخطوة الحالية بناءً على حالة الخطوات
                 state.currentStep = action.payload.length - 1;
             })
             .addCase(fetchSteps.rejected, (state, action) => {

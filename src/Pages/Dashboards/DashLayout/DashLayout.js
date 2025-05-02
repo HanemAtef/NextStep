@@ -3,7 +3,6 @@ import Sidebar from "../../../Component/Sidebar/Sidebar";
 import Nav from "../../../Component/Nav/Nav";
 import { Outlet, Link, useNavigate } from "react-router-dom";  
 import styles from "./DashLayout.module.css";
-import { FiMail, FiSend, FiUser, FiPlus } from "react-icons/fi";
 
 const DashLayout = ({ title }) => {
   const navigate = useNavigate();

@@ -29,7 +29,6 @@ const AddUser = () => {
     e.preventDefault();
     setError(null);
 
-    // Validation
     if (!user.userName.trim()) {
       setError('يجب إدخال اسم المستخدم');
       return;
@@ -51,22 +50,18 @@ const AddUser = () => {
     }
 
     try {
-      // Format the data to match API expectations
       const userData = {
         ...user,
         departmentId: parseInt(user.departmentId),
         roleId: parseInt(user.roleId),
-        firstName: user.userName, // Use userName as firstName
-        lastName: user.userName   // Use userName as lastName
+        firstName: user.userName, 
+        lastName: user.userName   
       };
 
-      // Send user data to API
       await dispatch(addUser(userData)).unwrap();
 
-      // Success message
       alert(`تم إضافة المستخدم "${user.userName}" بنجاح`);
 
-      // Navigate back to users list
       navigate('/admin/users');
     } catch (err) {
       console.error('Error adding user:', err);
@@ -116,18 +111,7 @@ const AddUser = () => {
           />
         </div>
 
-        {/* <div className={styles.formGroup}>
-          <label htmlFor="phoneNumber">رقم الهاتف</label>
-          <input
-            type="tel"
-            id="phoneNumber"
-            name="phoneNumber"
-            value={user.phoneNumber}
-            onChange={handleChange}
-            className={styles.formControl}
-            placeholder="أدخل رقم الهاتف"
-          />
-        </div> */}
+       
 
         <div className={styles.formGroup}>
           <label htmlFor="password">كلمة المرور</label>

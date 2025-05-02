@@ -68,7 +68,6 @@ const APPLICATION_TYPES = [
 export default function Outbox() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-
   const requests = useSelector(selectOutboxRequests);
   const isLoading = useSelector(selectOutboxLoading);
   const error = useSelector(selectOutboxError);
@@ -76,7 +75,6 @@ export default function Outbox() {
   const currentPage = useSelector(selectOutboxPage);
   const pageSize = useSelector(selectOutboxPageSize);
   const totalCount = useSelector(selectOutboxTotalCount);
-
   const role = sessionStorage.getItem("role") || "";
   const [userRole, setUserRole] = useState("");
   const [departmentName, setDepartmentName] = useState("");
@@ -108,7 +106,7 @@ export default function Outbox() {
           department: departmentName
         }));
       } catch (error) {
-        console.error('Error loading outbox data:', error);
+        // console.error('Error loading outbox data:', error);
       }
     };
     loadData();

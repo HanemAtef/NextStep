@@ -45,7 +45,6 @@ export const addrequest = createAsyncThunk(
     }
 );
 
-// 3. تحديث بيانات طلب
 export const updaterequest = createAsyncThunk(
     'request/update',
     async (updatedrequest) => {
@@ -63,7 +62,6 @@ export const updaterequest = createAsyncThunk(
     }
 );
 
-// 4. حذف طلب
 export const deleterequest = createAsyncThunk(
     'request/delete',
     async (id) => {
@@ -76,7 +74,6 @@ export const deleterequest = createAsyncThunk(
     }
 );
 
-// 5. جلب طلب محدد بواسطة المعرف
 export const fetchrequestById = createAsyncThunk(
     'request/fetchById',
     async (id) => {

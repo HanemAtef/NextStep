@@ -78,18 +78,15 @@ const EditUser = () => {
       }
     }
 
-    // بناء البيانات المطلوبة بالتنسيق الذي تتوقعه API
     const updatedUser = {
       name: user.userName,
       email: user.email
     };
 
-    // إضافة كلمة المرور فقط إذا تم إدخالها
     if (user.password && user.password.trim()) {
       updatedUser.password = user.password;
     }
 
-    // إضافة رقم القسم إذا كان متاحًا
     if (user.departmentID) {
       updatedUser.departmentID = parseInt(user.departmentID);
     }
