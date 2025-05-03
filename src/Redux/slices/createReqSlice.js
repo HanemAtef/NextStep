@@ -10,26 +10,6 @@ const getHeaders = () => {
     };
 };
 
-// Load saved form data from localStorage
-const loadSavedFormData = () => {
-    try {
-        const savedData = localStorage.getItem('createReqFormData');
-        return savedData ? JSON.parse(savedData) : null;
-    } catch (error) {
-        console.error('Error loading saved form data:', error);
-        return null;
-    }
-};
-
-// Save form data to localStorage
-const saveFormData = (data) => {
-    try {
-        localStorage.setItem('createReqFormData', JSON.stringify(data));
-    } catch (error) {
-        console.error('Error saving form data:', error);
-    }
-};
-
 export const fetchApplicationTypes = createAsyncThunk(
     "createReq/fetchApplicationTypes",
     async () => {
@@ -94,7 +74,7 @@ export const submitApplication = createAsyncThunk(
 );
 
 const initialState = {
-    formData: loadSavedFormData() || {
+    formData: {
         applicationType: "",
         studentId: "",
         studentName: "",
@@ -118,13 +98,11 @@ const createReqSlice = createSlice({
                 state.conditions = value;
             } else {
                 state.formData[field] = value;
-                saveFormData(state.formData);
             }
         },
         resetForm: (state) => {
             state.formData = initialState.formData;
             state.conditions = [];
-            localStorage.removeItem('createReqFormData');
         },
     },
     extraReducers: (builder) => {
@@ -161,7 +139,6 @@ const createReqSlice = createSlice({
                 state.loading = false;
                 state.formData = initialState.formData;
                 state.conditions = [];
-                localStorage.removeItem('createReqFormData');
             })
             .addCase(submitApplication.rejected, (state, action) => {
                 state.loading = false;

@@ -173,7 +173,7 @@ const CreateReq = () => {
                 <form className={styles.form} onSubmit={handleSubmit}>
                     <div className={styles.formRow}>
                         <div className={styles.formGroup}>
-                            <label htmlFor="applicationType" className={styles.formLabel}>نوع الطلب *</label>
+                            <label htmlFor="applicationType" className={styles.formLabel}>نوع الطلب </label>
                             <select
                                 id="applicationType"
                                 name="applicationType"
@@ -197,7 +197,7 @@ const CreateReq = () => {
                     {conditions.length > 0 && (
                         <div className={styles.formRow}>
                             <div className={styles.formGroup}>
-                                <label className={styles.formLabel}>الشروط *</label>
+                                <label className={styles.formLabel}>الشروط </label>
                                 <div className={styles.conditionsList}>
                                     {conditions.map((condition) => (
                                         <div key={condition.id} className={styles.conditionItem}>
@@ -224,7 +224,7 @@ const CreateReq = () => {
                     )}
                     <div className={styles.formRow}>
                         <div className={styles.formGroup}>
-                            <label htmlFor="studentId" className={styles.formLabel}>الرقم الجامعي *</label>
+                            <label htmlFor="studentId" className={styles.formLabel}>الرقم القومي </label>
                             <input
                                 type="text"
                                 id="studentId"
@@ -239,7 +239,7 @@ const CreateReq = () => {
                             {formErrors.studentId && <div className={styles.errorText}>{formErrors.studentId}</div>}
                         </div>
                         <div className={styles.formGroup}>
-                            <label htmlFor="studentName" className={styles.formLabel}>اسم الطالب *</label>
+                            <label htmlFor="studentName" className={styles.formLabel}>اسم الطالب </label>
                             <input
                                 type="text"
                                 id="studentName"
@@ -254,7 +254,7 @@ const CreateReq = () => {
                     </div>
                     <div className={styles.formRow}>
                         <div className={styles.formGroup}>
-                            <label htmlFor="studentPhone" className={styles.formLabel}>رقم الهاتف *</label>
+                            <label htmlFor="studentPhone" className={styles.formLabel}>رقم الهاتف </label>
                             <input
                                 type="text"
                                 id="studentPhone"
@@ -267,7 +267,7 @@ const CreateReq = () => {
                             {formErrors.studentPhone && <div className={styles.errorText}>{formErrors.studentPhone}</div>}
                         </div>
                         <div className={styles.formGroup}>
-                            <label htmlFor="attachment" className={styles.formLabel}>إرفاق ملف *</label>
+                            <label htmlFor="attachment" className={styles.formLabel}>إرفاق ملف </label>
                             <input
                                 type="file"
                                 id="attachment"
