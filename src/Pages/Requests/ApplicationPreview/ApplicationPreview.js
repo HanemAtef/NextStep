@@ -185,7 +185,7 @@ const ApplicationPreview = () => {
       <div className={styles.actions}>
         <div className={styles.upload}>
           <label htmlFor="file-upload">
-            <span className={styles.upIcon}>📤</span>ارفاق ملف (PDF أو صورة)
+            <span className={styles.upIcon}>📤</span>ارفاق ملف 
           </label>
           <input
             type="file"

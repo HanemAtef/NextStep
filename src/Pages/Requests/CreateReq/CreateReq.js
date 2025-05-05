@@ -33,7 +33,7 @@ const CreateReq = () => {
     }, [dispatch]);
 
     useEffect(() => {
-        // console.log("Current conditions:", conditions);
+        console.log("Current conditions:", conditions);
     }, [conditions]);
 
     const validateForm = () => {
@@ -50,8 +50,8 @@ const CreateReq = () => {
         if (!formData.studentPhone) {
             errors.studentPhone = "رقم الهاتف مطلوب";
         }
-        if (conditions.length > 0 && !conditions.every(condition => condition.checked)) {
-            errors.conditions = "يجب الموافقة على جميع الشروط";
+        if (conditions.length > 0 && !conditions.some(condition => condition.checked)) {
+            errors.conditions = "يجب اختيار شرط واحد على الأقل";
         }
         setFormErrors(errors);
         return Object.keys(errors).length === 0;
@@ -59,7 +59,6 @@ const CreateReq = () => {
 
     const handleTypeChange = (e) => {
         const selectedType = e.target.value;
-        // console.log("Selected type:", selectedType);
         dispatch(updateField({ field: "applicationType", value: selectedType }));
         if (selectedType) {
             dispatch(fetchConditions(selectedType));
@@ -67,13 +66,11 @@ const CreateReq = () => {
     };
 
     const handleConditionChange = (conditionId) => {
-        // console.log("Changing condition:", conditionId);
         const updatedConditions = conditions.map(condition =>
             condition.id === conditionId
                 ? { ...condition, checked: !condition.checked }
                 : condition
         );
-        // console.log("Updated conditions:", updatedConditions);
         dispatch(updateField({ field: "conditions", value: updatedConditions }));
     };
 
@@ -110,6 +107,10 @@ const CreateReq = () => {
         e.preventDefault();
         setError(null);
 
+        if (!validateForm()) {
+            return;
+        }
+
         const hasSelectedCondition = conditions.some(condition => condition.checked);
         if (!hasSelectedCondition) {
             setError("يجب اختيار شرط واحد على الأقل");
@@ -121,21 +122,39 @@ const CreateReq = () => {
             return;
         }
 
-        if (!formData.applicationType || !formData.studentId || !formData.studentName || !formData.studentPhone) {
-            setError("جميع الحقول مطلوبة");
-            return;
-        }
-
         try {
             const formDataToSubmit = new FormData();
-            formDataToSubmit.append("ApplicationTypeID", parseInt(formData.applicationType));
-            formDataToSubmit.append("StudentNaid", formData.studentId);
-            formDataToSubmit.append("StudentName", formData.studentName);
-            formDataToSubmit.append("StudentPhone", formData.studentPhone);
-            formDataToSubmit.append("Notes", formData.notes || "");
-            formDataToSubmit.append("Attachment", currentFile);
 
-            await dispatch(submitApplication(formDataToSubmit)).unwrap();
+            // تحويل نوع الطلب إلى رقم
+            const applicationTypeId = parseInt(formData.applicationType);
+            if (!applicationTypeId) {
+                setError("نوع الطلب غير صالح");
+                return;
+            }
+
+            // إضافة البيانات بالضبط كما في Swagger
+            formDataToSubmit.append("ApplicationTypeID", applicationTypeId);
+            formDataToSubmit.append("StudentNaid", formData.studentId.trim());
+            formDataToSubmit.append("StudentName", formData.studentName.trim());
+            formDataToSubmit.append("StudentPhone", formData.studentPhone.trim());
+            formDataToSubmit.append("Attachment", currentFile);
+            if (formData.notes) {
+                formDataToSubmit.append("Notes", formData.notes.trim());
+            }
+
+            // طباعة البيانات للتحقق
+            console.log("Form Data being sent:", {
+                ApplicationTypeID: applicationTypeId,
+                StudentNaid: formData.studentId.trim(),
+                StudentName: formData.studentName.trim(),
+                StudentPhone: formData.studentPhone.trim(),
+                Notes: formData.notes ? formData.notes.trim() : "",
+                Attachment: currentFile.name
+            });
+
+            const result = await dispatch(submitApplication(formDataToSubmit)).unwrap();
+            console.log("Response:", result);
+
             setSuccessMessage("تم إرسال الطلب بنجاح");
             dispatch(resetForm());
             setFileName("");
@@ -144,7 +163,7 @@ const CreateReq = () => {
             setFormErrors({});
             e.target.reset();
             setTimeout(() => {
-                navigate("/requests");
+                navigate("/outbox");
             }, 2000);
         } catch (error) {
             console.error("حدث خطأ أثناء إرسال الطلب", error);
@@ -173,7 +192,7 @@ const CreateReq = () => {
                 <form className={styles.form} onSubmit={handleSubmit}>
                     <div className={styles.formRow}>
                         <div className={styles.formGroup}>
-                            <label htmlFor="applicationType" className={styles.formLabel}>نوع الطلب </label>
+                            <label htmlFor="applicationType" className={styles.formLabel}>نوع الطلب *</label>
                             <select
                                 id="applicationType"
                                 name="applicationType"
@@ -197,7 +216,7 @@ const CreateReq = () => {
                     {conditions.length > 0 && (
                         <div className={styles.formRow}>
                             <div className={styles.formGroup}>
-                                <label className={styles.formLabel}>الشروط </label>
+                                <label className={styles.formLabel}>الشروط *</label>
                                 <div className={styles.conditionsList}>
                                     {conditions.map((condition) => (
                                         <div key={condition.id} className={styles.conditionItem}>
@@ -224,7 +243,7 @@ const CreateReq = () => {
                     )}
                     <div className={styles.formRow}>
                         <div className={styles.formGroup}>
-                            <label htmlFor="studentId" className={styles.formLabel}>الرقم القومي </label>
+                            <label htmlFor="studentId" className={styles.formLabel}>الرقم الجامعي *</label>
                             <input
                                 type="text"
                                 id="studentId"
@@ -239,7 +258,7 @@ const CreateReq = () => {
                             {formErrors.studentId && <div className={styles.errorText}>{formErrors.studentId}</div>}
                         </div>
                         <div className={styles.formGroup}>
-                            <label htmlFor="studentName" className={styles.formLabel}>اسم الطالب </label>
+                            <label htmlFor="studentName" className={styles.formLabel}>اسم الطالب *</label>
                             <input
                                 type="text"
                                 id="studentName"
@@ -254,7 +273,7 @@ const CreateReq = () => {
                     </div>
                     <div className={styles.formRow}>
                         <div className={styles.formGroup}>
-                            <label htmlFor="studentPhone" className={styles.formLabel}>رقم الهاتف </label>
+                            <label htmlFor="studentPhone" className={styles.formLabel}>رقم الهاتف *</label>
                             <input
                                 type="text"
                                 id="studentPhone"
@@ -267,7 +286,7 @@ const CreateReq = () => {
                             {formErrors.studentPhone && <div className={styles.errorText}>{formErrors.studentPhone}</div>}
                         </div>
                         <div className={styles.formGroup}>
-                            <label htmlFor="attachment" className={styles.formLabel}>إرفاق ملف </label>
+                            <label htmlFor="attachment" className={styles.formLabel}>إرفاق ملف</label>
                             <input
                                 type="file"
                                 id="attachment"
@@ -275,14 +294,8 @@ const CreateReq = () => {
                                 className={styles.formFileInput}
                                 onChange={handleChange}
                                 disabled={loading}
-                                required
                             />
                             {fileName && <div className={styles.successText}>تم اختيار الملف: {fileName}</div>}
-                            {errorMessage && errorMessage.includes("يجب رفع الملف المطلوب") && (
-                                <div className={styles.errorText} style={{ position: 'relative', bottom: 'auto', marginTop: '10px' }}>
-                                    {errorMessage}
-                                </div>
-                            )}
                         </div>
                     </div>
                     <div className={styles.formGroup}>
