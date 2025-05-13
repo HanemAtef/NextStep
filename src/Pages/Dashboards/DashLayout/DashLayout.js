@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import Sidebar from "../../../Component/Sidebar/Sidebar";
 import Nav from "../../../Component/Nav/Nav";
-import { Outlet, Link, useNavigate } from "react-router-dom";  
+import { Outlet, Link, useNavigate } from "react-router-dom";
 import styles from "./DashLayout.module.css";
 
 const DashLayout = ({ title }) => {

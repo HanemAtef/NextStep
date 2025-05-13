@@ -28,7 +28,7 @@
     max-width: 400px;
 }
 
-.searchInput {
+.searchInputt {
     width: 100%;
     padding: 10px 15px;
     border: 1px solid #ddd;
@@ -36,7 +36,7 @@
     transition: border-color 0.3s;
 }
 
-.searchInput:focus {
+.searchInputt:focus {
     outline: none;
     border-color: #007bff;
 }

@@ -21,12 +21,12 @@ export default function RequestList() {
     );
 
     useEffect(() => {
-        dispatch(fetchrequests()); 
+        dispatch(fetchrequests());
     }, [dispatch]);
 
     const handleDelete = () => {
         if (requestToDelete) {
-            dispatch(deleterequest(requestToDelete.id)); 
+            dispatch(deleterequest(requestToDelete.id));
             setShowModal(false);
             setRequestToDelete(null);
         }

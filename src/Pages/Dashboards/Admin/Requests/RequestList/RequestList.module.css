@@ -37,7 +37,7 @@
     transition: border-color 0.3s;
 }
 
-.searchInput:focus {
+.searchInputt:focus {
     outline: none;
     border-color: #007bff;
 }

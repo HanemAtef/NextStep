@@ -39,20 +39,20 @@ const DeptList = () => {
   return (
     <div className={userCss.container}>
       <h2 className={userCss.title}>الاقسام المتاحه</h2>
-
-      <div className={userCss.topBar}>
-        <input
-          type="text"
-          placeholder="بحث..."
-          className={userCss.searchInputt}
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-        />
+      <div className={userCss.topActions}>
+        <div className={userCss.searchContainer}>
+          <input
+            type="text"
+            placeholder="البحث بإسم القسم..."
+            className={userCss.searchInput}
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
         <button className={userCss.createButton} onClick={() => navigate('/admin/department/add')}>
           إنشاء
         </button>
       </div>
-
       {loading ? (
         <p>جاري التحميل...</p>
       ) : error ? (
@@ -88,8 +88,8 @@ const DeptList = () => {
       )}
 
       {showModal && requestToDelete && (
-        <div className={userCss.modalStyles}>
-          <div className={userCss.modalContentStyles}>
+        <div className={userCss.modaluserCss}>
+          <div className={userCss.modalContentuserCss}>
             <div className={userCss.deleteHead}>
               <h5>حذف القسم</h5>
               <button className={userCss.close} onClick={() => setShowModal(false)}>

@@ -83,6 +83,14 @@ input[type="text"] {
     outline: none;
 }
 
+#file-upload,
+#notes {
+    width: 50%;
+    padding: 8px;
+    border: 1px solid #ccc;
+    outline: none;
+}
+
 .buttons {
     display: flex;
     justify-content: center;
@@ -90,13 +98,7 @@ input[type="text"] {
     gap: 30px;
 }
 
-/* button {
-    padding: 10px 10px;
-    cursor: pointer;
-    width: 15%;
-    margin-top: 20px;
-    margin-bottom: 10px;
-} */
+
 
 .approve {
     background-color: #e6f9f0;

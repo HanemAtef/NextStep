@@ -12,7 +12,7 @@ export default function Sidebar({ canCreate }) {
 
   return (
     <>
-    
+
       <button
         className={styles.toggleButton}
         onClick={() => setIsOpen(!isOpen)}
