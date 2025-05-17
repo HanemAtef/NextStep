@@ -54,16 +54,34 @@ const APPLICATION_TYPE_MAPPING = {
 
 export const fetchInboxRequests = createAsyncThunk(
     "inbox/fetchRequests",
-    async ({ page, pageSize, searchID, status, type, department }, { rejectWithValue }) => {
+    async ({ page, pageSize, searchID, status, type, department }, { rejectWithValue, dispatch, getState }) => {
         try {
+            // Get current filters from state
+            const state = getState();
+            const currentFilters = state.inbox.filters;
+
+            // Use provided filters or fallback to stored filters
+            const effectiveSearchID = searchID !== undefined ? searchID : currentFilters.searchID;
+            const effectiveStatus = status !== undefined ? status : currentFilters.status;
+            const effectiveType = type !== undefined ? type : currentFilters.type;
+
+            // Store new filters if they are different
+            if (effectiveSearchID !== currentFilters.searchID ||
+                effectiveStatus !== currentFilters.status ||
+                effectiveType !== currentFilters.type) {
+                dispatch(setFilters({
+                    searchID: effectiveSearchID,
+                    status: effectiveStatus,
+                    type: effectiveType
+                }));
+            }
+
             let url = `${BASE_URL}/api/Applications/inbox?page=${page}&limit=${pageSize}`;
 
-            if (searchID) url += `&search=${searchID}`;
-            if (status) url += `&status=${status}`;
-            if (type) url += `&requestType=${type}`;
+            if (effectiveSearchID) url += `&search=${effectiveSearchID}`;
+            if (effectiveStatus) url += `&status=${effectiveStatus}`;
+            if (effectiveType) url += `&requestType=${effectiveType}`;
             if (department) url += `&department=${department}`;
-
-            // console.log("Inbox API URL:", url);
 
             const response = await fetch(url, { headers: getHeaders() });
 
@@ -72,11 +90,8 @@ export const fetchInboxRequests = createAsyncThunk(
             }
 
             const data = await response.json();
-            // console.log("Raw API Response:", data);
-            // console.log("First application details:", data.applications?.[0]);
             return data;
         } catch (error) {
-            // console.error("Inbox API Error:", error);
             return rejectWithValue(error.message || "فشل في جلب الطلبات الواردة");
         }
     }
@@ -132,6 +147,11 @@ const inboxSlice = createSlice({
         pageSize: 10,
         totalCount: 0,
         currentRequest: null,
+        filters: {
+            searchID: "",
+            status: "",
+            type: ""
+        },
         stats: {
             total: 0,
             new: 0,
@@ -143,6 +163,9 @@ const inboxSlice = createSlice({
         setPage: (state, action) => {
             state.page = action.payload;
         },
+        resetPage: (state) => {
+            state.page = 1;
+        },
         setPageSize: (state, action) => {
             state.pageSize = action.payload;
         },
@@ -151,6 +174,19 @@ const inboxSlice = createSlice({
         },
         clearCurrentInboxRequest: (state) => {
             state.currentRequest = null;
+        },
+        setFilters: (state, action) => {
+            state.filters = {
+                ...state.filters,
+                ...action.payload
+            };
+        },
+        clearFilters: (state) => {
+            state.filters = {
+                searchID: "",
+                status: "",
+                type: ""
+            };
         },
     },
     extraReducers: (builder) => {
@@ -230,9 +266,12 @@ const inboxSlice = createSlice({
 
 export const {
     setPage,
+    resetPage,
     setPageSize,
     setCurrentInboxRequest,
     clearCurrentInboxRequest,
+    setFilters,
+    clearFilters
 } = inboxSlice.actions;
 
 export default inboxSlice.reducer;
@@ -248,4 +287,5 @@ export const selectRequestDetailsError = state => state.inbox.requestDetailsErro
 export const selectInboxPage = state => state.inbox.page;
 export const selectInboxPageSize = state => state.inbox.pageSize;
 export const selectInboxTotalCount = state => state.inbox.totalCount;
+export const selectInboxFilters = state => state.inbox.filters;
 export const selectLastUpdatedInbox = state => state.inbox.lastUpdated;

@@ -12,6 +12,9 @@ import CustomSelect from '../../../Component/CustomSelect/CustomSelect';
 import {
   fetchInboxRequests,
   setPage,
+  resetPage,
+  setFilters,
+  clearFilters,
   setCurrentInboxRequest,
   selectInboxRequests,
   selectInboxLoading,
@@ -19,7 +22,8 @@ import {
   selectInboxStats,
   selectInboxPage,
   selectInboxPageSize,
-  selectInboxTotalCount
+  selectInboxTotalCount,
+  selectInboxFilters
 } from "../../../Redux/slices/inboxSlice";
 
 const APPLICATION_TYPES = [
@@ -75,6 +79,7 @@ export default function Inbox() {
   const currentPage = useSelector(selectInboxPage);
   const pageSize = useSelector(selectInboxPageSize);
   const totalCount = useSelector(selectInboxTotalCount);
+  const savedFilters = useSelector(selectInboxFilters);
 
   const role = sessionStorage.getItem("role") || "";
   const [userRole, setUserRole] = useState("");
@@ -90,17 +95,15 @@ export default function Inbox() {
   }, []);
 
   const [selectedRequest, setSelectedRequest] = useState(null);
-  const [searchID, setSearchID] = useState("");
-  const [statusFilter, setStatusFilter] = useState("");
-  const [typeFilter, setTypeFilter] = useState("");
+  const [searchID, setSearchID] = useState(savedFilters.searchID || "");
+  const [statusFilter, setStatusFilter] = useState(savedFilters.status || "");
+  const [typeFilter, setTypeFilter] = useState(savedFilters.type || "");
   const [filteredRequests, setFilteredRequests] = useState([]);
 
   const totalPages = Math.ceil(totalCount / pageSize);
 
   useEffect(() => {
     let filtered = [...requests];
-    // console.log("Current requests:", requests);
-    // console.log("Current filters:", { statusFilter, searchID, typeFilter });
 
     if (statusFilter) {
       filtered = filtered.filter(req => req.status === statusFilter);
@@ -115,14 +118,11 @@ export default function Inbox() {
     }
 
     if (typeFilter) {
-      // console.log("Filtering by type:", typeFilter);
       filtered = filtered.filter(req => {
-        // console.log("Request type:", req.type, "ApplicationTypeId:", req.applicationTypeId);
         return req.applicationTypeId === parseInt(typeFilter);
       });
     }
 
-    // console.log("Filtered requests:", filtered);
     setFilteredRequests(filtered);
   }, [requests, searchID, statusFilter, typeFilter]);
 
@@ -154,6 +154,28 @@ export default function Inbox() {
     setSearchID("");
     setStatusFilter("");
     setTypeFilter("");
+    dispatch(clearFilters());
+    dispatch(resetPage());
+  };
+
+  const handleSearchChange = (e) => {
+    const newValue = e.target.value;
+    setSearchID(newValue);
+    dispatch(setFilters({ searchID: newValue }));
+    dispatch(resetPage());
+  };
+
+  const handleStatusChange = (e) => {
+    const newValue = e.target.value;
+    setStatusFilter(newValue);
+    dispatch(setFilters({ status: newValue }));
+    dispatch(resetPage());
+  };
+
+  const handleTypeChange = (value) => {
+    setTypeFilter(value);
+    dispatch(setFilters({ type: value }));
+    dispatch(resetPage());
   };
 
   const handleSelectRequest = (req) => {
@@ -271,23 +293,23 @@ export default function Inbox() {
             <input
               id="filter"
               type="text"
-              placeholder=" بحث..."
+              placeholder="بحث... "
               className={styles.searchBox}
               value={searchID}
-              onChange={(e) => setSearchID(e.target.value)}
+              onChange={handleSearchChange}
             />
           </div>
           <div className={styles.filters}>
             <div className={styles.selectBox}>
               <select
                 value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
+                onChange={handleStatusChange}
               >
                 <option value="">كل الحالات</option>
-                <option value="طلب_جديد">طلب جديد</option>
                 <option value="قيد_التنفيذ">قيد التنفيذ</option>
                 <option value="مقبول">مقبول</option>
                 <option value="مرفوض">مرفوض</option>
+                <option value="طلب_جديد">طلب جديد</option>
               </select>
             </div>
             <div className={styles.selectBox}>
@@ -297,10 +319,7 @@ export default function Inbox() {
                   label: type.name
                 }))}
                 value={typeFilter}
-                onChange={(value) => {
-                  setTypeFilter(value);
-                  dispatch(setPage(1));
-                }}
+                onChange={handleTypeChange}
                 placeholder="اختر نوع الطلب"
                 searchable={true}
               />
