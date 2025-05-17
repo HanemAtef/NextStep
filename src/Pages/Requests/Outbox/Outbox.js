@@ -14,6 +14,8 @@ import {
   fetchOutboxRequests,
   setPage,
   resetPage,
+  setFilters,
+  clearFilters,
   setCurrentOutboxRequest,
   selectOutboxRequests,
   selectOutboxLoading,
@@ -21,7 +23,8 @@ import {
   selectOutboxStats,
   selectOutboxPage,
   selectOutboxPageSize,
-  selectOutboxTotalCount
+  selectOutboxTotalCount,
+  selectOutboxFilters
 } from "../../../Redux/slices/outboxSlice";
 
 const APPLICATION_TYPES = [
@@ -76,6 +79,7 @@ export default function Outbox() {
   const currentPage = useSelector(selectOutboxPage);
   const pageSize = useSelector(selectOutboxPageSize);
   const totalCount = useSelector(selectOutboxTotalCount);
+  const savedFilters = useSelector(selectOutboxFilters);
   const role = sessionStorage.getItem("role") || "";
   const [userRole, setUserRole] = useState("");
   const [departmentName, setDepartmentName] = useState("");
@@ -89,9 +93,9 @@ export default function Outbox() {
     }
   }, []);
 
-  const [searchID, setSearchID] = useState("");
-  const [statusFilter, setStatusFilter] = useState("");
-  const [typeFilter, setTypeFilter] = useState("");
+  const [searchID, setSearchID] = useState(savedFilters.searchID || "");
+  const [statusFilter, setStatusFilter] = useState(savedFilters.status || "");
+  const [typeFilter, setTypeFilter] = useState(savedFilters.type || "");
 
   const totalPages = Math.ceil(totalCount / pageSize);
 
@@ -123,21 +127,27 @@ export default function Outbox() {
     setSearchID("");
     setStatusFilter("");
     setTypeFilter("");
+    dispatch(clearFilters());
     dispatch(resetPage());
   };
 
   const handleSearchChange = (e) => {
-    setSearchID(e.target.value);
+    const newValue = e.target.value;
+    setSearchID(newValue);
+    dispatch(setFilters({ searchID: newValue }));
     dispatch(resetPage());
   };
 
   const handleStatusChange = (e) => {
-    setStatusFilter(e.target.value);
+    const newValue = e.target.value;
+    setStatusFilter(newValue);
+    dispatch(setFilters({ status: newValue }));
     dispatch(resetPage());
   };
 
   const handleTypeChange = (value) => {
     setTypeFilter(value);
+    dispatch(setFilters({ type: value }));
     dispatch(resetPage());
   };
 

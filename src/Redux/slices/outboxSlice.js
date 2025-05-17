@@ -12,21 +12,33 @@ const getHeaders = () => {
 
 export const fetchOutboxRequests = createAsyncThunk(
     "outbox/fetchOutboxRequests",
-    async ({ page, pageSize, searchID, status, type }, { rejectWithValue, dispatch }) => {
+    async ({ page, pageSize, searchID, status, type }, { rejectWithValue, dispatch, getState }) => {
         try {
-            // Reset to page 1 if any filter is applied
-            const effectivePage = (searchID || status || type) ? 1 : page;
+            // Get current filters from state
+            const state = getState();
+            const currentFilters = state.outbox.filters;
 
-            let url = `${BASE_URL}/api/Applications/outbox?page=${effectivePage}&limit=${pageSize}`;
-            if (searchID) url += `&search=${searchID}`;
-            if (status) url += `&status=${status}`;
-            if (type) url += `&requestType=${type}`;
-            // if (department) url += `&department=${department}`;
+            // Use provided filters or fallback to stored filters
+            const effectiveSearchID = searchID !== undefined ? searchID : currentFilters.searchID;
+            const effectiveStatus = status !== undefined ? status : currentFilters.status;
+            const effectiveType = type !== undefined ? type : currentFilters.type;
 
-            // Update the page state if we're using page 1 due to filters
-            if (effectivePage === 1 && page !== 1) {
-                dispatch(resetPage());
+            // Store new filters if they are different
+            if (effectiveSearchID !== currentFilters.searchID ||
+                effectiveStatus !== currentFilters.status ||
+                effectiveType !== currentFilters.type) {
+                dispatch(setFilters({
+                    searchID: effectiveSearchID,
+                    status: effectiveStatus,
+                    type: effectiveType
+                }));
             }
+
+            let url = `${BASE_URL}/api/Applications/outbox?page=${page}&limit=${pageSize}`;
+            if (effectiveSearchID) url += `&search=${effectiveSearchID}`;
+            if (effectiveStatus) url += `&status=${effectiveStatus}`;
+            if (effectiveType) url += `&requestType=${effectiveType}`;
+            // if (department) url += `&department=${department}`;
 
             const response = await fetch(
                 url,
@@ -104,6 +116,11 @@ const outboxSlice = createSlice({
         pageSize: 10,
         totalCount: 0,
         currentRequest: null,
+        filters: {
+            searchID: "",
+            status: "",
+            type: ""
+        },
         stats: {
             total: 0,
             new: 0,
@@ -128,6 +145,19 @@ const outboxSlice = createSlice({
         },
         clearCurrentOutboxRequest: (state) => {
             state.currentRequest = null;
+        },
+        setFilters: (state, action) => {
+            state.filters = {
+                ...state.filters,
+                ...action.payload
+            };
+        },
+        clearFilters: (state) => {
+            state.filters = {
+                searchID: "",
+                status: "",
+                type: ""
+            };
         },
     },
     extraReducers: (builder) => {
@@ -213,6 +243,8 @@ export const {
     setPageSize,
     setCurrentOutboxRequest,
     clearCurrentOutboxRequest,
+    setFilters,
+    clearFilters
 } = outboxSlice.actions;
 
 export default outboxSlice.reducer;
@@ -228,4 +260,5 @@ export const selectRequestDetailsError = (state) => state.outbox.requestDetailsE
 export const selectOutboxPage = (state) => state.outbox.page;
 export const selectOutboxPageSize = (state) => state.outbox.pageSize;
 export const selectOutboxTotalCount = (state) => state.outbox.totalCount;
+export const selectOutboxFilters = (state) => state.outbox.filters;
 export const selectLastUpdatedOutbox = (state) => state.outbox.lastUpdated;
