@@ -12,14 +12,21 @@ const getHeaders = () => {
 
 export const fetchOutboxRequests = createAsyncThunk(
     "outbox/fetchOutboxRequests",
-    async ({ page, pageSize, searchID, status, type }, { rejectWithValue }) => {
+    async ({ page, pageSize, searchID, status, type }, { rejectWithValue, dispatch }) => {
         try {
-            let url = `${BASE_URL}/api/Applications/outbox?page=${page}&limit=${pageSize}`;
+            // Reset to page 1 if any filter is applied
+            const effectivePage = (searchID || status || type) ? 1 : page;
 
+            let url = `${BASE_URL}/api/Applications/outbox?page=${effectivePage}&limit=${pageSize}`;
             if (searchID) url += `&search=${searchID}`;
             if (status) url += `&status=${status}`;
             if (type) url += `&requestType=${type}`;
             // if (department) url += `&department=${department}`;
+
+            // Update the page state if we're using page 1 due to filters
+            if (effectivePage === 1 && page !== 1) {
+                dispatch(resetPage());
+            }
 
             const response = await fetch(
                 url,
@@ -110,6 +117,9 @@ const outboxSlice = createSlice({
         setPage: (state, action) => {
             state.page = action.payload;
         },
+        resetPage: (state) => {
+            state.page = 1;
+        },
         setPageSize: (state, action) => {
             state.pageSize = action.payload;
         },
@@ -199,6 +209,7 @@ const outboxSlice = createSlice({
 
 export const {
     setPage,
+    resetPage,
     setPageSize,
     setCurrentOutboxRequest,
     clearCurrentOutboxRequest,
@@ -211,7 +222,7 @@ export const selectOutboxRequests = (state) => state.outbox.requests;
 export const selectOutboxLoading = (state) => state.outbox.loading;
 export const selectOutboxError = (state) => state.outbox.error;
 export const selectOutboxStats = (state) => state.outbox.stats;
-export const selectCurrentOutboxRequest = (state) => state.outbox.currentRequest; 
+export const selectCurrentOutboxRequest = (state) => state.outbox.currentRequest;
 export const selectRequestDetailsLoading = (state) => state.outbox.requestDetailsLoading;
 export const selectRequestDetailsError = (state) => state.outbox.requestDetailsError;
 export const selectOutboxPage = (state) => state.outbox.page;

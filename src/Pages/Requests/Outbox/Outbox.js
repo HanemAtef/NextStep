@@ -13,6 +13,7 @@ import CustomSelect from '../../../Component/CustomSelect/CustomSelect';
 import {
   fetchOutboxRequests,
   setPage,
+  resetPage,
   setCurrentOutboxRequest,
   selectOutboxRequests,
   selectOutboxLoading,
@@ -122,6 +123,22 @@ export default function Outbox() {
     setSearchID("");
     setStatusFilter("");
     setTypeFilter("");
+    dispatch(resetPage());
+  };
+
+  const handleSearchChange = (e) => {
+    setSearchID(e.target.value);
+    dispatch(resetPage());
+  };
+
+  const handleStatusChange = (e) => {
+    setStatusFilter(e.target.value);
+    dispatch(resetPage());
+  };
+
+  const handleTypeChange = (value) => {
+    setTypeFilter(value);
+    dispatch(resetPage());
   };
 
   const handleSelectRequest = (req) => {
@@ -229,14 +246,14 @@ export default function Outbox() {
               placeholder="بحث... "
               className={styles.searchBox}
               value={searchID}
-              onChange={(e) => setSearchID(e.target.value)}
+              onChange={handleSearchChange}
             />
           </div>
           <div className={styles.filters}>
             <div className={styles.selectBox}>
               <select
                 value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
+                onChange={handleStatusChange}
               >
                 <option value="">كل الحالات</option>
                 <option value="قيد_التنفيذ">قيد التنفيذ</option>
@@ -252,10 +269,7 @@ export default function Outbox() {
                   label: type.name
                 }))}
                 value={typeFilter}
-                onChange={(value) => {
-                  setTypeFilter(value);
-                  dispatch(setPage(1));
-                }}
+                onChange={handleTypeChange}
                 placeholder="اختر نوع الطلب"
                 searchable={true}
               />
