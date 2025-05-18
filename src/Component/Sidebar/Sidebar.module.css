@@ -1,7 +1,7 @@
 .sidebar {
     position: fixed;
     top: 77px;
-    right: 15px;
+    right: 10px;
     width: 220px;
     height: 60vh;
     background-color: white;
@@ -79,6 +79,8 @@
 
 .toggleButton {
     display: none;
+    
+
 }
 
 
