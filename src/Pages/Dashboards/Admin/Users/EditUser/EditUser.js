@@ -188,7 +188,7 @@ const EditUser = () => {
           />
         </div>
 
-        <div className={styles.formGroup}>
+        {/* <div className={styles.formGroup}>
           <label htmlFor="departmentID">القسم</label>
           <input
             type="number"
@@ -199,7 +199,7 @@ const EditUser = () => {
             className={styles.formControl}
             placeholder="رقم القسم"
           />
-        </div>
+        </div> */}
 
         {error && <div className={styles.errorMessage}>{error}</div>}
 

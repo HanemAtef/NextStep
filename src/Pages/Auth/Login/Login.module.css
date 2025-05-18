@@ -149,7 +149,7 @@
     color: #731755;
 }
 
-/* Media Queries for Responsive Design */
+
 @media (max-width: 992px) {
     .loginCard {
         width: 95%;

@@ -14,11 +14,9 @@ const UserList = () => {
   const [requestToDelete, setRequestToDelete] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
 
-
   const { data: users, loading, error } = useSelector((state) => state.userAdmin);
 
   useEffect(() => {
-
     dispatch(fetchUsers());
   }, [dispatch]);
 
@@ -58,42 +56,47 @@ const UserList = () => {
         </button>
       </div>
 
-      {loading && <p>جاري تحميل البيانات...</p>}
-      {error && <p>حدث خطأ: {error}</p>}
+      {loading && <div className={userCss.loading}>جاري تحميل البيانات...</div>}
+      {error && <div className={userCss.noData}>حدث خطأ: {error}</div>}
 
-      <table className={userCss.table}>
-        <thead>
-          <tr>
-            <th>الرقم</th>
-            <th>الاسم</th>
-            <th>البريد الالكتروني</th>
-            <th>الوظيفة</th>
-            <th>العمليات</th>
-          </tr>
-        </thead>
-        <tbody>
-          {filteredUsers.map((user, index) => (
-            <tr key={user.id} className={userCss.tableRow}>
-              <td>{index + 1}</td>
-              <td>{user.name}</td>
-              <td>{user.email}</td>
-              <td>{user.role}</td>
-
-              <td>
-                <button className={userCss.iconedit} onClick={() => goToEditUser(user.id)}>
-                  <FiEdit size={24} />
-                </button>
-                <button className={userCss.icondelete} onClick={() => {
-                  setRequestToDelete(user);
-                  setShowModal(true);
-                }}>
-                  <FiTrash2 size={25} />
-                </button>
-              </td>
+      <div className={userCss.tableContainer}>
+        <table className={userCss.table}>
+          <thead>
+            <tr>
+              <th>الرقم</th>
+              <th>الاسم</th>
+              <th>البريد الالكتروني</th>
+              <th>الوظيفة</th>
+              <th>العمليات</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {filteredUsers.map((user, index) => (
+              <tr key={user.id} className={userCss.tableRow}>
+                <td>{index + 1}</td>
+                <td>{user.name}</td>
+                <td>{user.email}</td>
+                <td>{user.role}</td>
+                <td className={userCss.actions}>
+                  <button className={userCss.iconedit} onClick={() => goToEditUser(user.id)}>
+                    <FiEdit size={24} />
+                  </button>
+                  <button className={userCss.icondelete} onClick={() => {
+                    setRequestToDelete(user);
+                    setShowModal(true);
+                  }}>
+                    <FiTrash2 size={25} />
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {filteredUsers.length === 0 && !loading && (
+        <div className={userCss.noData}>لا توجد بيانات للعرض</div>
+      )}
 
       {showModal && requestToDelete && (
         <div className={userCss.modalStyles}>
@@ -104,7 +107,7 @@ const UserList = () => {
                 <FaTimes />
               </button>
             </div>
-            <p>هل أنت متأكد أنك تريد الحذف؟</p>
+            <p>هل أنت متأكد أنك تريد حذف المستخدم {requestToDelete.name}؟</p>
             <div className={userCss.btns}>
               <button className={userCss.ok} onClick={handleDelete}>تأكيد</button>
               <button className={userCss.no} onClick={() => setShowModal(false)}>الغاء</button>

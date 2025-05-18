@@ -6,6 +6,8 @@
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
     max-width: 800px;
     direction: rtl;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .header {
@@ -15,6 +17,8 @@
     margin-bottom: 24px;
     border-bottom: 1px solid #eee;
     padding-bottom: 16px;
+    flex-wrap: wrap;
+    gap: 15px;
 }
 
 .title {
@@ -22,6 +26,9 @@
     color: #4B5563;
     margin: 0;
     font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 10px;
 }
 
 .backButton {
@@ -35,6 +42,7 @@
     border-radius: 4px;
     cursor: pointer;
     transition: all 0.3s ease;
+    white-space: nowrap;
 }
 
 .backButton:hover {
@@ -77,6 +85,7 @@
     border-radius: 6px;
     transition: all 0.3s ease;
     background-color: #f8f9fa;
+    box-sizing: border-box;
 }
 
 .formControl:focus {
@@ -103,6 +112,7 @@
     margin-top: 24px;
     justify-content: flex-end;
     grid-column: 1 / -1;
+    flex-wrap: wrap;
 }
 
 .saveButton {
@@ -197,6 +207,17 @@
     font-size: 18px;
 }
 
+/* Responsive Media Queries */
+@media (max-width: 992px) {
+    .container {
+        max-width: 95%;
+    }
+
+    .formControl {
+        width: 100%;
+    }
+}
+
 @media (max-width: 768px) {
     .form {
         grid-template-columns: 1fr;
@@ -226,5 +247,91 @@
 
     .container {
         padding: 16px;
+    }
+
+    .title {
+        font-size: 22px;
+    }
+
+    .loading {
+        height: 250px;
+        font-size: 18px;
+    }
+
+    .loading::before {
+        width: 35px;
+        height: 35px;
+    }
+}
+
+@media (max-width: 576px) {
+    .container {
+        padding: 12px;
+        border-radius: 6px;
+    }
+
+    .formControl {
+        padding: 10px 14px;
+        font-size: 15px;
+    }
+
+    .formGroup label {
+        font-size: 15px;
+    }
+
+    .title {
+        font-size: 20px;
+    }
+
+    .saveButton,
+    .cancelButton {
+        padding: 10px 20px;
+        font-size: 15px;
+        min-width: auto;
+    }
+
+    .error {
+        padding: 16px;
+    }
+
+    .error p {
+        font-size: 16px;
+    }
+}
+
+@media (max-width: 480px) {
+    .container {
+        padding: 10px;
+    }
+
+    .formControl {
+        padding: 8px 12px;
+        font-size: 14px;
+    }
+
+    .formGroup label {
+        font-size: 14px;
+        margin-bottom: 6px;
+    }
+
+    .title {
+        font-size: 18px;
+    }
+
+    .saveButton,
+    .cancelButton {
+        padding: 8px 16px;
+        font-size: 14px;
+    }
+
+    .loading {
+        height: 200px;
+        font-size: 16px;
+    }
+
+    .loading::before {
+        width: 30px;
+        height: 30px;
+        border-width: 3px;
     }
 }
