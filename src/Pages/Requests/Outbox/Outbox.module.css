@@ -7,6 +7,9 @@
     text-align: right;
     transition: all 0.3s ease-in-out;
     overflow: hidden;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
 }
 
 .header {
@@ -36,6 +39,7 @@
 .statsSection {
     display: flex;
     gap: 10px;
+    flex-wrap: wrap;
 }
 
 .statBox {
@@ -85,18 +89,15 @@
     align-items: center;
     flex-wrap: wrap;
     gap: 12px;
-    /* background-color: #f8f9ff; */
     border-radius: 10px;
     padding: 15px;
     margin-bottom: 20px;
-    /* border: 1px solid #eaedf7; */
-    /* box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05); */
 }
 
 .searchContainer {
     position: relative;
     flex: 1;
-    min-width: 250px;
+    min-width: 200px;
 }
 
 .searchIcon {
@@ -108,7 +109,8 @@
 }
 
 .searchBox {
-    width: 50%;
+    width: 100%;
+    max-width: 300px;
     height: 30px;
     padding: 8px 15px;
     padding-right: 35px;
@@ -137,7 +139,6 @@
     position: relative;
     min-width: 200px;
     direction: rtl;
-
 }
 
 .selectBox select {
@@ -250,15 +251,28 @@
 
 .tableContainer {
     border-radius: 10px;
-    overflow: hidden;
+    overflow-x: auto;
     box-shadow: 0 0 15px rgba(0, 0, 0, 0.05);
     margin-bottom: 20px;
     border: 1px solid #eaedf7;
+    max-width: 100%;
+    -webkit-overflow-scrolling: touch;
+    display: block;
+    width: 100%;
+    overflow-y: hidden;
 }
 
 .table {
     width: 100%;
     border-collapse: collapse;
+    table-layout: fixed;
+    min-width: 600px;
+}
+
+.table th,
+.table td {
+    white-space: normal;
+    word-break: break-word;
 }
 
 .table th {
@@ -320,10 +334,17 @@
 .idCell {
     font-weight: 700;
     color: #3470db;
+    width: 60px;
 }
 
 .typeCell {
     font-weight: 600;
+    max-width: 200px;
+}
+
+.actionType {
+    min-width: 90px;
+    width: 90px;
 }
 
 .dateIcon {
@@ -348,6 +369,7 @@
     box-shadow: 0 2px 5px rgba(52, 112, 219, 0.3);
     width: 100px;
     margin: 0 auto;
+    white-space: nowrap;
 }
 
 .detailsButton:hover {
@@ -525,5 +547,151 @@
 
     100% {
         transform: rotate(360deg);
+    }
+}
+
+/* Media Queries for Responsive Design */
+@media (max-width: 1024px) {
+    .header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .statsSection {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .filtersContainer {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .searchContainer {
+        width: 100%;
+    }
+
+    .searchBox {
+        max-width: 100%;
+    }
+
+    .filters {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .selectBox {
+        flex: 1;
+        min-width: 150px;
+    }
+}
+
+@media (max-width: 800px) {
+    .outboxContainer {
+        padding: 15px;
+    }
+
+    .title {
+        font-size: 22px;
+    }
+
+    .titleIcon {
+        font-size: 20px;
+    }
+
+    .statsSection {
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .statBox {
+        flex: 1;
+        min-width: 60px;
+    }
+
+    .filters {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .selectBox {
+        width: 100%;
+    }
+
+    .pagination {
+        flex-wrap: wrap;
+    }
+
+    .newRequest,
+    .accepted,
+    .rejected,
+    .inprogress {
+        min-width: 80px;
+        font-size: 13px;
+        padding: 5px 8px;
+    }
+
+    .detailsButton {
+        padding: 6px 10px;
+        font-size: 12px;
+        width: 80px;
+    }
+
+    .table th,
+    .table td {
+        padding: 12px 6px;
+    }
+
+    .table {
+        min-width: 650px;
+    }
+}
+
+@media (max-width: 480px) {
+    .outboxContainer {
+        padding: 10px;
+    }
+
+    .title {
+        font-size: 18px;
+    }
+
+    .statValue {
+        font-size: 18px;
+    }
+
+    .statLabel {
+        font-size: 12px;
+    }
+
+    .paginationButton {
+        padding: 8px 12px;
+        font-size: 12px;
+        min-width: 80px;
+    }
+
+    .pageInfo {
+        font-size: 12px;
+    }
+
+    .newRequest,
+    .accepted,
+    .rejected,
+    .inprogress {
+        min-width: 70px;
+        font-size: 12px;
+        padding: 4px 6px;
+    }
+
+    .detailsButton {
+        width: 80px;
+        font-size: 11px;
+        padding: 6px 10px;
+    }
+
+    .table td,
+    .table th {
+        padding: 10px 5px;
+        font-size: 12px;
     }
 }
