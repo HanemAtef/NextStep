@@ -107,18 +107,14 @@ const Login = () => {
                   <input
                     type={showPassword ? "text" : "password"}
                     id="password"
-                    className={`${styles.inputt} ${styles.passwordInput} ${errors.password ? styles.invalid : ""}`}
+                    className={`${styles.inputt} ${errors.password ? styles.invalid : ""}`}
                     placeholder="*********"
                     value={password || ""}
                     onChange={handleChange}
                   />
-                  <button
-                    type="button"
-                    className={styles.togglePassword}
-                    onClick={() => setShowPassword(!showPassword)}
-                  >
+                  <span className={styles.togglePassword} onClick={() => setShowPassword(!showPassword)}>
                     {showPassword ? <FaEyeSlash /> : <FaEye />}
-                  </button>
+                  </span>
                 </div>
                 {errors.password && <div className={styles.error}>{errors.password}</div>}
               </div>

@@ -13,6 +13,7 @@
     margin: 10px auto;
     direction: rtl;
     position: relative;
+    box-sizing: border-box;
 }
 
 /* .leftSection {
@@ -68,6 +69,7 @@
     padding: 40px 30px;
     background-color: #fff;
     position: relative;
+    box-sizing: border-box;
 }
 
 .rightSection::before {
@@ -141,6 +143,7 @@
     border-radius: 8px;
     background-color: #f9f9f9;
     transition: all 0.3s ease;
+    word-break: break-word;
 }
 
 .bottomSection p:hover {
@@ -199,6 +202,29 @@
     left: auto;
 }
 
+/* Responsive Media Queries */
+@media (max-width: 992px) {
+    .userCardd {
+        width: 80%;
+        min-height: 500px;
+    }
+
+    .rightSection {
+        padding: 30px 25px;
+    }
+
+    .avatar {
+        width: 130px;
+        height: 130px;
+    }
+
+    .cameraIcon {
+        width: 32px;
+        height: 32px;
+        font-size: 15px;
+    }
+}
+
 @media (max-width: 768px) {
     .userCardd {
         flex-direction: column;
@@ -223,7 +249,7 @@
     }
 
     .rightSection {
-        padding: 20px;
+        padding: 25px 20px;
     }
 
     .avatar {
@@ -242,16 +268,70 @@
         right: 32%;
         left: auto;
     }
+
+    .userWelcome h2 {
+        font-size: 22px;
+    }
+
+    .userIdBadge {
+        padding: 5px 10px;
+        font-size: 13px;
+    }
+}
+
+@media (max-width: 576px) {
+    .userCardd {
+        width: 95%;
+        border-radius: 10px;
+    }
+
+    .rightSection {
+        padding: 20px 15px;
+    }
+
+    .avatarWrapper {
+        margin-bottom: 20px;
+    }
+
+    .avatar {
+        width: 110px;
+        height: 110px;
+        border-width: 4px;
+    }
+
+    .cameraIcon {
+        width: 28px;
+        height: 28px;
+        font-size: 13px;
+        right: 31%;
+    }
+
+    [dir="rtl"] .cameraIcon {
+        right: 31%;
+    }
+
+    .bottomSection p {
+        padding: 10px 12px;
+        margin: 10px 0;
+        font-size: 15px;
+    }
+
+    .logoutBtn {
+        padding: 10px 20px;
+        font-size: 14px;
+        margin-top: 20px;
+    }
 }
 
 @media (max-width: 480px) {
     .userCardd {
-        width: 95%;
+        width: 100%;
     }
 
     .avatar {
         width: 100px;
         height: 100px;
+        border-width: 3px;
     }
 
     .cameraIcon {
@@ -268,6 +348,51 @@
 
     .bottomSection p {
         font-size: 14px;
+        padding: 8px 10px;
+    }
+
+    .userWelcome h2 {
+        font-size: 20px;
+    }
+
+    .userIdBadge {
+        padding: 4px 8px;
+        font-size: 12px;
+    }
+
+    .infoIcon {
+        font-size: 16px;
+    }
+
+    .logoutBtn {
+        padding: 10px 15px;
+        font-size: 13px;
+    }
+}
+
+@media (max-width: 360px) {
+    .avatar {
+        width: 90px;
+        height: 90px;
+    }
+
+    .cameraIcon {
+        width: 25px;
+        height: 25px;
+        font-size: 11px;
+        right: 28%;
+    }
+
+    [dir="rtl"] .cameraIcon {
+        right: 28%;
+    }
+
+    .userWelcome h2 {
+        font-size: 18px;
+    }
+
+    .bottomSection p {
+        font-size: 13px;
     }
 }
 
@@ -368,4 +493,42 @@
     margin: 20px auto;
     max-width: 500px;
     border-right: 4px solid #c62828;
+}
+
+/* Additional responsive styles for loading and error containers */
+@media (max-width: 768px) {
+
+    .loadingContainer,
+    .errorContainer {
+        width: 90%;
+        padding: 25px;
+        margin: 80px auto;
+        font-size: 16px;
+    }
+
+    .loadingSpinner {
+        width: 40px;
+        height: 40px;
+    }
+}
+
+@media (max-width: 480px) {
+
+    .loadingContainer,
+    .errorContainer {
+        width: 95%;
+        padding: 20px;
+        margin: 60px auto;
+        font-size: 15px;
+    }
+
+    .loadingSpinner {
+        width: 35px;
+        height: 35px;
+        border-width: 4px;
+    }
+
+    .errorContainer {
+        border-right-width: 3px;
+    }
 }
