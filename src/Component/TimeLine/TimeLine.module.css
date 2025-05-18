@@ -3,6 +3,8 @@
   flex-direction: column;
   padding: 25px;
   background-color: #fff;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .timeContainer h3 {
@@ -13,7 +15,6 @@
   gap: 12px;
   font-weight: 700;
   color: #1a3a5f !important;
-
 }
 
 .timeIcon {
@@ -26,6 +27,9 @@
   display: flex;
   align-items: center;
   margin-top: 20px;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
 }
 
 .step {
@@ -33,6 +37,7 @@
   flex-direction: column;
   align-items: center;
   color: #0a162b;
+  margin-bottom: 15px;
 }
 
 .circle {
@@ -42,6 +47,9 @@
   background-color: #bbcde0;
   border: 2px solid #bbcde0;
   z-index: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .circle.active {
@@ -66,5 +74,131 @@
   font-size: 20px;
   text-align: center;
   width: 200px;
+  word-break: break-word;
+}
 
+/* Responsive Media Queries */
+@media (max-width: 1200px) {
+  .line {
+    width: 80px;
+  }
+
+  .stepLabel {
+    width: 180px;
+    font-size: 18px;
+  }
+}
+
+@media (max-width: 992px) {
+  .timeContainer {
+    padding: 20px;
+  }
+
+  .timeContainer h3 {
+    font-size: 25px;
+  }
+
+  .line {
+    width: 60px;
+  }
+
+  .circle {
+    width: 35px;
+    height: 35px;
+  }
+
+  .stepLabel {
+    width: 150px;
+    font-size: 16px;
+  }
+}
+
+@media (max-width: 768px) {
+  .timeContainer {
+    padding: 15px;
+  }
+
+  .timeContainer h3 {
+    font-size: 22px;
+    gap: 10px;
+  }
+
+  .timeIcon {
+    font-size: 18px;
+  }
+
+  .timeline {
+    margin-top: 15px;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .step {
+    flex-direction: row;
+    width: 100%;
+    margin-bottom: 10px;
+  }
+
+  .circle {
+    width: 30px;
+    height: 30px;
+  }
+
+  .line {
+    width: 2px;
+    height: 30px;
+    margin: 5px 0;
+  }
+
+  .stepLabel {
+    width: auto;
+    margin-top: 0;
+    margin-right: 10px;
+    text-align: right;
+    font-size: 15px;
+  }
+}
+
+@media (max-width: 576px) {
+  .timeContainer {
+    padding: 12px;
+  }
+
+  .timeContainer h3 {
+    font-size: 20px;
+    gap: 8px;
+  }
+
+  .timeIcon {
+    font-size: 16px;
+    padding-left: 3px;
+  }
+
+  .circle {
+    width: 25px;
+    height: 25px;
+  }
+
+  .stepLabel {
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .timeContainer h3 {
+    font-size: 18px;
+  }
+
+  .circle {
+    width: 22px;
+    height: 22px;
+  }
+
+  .stepLabel {
+    font-size: 13px;
+  }
+
+  .line {
+    height: 25px;
+  }
 }

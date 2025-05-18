@@ -3,6 +3,8 @@
     margin-bottom: 35px;
     position: relative;
     padding: 10px 5px;
+    width: 100%;
+    box-sizing: border-box;
   }
 
   .historyy h3 {
@@ -21,12 +23,12 @@
 
   .historyCardd {
     display: flex;
-    transition: all .5s ease-in;
-    transition: transform 0.3s ease;
-    transform: translateZ(0);
-    backface-visibility: hidden;
-    will-change: transform;
-
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-top: 20px;
+    justify-content: flex-start;
+    width: 100%;
   }
 
   .cardBody {
@@ -37,18 +39,18 @@
   }
 
   .historyItem {
-    min-width: 250px;
-    padding: 22px 25px;
-    border-radius: 0 0 12px 12px;
-    margin-top: 0;
-    gap: 12px;
-    display: flex;
-    flex-direction: column;
-    background-color: #fff;
-    position: relative;
-
+    width: calc(25% - 13px);
+    box-sizing: border-box;
+    transition: transform 0.3s ease;
   }
 
+  .cardWrapper {
+    width: 100%;
+    height: 100%;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 4px;
+    overflow: hidden;
+  }
 
 
   .cardTitlee {
@@ -56,31 +58,20 @@
     justify-content: center;
     text-align: center;
     color: #fff;
-    font-size: large;
     font-weight: 700;
-    font-size: 14px;
+    font-size: 15px;
     background-color: #3470db;
-    padding: 1px;
-
+    padding: 10px;
   }
 
   .cardItem {
-    font-size: 18px;
-
-  }
-
-  .cardItem strong {
-    margin: 5px;
-    color: #0a162b;
-  }
-
-  .cardItem {
-    font-size: 16px;
+    font-size: 15px;
     line-height: 1.6;
     padding: 10px 12px;
     border-bottom: 1px solid rgba(0, 0, 0, 0.06);
     transition: all 0.25s ease;
-    border-radius: 8px;
+    border-radius: 0;
+    word-break: break-word;
   }
 
   .cardItem:last-child {
@@ -95,41 +86,114 @@
     position: relative;
   }
 
-  @media (max-width: 768px) {
-    .history h3 {
-      font-size: 24px;
-    }
-
+  /* Responsive Media Queries */
+  @media (max-width: 1400px) {
     .historyItem {
-      padding: 18px;
-    }
-
-    .cardItem {
-      font-size: 16px;
-    }
-
-    .historyCard:hover {
-      transform: translateY(-5px);
+      width: calc(33.333% - 15px);
     }
   }
 
-  @media (max-width: 480px) {
-    .history h3 {
+  @media (max-width: 1200px) {
+    .historyItem {
+      width: calc(50% - 15px);
+    }
+  }
+
+  @media (max-width: 992px) {
+    .historyy h3 {
+      font-size: 25px;
+    }
+
+    .historyItem {
+      width: calc(50% - 15px);
+    }
+
+    .cardTitlee {
+      font-size: 15px;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .historyy {
+      margin-top: 40px;
+      margin-bottom: 30px;
+    }
+
+    .historyy h3 {
+      font-size: 24px;
+    }
+
+    .historyCardd {
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .historyItem {
+      width: 100%;
+    }
+
+    .cardItem {
+      font-size: 15px;
+      padding: 8px 10px;
+    }
+  }
+
+  @media (max-width: 576px) {
+    .historyy {
+      margin-top: 30px;
+      padding: 8px 3px;
+    }
+
+    .historyy h3 {
       font-size: 22px;
       gap: 10px;
     }
 
-    .cardTitle {
-      font-size: 17px;
-      padding: 15px;
+    .penIcon {
+      font-size: 18px;
+    }
+
+    .cardTitlee {
+      font-size: 14px;
+      padding: 8px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .historyy h3 {
+      font-size: 20px;
+      gap: 8px;
+    }
+
+    .cardTitlee {
+      font-size: 13px;
+      padding: 6px;
     }
 
     .cardItem {
       padding: 8px 10px;
+      font-size: 14px;
+      line-height: 1.5;
     }
 
-    .cardItem:hover {
-      transform: translateX(-3px);
-      padding-left: 14px;
+    .cardItem strong {
+      margin-right: 5px;
+      display: block;
+      margin-bottom: 3px;
+    }
+
+    .penIcon {
+      font-size: 16px;
+    }
+  }
+
+  @media (max-width: 360px) {
+    .historyy h3 {
+      font-size: 18px;
+    }
+
+    .cardItem {
+      font-size: 13px;
+      padding: 6px 8px;
     }
   }

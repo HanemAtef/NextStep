@@ -1,4 +1,3 @@
-
 import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchHistory } from "../../Redux/slices/historySlice";
@@ -35,9 +34,9 @@ const History = ({ request }) => {
         <div className={HistoryCSS.historyCardd}>
           {history.map((item, index) => (
             <div key={index} className={HistoryCSS.historyItem}>
-              <Card>
+              <Card className={HistoryCSS.cardWrapper}>
                 <Card.Header className={HistoryCSS.cardTitlee}>
-                  <h4>{item.department || "قسم غير محدد"}</h4>
+                  {item.department || "قسم غير محدد"}
                 </Card.Header>
                 <ListGroup variant="flush">
                   <ListGroup.Item className={HistoryCSS.cardItem}>

@@ -2,7 +2,7 @@
         width: 70%;
         margin-top: 30px;
         margin-right: 100px;
-
+        box-sizing: border-box;
     }
 
     .card {
@@ -14,8 +14,8 @@
         overflow: hidden;
         border: 1px solid #e8eef7;
         margin-bottom: 25px;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
     }
-
 
     .cardTitlee {
         display: flex;
@@ -27,16 +27,13 @@
         font-size: 17px;
         background-color: #3470db;
         letter-spacing: 0.5px;
+        padding: 12px;
     }
-
-
-
 
     .card:hover {
         transform: translateY(-8px);
         box-shadow: 0 15px 35px rgba(52, 112, 219, 0.2);
     }
-
 
     .infoRow {
         display: flex;
@@ -83,6 +80,7 @@
         align-items: center;
         background-color: #fff;
         line-height: 1.5;
+        word-break: break-word;
     }
 
     .documentDownload {
@@ -109,6 +107,7 @@
         gap: 8px;
         position: relative;
         overflow: hidden;
+        white-space: nowrap;
     }
 
     .downloadbtn:hover {
@@ -122,11 +121,42 @@
         box-shadow: 0 4px 10px rgba(52, 112, 219, 0.4);
     }
 
-
     /* Responsive adjustments */
+    @media (max-width: 1200px) {
+        .cardsContainerr {
+            width: 80%;
+            margin-right: 50px;
+        }
+    }
+
+    @media (max-width: 992px) {
+        .cardsContainerr {
+            width: 85%;
+            margin-right: 30px;
+        }
+
+        .cardTitlee {
+            font-size: 16px;
+            padding: 10px;
+        }
+
+        .infolabel,
+        .infovalue {
+            font-size: 15px;
+            padding: 14px 15px;
+        }
+
+        .downloadbtn {
+            padding: 10px 24px;
+            font-size: 14px;
+        }
+    }
+
     @media (max-width: 768px) {
-        .cardsContainer {
-            width: 95%;
+        .cardsContainerr {
+            width: 90%;
+            margin-right: 20px;
+            margin-left: 20px;
         }
 
         .infoRow {
@@ -135,14 +165,85 @@
         }
 
         .infolabel {
-            text-align: left;
+            text-align: right;
             border-left: none;
-            border-top: 4px solid #3470db;
-            justify-content: flex-start;
+            border-right: 5px solid #3470db;
+            justify-content: flex-end;
+            border-bottom: 1px solid #edf2fd;
         }
 
         .infovalue {
             padding: 15px;
+        }
+
+        .documentDownload {
+            justify-content: center;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .cardsContainerr {
+            width: 95%;
+            margin-right: 10px;
+            margin-left: 10px;
+            margin-top: 20px;
+        }
+
+        .cardTitlee {
+            font-size: 15px;
+            padding: 8px;
+        }
+
+        .infolabel,
+        .infovalue {
+            font-size: 14px;
+            padding: 12px;
+        }
+
+        .downloadbtn {
+            padding: 8px 20px;
+            font-size: 13px;
+            gap: 6px;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .cardsContainerr {
+            width: 100%;
+            margin-right: 5px;
+            margin-left: 5px;
+            margin-top: 15px;
+        }
+
+        .card {
+            border-radius: 12px;
+        }
+
+        .cardTitlee {
+            font-size: 14px;
+            padding: 7px;
+        }
+
+        .infolabel {
+            font-size: 13px;
+            padding: 10px;
+        }
+
+        .infovalue {
+            font-size: 13px;
+            padding: 10px;
+            line-height: 1.4;
+        }
+
+        .documentDownload {
+            margin: 10px;
+        }
+
+        .downloadbtn {
+            padding: 7px 16px;
+            font-size: 12px;
+            gap: 5px;
+            border-radius: 8px;
         }
     }
 
