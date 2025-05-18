@@ -7,7 +7,7 @@ import {
     updateField,
     resetForm,
 } from "../../../Redux/slices/createReqSlice";
-import { FaPlus } from "react-icons/fa";
+import { FaPlus, FaExclamationTriangle, FaCheckCircle } from "react-icons/fa";
 import styles from "./CreateReq.module.css";
 import { useNavigate } from "react-router-dom";
 
@@ -170,7 +170,7 @@ const CreateReq = () => {
             if (error.response?.data) {
                 setError(error.response.data);
             } else {
-                // setError("حدث خطأ أثناء إرسال الطلب");
+                setError("حدث خطأ أثناء إرسال الطلب، يرجى المحاولة مرة أخرى");
             }
         }
     };
@@ -233,10 +233,8 @@ const CreateReq = () => {
                                         </div>
                                     ))}
                                 </div>
-                                {errorMessage && errorMessage.includes("يجب اختيار شرط واحد على الأقل") && (
-                                    <div className={styles.errorText} style={{ position: 'relative', bottom: 'auto', marginTop: '10px' }}>
-                                        {errorMessage}
-                                    </div>
+                                {formErrors.conditions && (
+                                    <div className={styles.errorText}>{formErrors.conditions}</div>
                                 )}
                             </div>
                         </div>
@@ -310,10 +308,18 @@ const CreateReq = () => {
                             disabled={loading}
                         />
                     </div>
-                    {errorMessage && !errorMessage.includes("يجب اختيار شرط واحد على الأقل") && (
-                        <div className={styles.errorText}>{errorMessage}</div>
+                    {errorMessage && (
+                        <div className={styles.errorMessage}>
+                            <FaExclamationTriangle />
+                            {errorMessage}
+                        </div>
                     )}
-                    {successMessage && <div className={styles.successText}>{successMessage}</div>}
+                    {successMessage && (
+                        <div className={styles.successMessage}>
+                            <FaCheckCircle />
+                            {successMessage}
+                        </div>
+                    )}
                     <div className={styles.buttonGroup}>
                         <button
                             type="button"
