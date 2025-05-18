@@ -92,7 +92,7 @@
 
 @media (max-width: 480px) {
     .navbar {
-        flex-direction: column;
+        /* flex-direction: column; */
         height: auto;
         padding: 10px;
         align-items: flex-start;
