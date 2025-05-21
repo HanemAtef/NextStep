@@ -299,7 +299,7 @@ export default function Outbox() {
             <FiSend size={48} />
           </div>
           <h3>لا توجد طلبات متاحة</h3>
-          <p>لا توجد طلبات تطابق معايير البحث الحالية</p>
+          {/* <p>لا توجد طلبات تطابق معايير البحث الحالية</p> */}
           {(searchID || statusFilter || typeFilter) && (
             <button className={styles.clearFiltersBtn} onClick={handleClearFilters}>
               مسح معايير التصفية

@@ -33,7 +33,7 @@ const CreateReq = () => {
     }, [dispatch]);
 
     useEffect(() => {
-        console.log("Current conditions:", conditions);
+        // console.log("Current conditions:", conditions);
     }, [conditions]);
 
     const validateForm = () => {
