@@ -100,20 +100,14 @@ const CreateReq = () => {
                     setStudentIdError("");
                 }
 
-                // لا نتحقق من الرقم القومي هنا، سنتحقق فقط عند تغيير الاسم أو عند الإرسال
+                // لا نتحقق من الرقم القومي هنا، سنتحقق فقط عند الإرسال
             } else {
                 setStudentIdError("الرجاء إدخال أرقام فقط");
             }
         } else if (name === "studentName") {
             dispatch(updateField({ field: name, value }));
 
-            // التحقق من الرقم القومي فقط إذا تم إدخال اسم كامل وكان الرقم القومي 14 رقم
-            if (formData.studentId && formData.studentId.length === 14 && value.trim() !== "") {
-                // نتأخر قليلاً في التحقق لإعطاء المستخدم فرصة لإكمال الاسم
-                setTimeout(() => {
-                    validateNationalId(formData.studentId, value);
-                }, 500);
-            }
+            // لا نتحقق من الرقم القومي هنا، سنتحقق فقط عند الإرسال
         } else if (name === "studentPhone") {
             dispatch(updateField({ field: name, value }));
         } else if (name === "attachment") {
@@ -136,53 +130,6 @@ const CreateReq = () => {
         }
     };
 
-    // Function to validate national ID against student name
-    const validateNationalId = async (nationalId, studentName) => {
-        try {
-            // تأكد من أن الرقم القومي هو 14 رقم
-            if (nationalId.length !== 14) {
-                setStudentIdError("الرقم القومي يجب أن يكون 14 رقم");
-                return;
-            }
-
-            // تأكد من أن اسم الطالب غير فارغ
-            if (!studentName || studentName.trim() === "") {
-                return; // لا تتحقق إذا كان الاسم فارغًا
-            }
-
-            const result = await dispatch(checkNationalId({ nationalId, studentName })).unwrap();
-            // If successful, the ID is valid for this student
-            setStudentIdError("");
-
-            // إذا كان هناك اسم مختلف، قم بتحديثه
-            if (result && result.name && result.name !== studentName) {
-                dispatch(updateField({ field: "studentName", value: result.name }));
-            }
-        } catch (error) {
-            // If error, the ID is already used with a different name
-            let errorMessage;
-            let correctName = null;
-
-            if (typeof error === 'object') {
-                if (error.correctName) {
-                    correctName = error.correctName;
-                    errorMessage = error.message || "الرقم القومي مسجل باسم طالب آخر";
-                } else {
-                    errorMessage = error.message || "الرقم القومي مسجل باسم طالب آخر";
-                }
-            } else {
-                errorMessage = error || "الرقم القومي مسجل باسم طالب آخر";
-            }
-
-            setStudentIdError(errorMessage);
-
-            // إذا كان هناك اسم صحيح، قم بتحديثه تلقائيًا
-            if (correctName) {
-                dispatch(updateField({ field: "studentName", value: correctName }));
-            }
-        }
-    };
-
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError(null);
@@ -197,7 +144,7 @@ const CreateReq = () => {
             return;
         }
 
-        // التحقق من الرقم القومي مرة أخرى قبل الإرسال
+        // التحقق من الرقم القومي قبل الإرسال
         if (formData.studentId && formData.studentName) {
             try {
                 const result = await dispatch(checkNationalId({
@@ -231,18 +178,12 @@ const CreateReq = () => {
 
                 setError(errorMessage);
 
-                // إذا كان هناك اسم صحيح، قم بتحديثه تلقائيًا
+                // إذا كان هناك اسم صحيح، نعرضه للمستخدم ولكن لا نقوم بتحديثه تلقائيًا
                 if (correctName) {
-                    dispatch(updateField({ field: "studentName", value: correctName }));
-                    // نعرض رسالة تنبيه للمستخدم
-                    setSuccessMessage(`تم تحديث اسم الطالب تلقائيًا إلى: ${correctName}`);
-                    // نعطي وقتًا للتحديث قبل المتابعة
-                    await new Promise(resolve => setTimeout(resolve, 1500));
-                    setSuccessMessage("");
-                    setError(null);
-                } else {
-                    return; // توقف إذا كان هناك خطأ ولم يتم تحديث الاسم
+                    setError(`الرقم القومي مسجل باسم: ${correctName}. يرجى استخدام هذا الاسم أو رقم قومي آخر.`);
                 }
+
+                return; // توقف عند وجود خطأ
             }
         }
 
