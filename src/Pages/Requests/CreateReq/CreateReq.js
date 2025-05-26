@@ -6,10 +6,22 @@ import {
     submitApplication,
     updateField,
     resetForm,
+    checkNationalId,
 } from "../../../Redux/slices/createReqSlice";
 import { FaPlus, FaExclamationTriangle, FaCheckCircle } from "react-icons/fa";
 import styles from "./CreateReq.module.css";
 import { useNavigate } from "react-router-dom";
+
+/**
+ * Note: This implementation assumes the existence of a backend API endpoint:
+ * GET /api/Applications/check-national-id?nationalId=XXX&studentName=YYY
+ * 
+ * The API should:
+ * 1. Return 200 OK if the national ID is not used or is used with the same student name
+ * 2. Return 409 Conflict if the national ID is used with a different student name
+ * 
+ * If the API doesn't exist, it needs to be implemented on the backend.
+ */
 
 const CreateReq = () => {
     const dispatch = useDispatch();
@@ -42,7 +54,9 @@ const CreateReq = () => {
             errors.applicationType = "نوع الطلب مطلوب";
         }
         if (!formData.studentId) {
-            errors.studentId = "الرقم الجامعي مطلوب";
+            errors.studentId = "الرقم القومي مطلوب";
+        } else if (formData.studentId.length !== 14) {
+            errors.studentId = "الرقم القومي يجب أن يكون 14 رقم";
         }
         if (!formData.studentName) {
             errors.studentName = "اسم الطالب مطلوب";
@@ -80,9 +94,23 @@ const CreateReq = () => {
             if (/^\d*$/.test(value)) {
                 dispatch(updateField({ field: name, value }));
                 setStudentIdError("");
+
+                // Check national ID if student name is also filled
+                if (value.length === 14 && formData.studentName && formData.studentName.trim() !== "") {
+                    validateNationalId(value, formData.studentName);
+                }
             } else {
                 setStudentIdError("الرجاء إدخال أرقام فقط");
             }
+        } else if (name === "studentName") {
+            dispatch(updateField({ field: name, value }));
+
+            // Check national ID if it's already filled and student name changes
+            if (formData.studentId && formData.studentId.length === 14 && value.trim() !== "") {
+                validateNationalId(formData.studentId, value);
+            }
+        } else if (name === "studentPhone") {
+            dispatch(updateField({ field: name, value }));
         } else if (name === "attachment") {
             const file = files[0];
             if (file) {
@@ -103,12 +131,49 @@ const CreateReq = () => {
         }
     };
 
+    // Function to validate national ID against student name
+    const validateNationalId = async (nationalId, studentName) => {
+        try {
+            await dispatch(checkNationalId({ nationalId, studentName })).unwrap();
+            // If successful, the ID is valid for this student
+            setStudentIdError("");
+        } catch (error) {
+            // If error, the ID is already used with a different name
+            const errorMessage = typeof error === 'object' ?
+                (error.message || "الرقم القومي مسجل باسم طالب آخر") :
+                error || "الرقم القومي مسجل باسم طالب آخر";
+            setStudentIdError(errorMessage);
+        }
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError(null);
 
         if (!validateForm()) {
             return;
+        }
+
+        // Check if there's a national ID error
+        if (studentIdError) {
+            setError(studentIdError);
+            return;
+        }
+
+        // Validate national ID one more time before submission
+        if (formData.studentId && formData.studentName) {
+            try {
+                await dispatch(checkNationalId({
+                    nationalId: formData.studentId,
+                    studentName: formData.studentName
+                })).unwrap();
+            } catch (error) {
+                const errorMessage = typeof error === 'object' ?
+                    (error.message || "الرقم القومي مسجل باسم طالب آخر") :
+                    error || "الرقم القومي مسجل باسم طالب آخر";
+                setError(errorMessage);
+                return;
+            }
         }
 
         const hasSelectedCondition = conditions.some(condition => condition.checked);
@@ -142,15 +207,14 @@ const CreateReq = () => {
                 formDataToSubmit.append("Notes", formData.notes.trim());
             }
 
-            // طباعة البيانات للتحقق
-            console.log("Form Data being sent:", {
-                ApplicationTypeID: applicationTypeId,
-                StudentNaid: formData.studentId.trim(),
-                StudentName: formData.studentName.trim(),
-                StudentPhone: formData.studentPhone.trim(),
-                Notes: formData.notes ? formData.notes.trim() : "",
-                Attachment: currentFile.name
-            });
+            // console.log("Form Data being sent:", {
+            //     ApplicationTypeID: applicationTypeId,
+            //     StudentNaid: formData.studentId.trim(),
+            //     StudentName: formData.studentName.trim(),
+            //     StudentPhone: formData.studentPhone.trim(),
+            //     Notes: formData.notes ? formData.notes.trim() : "",
+            //     Attachment: currentFile.name
+            // });
 
             const result = await dispatch(submitApplication(formDataToSubmit)).unwrap();
             console.log("Response:", result);
@@ -168,7 +232,13 @@ const CreateReq = () => {
         } catch (error) {
             console.error("حدث خطأ أثناء إرسال الطلب", error);
             if (error.response?.data) {
-                setError(error.response.data);
+                const errorData = error.response.data;
+                const errorMessage = typeof errorData === 'object' ?
+                    (errorData.message || JSON.stringify(errorData)) :
+                    errorData;
+                setError(errorMessage);
+            } else if (typeof error === 'object') {
+                setError(error.message || "حدث خطأ أثناء إرسال الطلب، يرجى المحاولة مرة أخرى");
             } else {
                 setError("حدث خطأ أثناء إرسال الطلب، يرجى المحاولة مرة أخرى");
             }
@@ -241,7 +311,7 @@ const CreateReq = () => {
                     )}
                     <div className={styles.formRow}>
                         <div className={styles.formGroup}>
-                            <label htmlFor="studentId" className={styles.formLabel}>الرقم الجامعي *</label>
+                            <label htmlFor="studentId" className={styles.formLabel}>الرقم القومي *</label>
                             <input
                                 type="text"
                                 id="studentId"

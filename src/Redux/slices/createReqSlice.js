@@ -166,6 +166,38 @@ const getAuthToken = () => {
     return token;
 };
 
+// New function to check if national ID exists with a different student name
+export const checkNationalId = createAsyncThunk(
+    "createReq/checkNationalId",
+    async ({ nationalId, studentName }, { rejectWithValue }) => {
+        try {
+            const token = getAuthToken();
+            const response = await axios.get(`${API_URL}/Applications/check-national-id`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+                params: {
+                    nationalId,
+                    studentName
+                }
+            });
+            return response.data;
+        } catch (error) {
+            console.error("Error checking national ID:", error);
+            if (error.response?.status === 409) {
+                // 409 Conflict - National ID exists with different name
+                const errorData = error.response.data;
+                return rejectWithValue(
+                    typeof errorData === 'string' ?
+                        errorData :
+                        "الرقم القومي مسجل باسم طالب آخر"
+                );
+            }
+            return rejectWithValue("حدث خطأ أثناء التحقق من الرقم القومي");
+        }
+    }
+);
+
 export const fetchApplicationTypes = createAsyncThunk(
     "createReq/fetchApplicationTypes",
     async () => {
@@ -261,8 +293,13 @@ export const submitApplication = createAsyncThunk(
             return response.data;
         } catch (error) {
             console.error("Error in submitApplication:", error);
-            if (error.response) {
-                return rejectWithValue(error.response.data);
+            if (error.response?.data) {
+                const errorData = error.response.data;
+                return rejectWithValue(
+                    typeof errorData === 'string' ?
+                        errorData :
+                        (errorData.message || "حدث خطأ أثناء تقديم الطلب")
+                );
             }
             return rejectWithValue("حدث خطأ أثناء تقديم الطلب");
         }
@@ -312,7 +349,7 @@ const createReqSlice = createSlice({
             })
             .addCase(fetchApplicationTypes.rejected, (state, action) => {
                 state.loading = false;
-                state.error = action.error.message;
+                state.error = action.error.message || "حدث خطأ أثناء جلب أنواع الطلبات";
             })
             .addCase(fetchConditions.pending, (state) => {
                 state.loading = true;
@@ -324,7 +361,7 @@ const createReqSlice = createSlice({
             })
             .addCase(fetchConditions.rejected, (state, action) => {
                 state.loading = false;
-                state.error = action.error.message;
+                state.error = action.error.message || "حدث خطأ أثناء جلب الشروط";
             })
             .addCase(submitApplication.pending, (state) => {
                 state.loading = true;
@@ -337,7 +374,23 @@ const createReqSlice = createSlice({
             })
             .addCase(submitApplication.rejected, (state, action) => {
                 state.loading = false;
-                state.error = action.error.message;
+                state.error = typeof action.payload === 'string' ?
+                    action.payload :
+                    (action.error.message || "حدث خطأ أثناء تقديم الطلب");
+            })
+            .addCase(checkNationalId.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(checkNationalId.fulfilled, (state) => {
+                state.loading = false;
+                // National ID is valid for this student name
+            })
+            .addCase(checkNationalId.rejected, (state, action) => {
+                state.loading = false;
+                state.error = typeof action.payload === 'string' ?
+                    action.payload :
+                    (action.error.message || "حدث خطأ أثناء التحقق من الرقم القومي");
             });
     },
 });
