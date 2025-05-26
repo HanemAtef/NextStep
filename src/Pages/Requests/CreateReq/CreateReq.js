@@ -91,23 +91,28 @@ const CreateReq = () => {
     const handleChange = (e) => {
         const { name, value, files } = e.target;
         if (name === "studentId") {
+            // التأكد من أن المدخل أرقام فقط
             if (/^\d*$/.test(value)) {
                 dispatch(updateField({ field: name, value }));
-                setStudentIdError("");
 
-                // Check national ID if student name is also filled
-                if (value.length === 14 && formData.studentName && formData.studentName.trim() !== "") {
-                    validateNationalId(value, formData.studentName);
+                // مسح رسالة الخطأ إذا تم تغيير الرقم
+                if (studentIdError) {
+                    setStudentIdError("");
                 }
+
+                // لا نتحقق من الرقم القومي هنا، سنتحقق فقط عند تغيير الاسم أو عند الإرسال
             } else {
                 setStudentIdError("الرجاء إدخال أرقام فقط");
             }
         } else if (name === "studentName") {
             dispatch(updateField({ field: name, value }));
 
-            // Check national ID if it's already filled and student name changes
+            // التحقق من الرقم القومي فقط إذا تم إدخال اسم كامل وكان الرقم القومي 14 رقم
             if (formData.studentId && formData.studentId.length === 14 && value.trim() !== "") {
-                validateNationalId(formData.studentId, value);
+                // نتأخر قليلاً في التحقق لإعطاء المستخدم فرصة لإكمال الاسم
+                setTimeout(() => {
+                    validateNationalId(formData.studentId, value);
+                }, 500);
             }
         } else if (name === "studentPhone") {
             dispatch(updateField({ field: name, value }));
@@ -134,15 +139,47 @@ const CreateReq = () => {
     // Function to validate national ID against student name
     const validateNationalId = async (nationalId, studentName) => {
         try {
-            await dispatch(checkNationalId({ nationalId, studentName })).unwrap();
+            // تأكد من أن الرقم القومي هو 14 رقم
+            if (nationalId.length !== 14) {
+                setStudentIdError("الرقم القومي يجب أن يكون 14 رقم");
+                return;
+            }
+
+            // تأكد من أن اسم الطالب غير فارغ
+            if (!studentName || studentName.trim() === "") {
+                return; // لا تتحقق إذا كان الاسم فارغًا
+            }
+
+            const result = await dispatch(checkNationalId({ nationalId, studentName })).unwrap();
             // If successful, the ID is valid for this student
             setStudentIdError("");
+
+            // إذا كان هناك اسم مختلف، قم بتحديثه
+            if (result && result.name && result.name !== studentName) {
+                dispatch(updateField({ field: "studentName", value: result.name }));
+            }
         } catch (error) {
             // If error, the ID is already used with a different name
-            const errorMessage = typeof error === 'object' ?
-                (error.message || "الرقم القومي مسجل باسم طالب آخر") :
-                error || "الرقم القومي مسجل باسم طالب آخر";
+            let errorMessage;
+            let correctName = null;
+
+            if (typeof error === 'object') {
+                if (error.correctName) {
+                    correctName = error.correctName;
+                    errorMessage = error.message || "الرقم القومي مسجل باسم طالب آخر";
+                } else {
+                    errorMessage = error.message || "الرقم القومي مسجل باسم طالب آخر";
+                }
+            } else {
+                errorMessage = error || "الرقم القومي مسجل باسم طالب آخر";
+            }
+
             setStudentIdError(errorMessage);
+
+            // إذا كان هناك اسم صحيح، قم بتحديثه تلقائيًا
+            if (correctName) {
+                dispatch(updateField({ field: "studentName", value: correctName }));
+            }
         }
     };
 
@@ -154,25 +191,58 @@ const CreateReq = () => {
             return;
         }
 
-        // Check if there's a national ID error
+        // التحقق من وجود خطأ في الرقم القومي
         if (studentIdError) {
             setError(studentIdError);
             return;
         }
 
-        // Validate national ID one more time before submission
+        // التحقق من الرقم القومي مرة أخرى قبل الإرسال
         if (formData.studentId && formData.studentName) {
             try {
-                await dispatch(checkNationalId({
+                const result = await dispatch(checkNationalId({
                     nationalId: formData.studentId,
                     studentName: formData.studentName
                 })).unwrap();
+
+                // تم التحقق بنجاح
+                console.log("National ID validated successfully");
+
+                // إذا كان هناك اسم مختلف، قم بتحديثه
+                if (result && result.name && result.name !== formData.studentName) {
+                    dispatch(updateField({ field: "studentName", value: result.name }));
+                    // نعطي وقتًا للتحديث قبل المتابعة
+                    await new Promise(resolve => setTimeout(resolve, 100));
+                }
             } catch (error) {
-                const errorMessage = typeof error === 'object' ?
-                    (error.message || "الرقم القومي مسجل باسم طالب آخر") :
-                    error || "الرقم القومي مسجل باسم طالب آخر";
+                let errorMessage;
+                let correctName = null;
+
+                if (typeof error === 'object') {
+                    if (error.correctName) {
+                        correctName = error.correctName;
+                        errorMessage = error.message || "الرقم القومي مسجل باسم طالب آخر";
+                    } else {
+                        errorMessage = error.message || "الرقم القومي مسجل باسم طالب آخر";
+                    }
+                } else {
+                    errorMessage = error || "الرقم القومي مسجل باسم طالب آخر";
+                }
+
                 setError(errorMessage);
-                return;
+
+                // إذا كان هناك اسم صحيح، قم بتحديثه تلقائيًا
+                if (correctName) {
+                    dispatch(updateField({ field: "studentName", value: correctName }));
+                    // نعرض رسالة تنبيه للمستخدم
+                    setSuccessMessage(`تم تحديث اسم الطالب تلقائيًا إلى: ${correctName}`);
+                    // نعطي وقتًا للتحديث قبل المتابعة
+                    await new Promise(resolve => setTimeout(resolve, 1500));
+                    setSuccessMessage("");
+                    setError(null);
+                } else {
+                    return; // توقف إذا كان هناك خطأ ولم يتم تحديث الاسم
+                }
             }
         }
 
@@ -200,7 +270,16 @@ const CreateReq = () => {
             // إضافة البيانات بالضبط كما في Swagger
             formDataToSubmit.append("ApplicationTypeID", applicationTypeId);
             formDataToSubmit.append("StudentNaid", formData.studentId.trim());
-            formDataToSubmit.append("StudentName", formData.studentName.trim());
+
+            // نتحقق من وجود الرقم القومي في localStorage للحصول على الاسم الصحيح
+            const storedData = localStorage.getItem('nationalIds');
+            const nationalIds = storedData ? JSON.parse(storedData) : {};
+            const storedName = nationalIds[formData.studentId.trim()];
+
+            // استخدام الاسم المخزن إذا كان موجودًا، وإلا استخدام الاسم المدخل
+            const finalStudentName = storedName || formData.studentName.trim();
+            formDataToSubmit.append("StudentName", finalStudentName);
+
             formDataToSubmit.append("StudentPhone", formData.studentPhone.trim());
             formDataToSubmit.append("Attachment", currentFile);
             if (formData.notes) {
@@ -316,14 +395,15 @@ const CreateReq = () => {
                                 type="text"
                                 id="studentId"
                                 name="studentId"
-                                className={`${styles.formControl} ${formErrors.studentId ? styles.error : ''}`}
+                                className={`${styles.formControl} ${formErrors.studentId || studentIdError ? styles.error : ''}`}
                                 value={formData.studentId || ""}
                                 maxLength={14}
                                 onChange={handleChange}
                                 disabled={loading}
+                                placeholder="أدخل الرقم القومي المكون من 14 رقم"
                             />
                             {studentIdError && <div className={styles.errorText}>{studentIdError}</div>}
-                            {formErrors.studentId && <div className={styles.errorText}>{formErrors.studentId}</div>}
+                            {formErrors.studentId && !studentIdError && <div className={styles.errorText}>{formErrors.studentId}</div>}
                         </div>
                         <div className={styles.formGroup}>
                             <label htmlFor="studentName" className={styles.formLabel}>اسم الطالب *</label>
@@ -335,6 +415,7 @@ const CreateReq = () => {
                                 value={formData.studentName || ""}
                                 onChange={handleChange}
                                 disabled={loading}
+                                placeholder="أدخل اسم الطالب بالكامل"
                             />
                             {formErrors.studentName && <div className={styles.errorText}>{formErrors.studentName}</div>}
                         </div>
