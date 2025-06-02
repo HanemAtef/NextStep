@@ -77,7 +77,7 @@ export default function AppRoutes() {
 
             {/* مسارات إدارة التقارير - مستقلة مثل الأدمن */}
             <Route element={<ProtectedRoute allowedRole="Employee" />}>
-                <Route path="/reports" element={<ReportsDash title=" إدارة التقارير " />}>
+                <Route path="/reporttts" element={<ReportsDash title=" إدارة التقارير " />}>
                     <Route index element={<ReportsDashboard />} />
                     <Route path="department/:id" element={<DepartmentDetails />} />
                 </Route>
