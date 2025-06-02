@@ -1,7 +1,7 @@
-
 import React, { useState } from "react";
 import { FiInbox, FiPlus, FiSend } from "react-icons/fi";
 import { RiDashboardLine } from "react-icons/ri";
+import { FaChartBar } from "react-icons/fa";
 import { Link, useLocation } from "react-router-dom";
 import styles from "./Sidebar.module.css";
 
@@ -32,8 +32,7 @@ export default function Sidebar({ canCreate }) {
           <li>
             <Link
               to="inbox"
-              className={`${styles.sidebarItem} ${path.endsWith("/inbox") ? styles.active : ""
-                }`}
+              className={`${styles.sidebarItem} ${path.endsWith("/inbox") ? styles.active : ""}`}
             >
               <FiInbox className={styles.sidebarIcon} />
               <span>الطلبات الواردة</span>
@@ -43,8 +42,7 @@ export default function Sidebar({ canCreate }) {
           <li>
             <Link
               to="outbox"
-              className={`${styles.sidebarItem} ${path.endsWith("/outbox") ? styles.active : ""
-                }`}
+              className={`${styles.sidebarItem} ${path.endsWith("/outbox") ? styles.active : ""}`}
             >
               <FiSend className={styles.sidebarIcon} />
               <span>الطلبات الصادرة</span>
@@ -55,8 +53,7 @@ export default function Sidebar({ canCreate }) {
             <li>
               <Link
                 to="create"
-                className={`${styles.sidebarItem} ${path.endsWith("/create") ? styles.active : ""
-                  }`}
+                className={`${styles.sidebarItem} ${path.endsWith("/create") ? styles.active : ""}`}
               >
                 <FiPlus className={styles.sidebarIcon} />
                 <span>إنشاء طلب جديد</span>
@@ -64,6 +61,19 @@ export default function Sidebar({ canCreate }) {
             </li>
           )}
         </ul>
+
+        {/* <div className={styles.sectionTitle}>الأدوات</div>
+        <ul className={styles.sidebarMenu}>
+          <li>
+            <Link
+              to="/reports"
+              className={`${styles.sidebarItem} ${path.includes("/reports") ? styles.active : ""}`}
+            >
+              <FaChartBar className={styles.sidebarIcon} />
+              <span>إدارة التقارير</span>
+            </Link>
+          </li>
+        </ul> */}
       </div>
     </>
   );

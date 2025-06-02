@@ -21,6 +21,9 @@ import ProtectedRoute from "./ProtectedRoute";
 import Login from "../Pages/Auth/Login/Login";
 import { useSelector } from "react-redux";
 import { selectCurrentInboxRequest } from "../Redux/slices/inboxSlice";
+import ReportsDashboard from '../Pages/Reports/Dashboard/ReportsDashboard';
+import DepartmentDetails from '../Pages/Reports/DepartmentDetails/DepartmentDetails';
+import ReportsDash from '../Pages/Dashboards/Reports/Dashboard/ReportsDash';
 
 export default function AppRoutes() {
     const navigate = useNavigate();
@@ -69,6 +72,14 @@ export default function AppRoutes() {
                     <Route path="requests/add" element={<AddRequest />} />
                     <Route path="requests/edit/:id" element={<EditRequest />} />
                     <Route path="user" element={<UserInfo />} />
+                </Route>
+            </Route>
+
+            {/* مسارات إدارة التقارير - مستقلة مثل الأدمن */}
+            <Route element={<ProtectedRoute allowedRole="Employee" />}>
+                <Route path="/reports" element={<ReportsDash title=" إدارة التقارير " />}>
+                    <Route index element={<ReportsDashboard />} />
+                    <Route path="department/:id" element={<DepartmentDetails />} />
                 </Route>
             </Route>
 

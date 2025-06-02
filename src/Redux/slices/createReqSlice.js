@@ -171,38 +171,6 @@ export const checkNationalId = createAsyncThunk(
     "createReq/checkNationalId",
     async ({ nationalId, studentName }, { rejectWithValue }) => {
         try {
-            // هذه نسخة مؤقتة تعمل بدون API
-            // TODO: استبدل هذا الكود بالاتصال بالـ API عندما يتم تنفيذه
-
-            // للتجربة فقط: تخزين البيانات في localStorage
-            const storedData = localStorage.getItem('nationalIds');
-            const nationalIds = storedData ? JSON.parse(storedData) : {};
-
-            // تنظيف اسم الطالب (إزالة المسافات الزائدة)
-            const cleanStudentName = studentName.trim().replace(/\s+/g, ' ');
-
-            // التحقق إذا كان الرقم القومي موجود بالفعل
-            if (nationalIds[nationalId]) {
-                const storedName = nationalIds[nationalId].trim().replace(/\s+/g, ' ');
-
-                // نتحقق إذا كان الاسم مختلفًا تمامًا (مع تجاهل الفروق البسيطة في المسافات)
-                if (storedName.toLowerCase() !== cleanStudentName.toLowerCase()) {
-                    // الرقم القومي موجود لطالب آخر
-                    return rejectWithValue({
-                        message: `الرقم القومي مسجل باسم: ${nationalIds[nationalId]}`,
-                        correctName: nationalIds[nationalId]
-                    });
-                }
-            }
-
-            // تخزين الرقم القومي مع اسم الطالب
-            nationalIds[nationalId] = studentName;
-            localStorage.setItem('nationalIds', JSON.stringify(nationalIds));
-
-            return { success: true, name: studentName };
-
-            /* 
-            // الكود الأصلي - احتفظ به للمستقبل عندما يتم تنفيذ الـ API
             const token = getAuthToken();
             const response = await axios.get(`${API_URL}/Applications/check-national-id`, {
                 headers: {
@@ -214,7 +182,6 @@ export const checkNationalId = createAsyncThunk(
                 }
             });
             return response.data;
-            */
         } catch (error) {
             console.error("Error checking national ID:", error);
             if (error.response?.status === 409) {

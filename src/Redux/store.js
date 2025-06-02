@@ -12,7 +12,6 @@ import downloadSlice from "./slices/downloadSlice";
 import timelineReducer from "./slices/timelineSlice";
 import previewSlice from "./slices/previewSlice";
 import createReqReducer from "./slices/createReqSlice";
-
 const store = configureStore({
     reducer: {
         inbox: inboxReducer,
@@ -28,6 +27,7 @@ const store = configureStore({
         timeline: timelineReducer,
         preview: previewSlice,
         createReq: createReqReducer,
+        
     },
 });
 

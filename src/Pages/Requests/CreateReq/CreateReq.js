@@ -144,48 +144,24 @@ const CreateReq = () => {
             return;
         }
 
-        // التحقق من الرقم القومي قبل الإرسال
+        // تم تعطيل التحقق من الرقم القومي مؤقتاً حتى يتم تنفيذ الـ API
+        // TODO: إعادة تفعيل التحقق عندما يتم تنفيذ الـ API
+        /*
         if (formData.studentId && formData.studentName) {
             try {
-                const result = await dispatch(checkNationalId({
+                await dispatch(checkNationalId({
                     nationalId: formData.studentId,
                     studentName: formData.studentName
                 })).unwrap();
 
-                // تم التحقق بنجاح
                 console.log("National ID validated successfully");
-
-                // إذا كان هناك اسم مختلف، قم بتحديثه
-                if (result && result.name && result.name !== formData.studentName) {
-                    dispatch(updateField({ field: "studentName", value: result.name }));
-                    // نعطي وقتًا للتحديث قبل المتابعة
-                    await new Promise(resolve => setTimeout(resolve, 100));
-                }
             } catch (error) {
-                let errorMessage;
-                let correctName = null;
-
-                if (typeof error === 'object') {
-                    if (error.correctName) {
-                        correctName = error.correctName;
-                        errorMessage = error.message || "الرقم القومي مسجل باسم طالب آخر";
-                    } else {
-                        errorMessage = error.message || "الرقم القومي مسجل باسم طالب آخر";
-                    }
-                } else {
-                    errorMessage = error || "الرقم القومي مسجل باسم طالب آخر";
-                }
-
-                setError(errorMessage);
-
-                // إذا كان هناك اسم صحيح، نعرضه للمستخدم ولكن لا نقوم بتحديثه تلقائيًا
-                if (correctName) {
-                    setError(`الرقم القومي مسجل باسم: ${correctName}. يرجى استخدام هذا الاسم أو رقم قومي آخر.`);
-                }
-
-                return; // توقف عند وجود خطأ
+                console.error("Error validating national ID:", error);
+                setError(error || "حدث خطأ أثناء التحقق من الرقم القومي");
+                return;
             }
         }
+        */
 
         const hasSelectedCondition = conditions.some(condition => condition.checked);
         if (!hasSelectedCondition) {
@@ -211,30 +187,12 @@ const CreateReq = () => {
             // إضافة البيانات بالضبط كما في Swagger
             formDataToSubmit.append("ApplicationTypeID", applicationTypeId);
             formDataToSubmit.append("StudentNaid", formData.studentId.trim());
-
-            // نتحقق من وجود الرقم القومي في localStorage للحصول على الاسم الصحيح
-            const storedData = localStorage.getItem('nationalIds');
-            const nationalIds = storedData ? JSON.parse(storedData) : {};
-            const storedName = nationalIds[formData.studentId.trim()];
-
-            // استخدام الاسم المخزن إذا كان موجودًا، وإلا استخدام الاسم المدخل
-            const finalStudentName = storedName || formData.studentName.trim();
-            formDataToSubmit.append("StudentName", finalStudentName);
-
+            formDataToSubmit.append("StudentName", formData.studentName.trim());
             formDataToSubmit.append("StudentPhone", formData.studentPhone.trim());
             formDataToSubmit.append("Attachment", currentFile);
             if (formData.notes) {
                 formDataToSubmit.append("Notes", formData.notes.trim());
             }
-
-            // console.log("Form Data being sent:", {
-            //     ApplicationTypeID: applicationTypeId,
-            //     StudentNaid: formData.studentId.trim(),
-            //     StudentName: formData.studentName.trim(),
-            //     StudentPhone: formData.studentPhone.trim(),
-            //     Notes: formData.notes ? formData.notes.trim() : "",
-            //     Attachment: currentFile.name
-            // });
 
             const result = await dispatch(submitApplication(formDataToSubmit)).unwrap();
             console.log("Response:", result);
