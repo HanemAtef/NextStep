@@ -613,13 +613,40 @@ const DepartmentDetails = () => {
             rejectionChartRef
         };
 
+        // إضافة بيانات مخطط أسباب الرفض إلى chartData
+        const updatedChartData = {
+            ...chartData,
+            rejectionData: {
+                labels: rejectionData.labels,
+                data: rejectionData.datasets[0].data
+            },
+            pieChartData: {
+                pending: stats.pendingRequests,
+                delayed: stats.delayedRequests,
+                approved: stats.approvedRequests,
+                rejected: stats.rejectedRequests,
+                total: stats.totalRequests
+            },
+            processingTimes: processingTimeData.datasets[0].data,
+            requestTypes: processingTimeData.labels,
+            departments: [
+                { id: "1", name: 'إدارة الدراسات العليا', requests: 78, delayed: 12, rejected: 7, approved: 50, pending: 9, processingTime: 3.2 },
+                { id: "2", name: 'لجنة الدراسات العليا', requests: 65, delayed: 8, rejected: 5, approved: 40, pending: 12, processingTime: 2.7 },
+                { id: "3", name: 'قسم علوم الحاسب', requests: 94, delayed: 15, rejected: 10, approved: 60, pending: 9, processingTime: 4.1 },
+                { id: "4", name: 'قسم نظم المعلومات', requests: 56, delayed: 9, rejected: 6, approved: 30, pending: 11, processingTime: 3.8 },
+                { id: "5", name: 'قسم حسابات علمية', requests: 42, delayed: 5, rejected: 3, approved: 28, pending: 6, processingTime: 2.3 },
+                { id: "6", name: 'قسم الذكاء الاصطناعي', requests: 36, delayed: 4, rejected: 2, approved: 25, pending: 5, processingTime: 3.5 },
+                { id: "7", name: 'مجلس الكلية', requests: 27, delayed: 3, rejected: 2, approved: 18, pending: 4, processingTime: 2.9 }
+            ]
+        };
+
         // استدعاء وظيفة إنشاء التقرير
         const success = await generateDepartmentReport(
             department,
             stats,
             chartRefs,
             dateRange,
-            chartData
+            updatedChartData
         );
 
         // إظهار رسالة نجاح أو فشل
@@ -749,8 +776,8 @@ const DepartmentDetails = () => {
                     <h3 className={styles.chartTitle}>
                         <FaChartPie className={styles.chartIcon} /> نسب أسباب الرفض
                     </h3>
-                    <div className={styles.chartWrapper} style={{ height: '300px' }}>
-                        <Pie data={rejectionData} options={rejectionChartOptions} ref={rejectionChartRef} />
+                    <div className={styles.chartWrapper} style={{ height: '300px' }} ref={rejectionChartRef}>
+                        <Pie data={rejectionData} options={rejectionChartOptions} />
                     </div>
                 </div>
             </div>
@@ -768,4 +795,5 @@ const DepartmentDetails = () => {
     );
 };
 
-export default DepartmentDetails; 
+export default DepartmentDetails;
+

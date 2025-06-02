@@ -201,22 +201,7 @@ const ReportsDashboard = () => {
         setCreatedLineData({ labels, data });
     }, [startDate, endDate]);
 
-    // // توليد بيانات Line (التحليل الزمني) عند تغيير الزمن فقط
-    // useEffect(() => {
-    //     if (!startDate || !endDate) return;
-
-    //     const labels = generateTimeLabels(startDate, endDate);
-    //     const seed = getDateSeed();
-    //     const received = Array.from({ length: labels.length }, (_, i) =>
-    //         Math.floor(seededRandom(seed + i) * 90) + 40
-    //     );
-    //     const processed = Array.from({ length: labels.length }, (_, i) =>
-    //         Math.floor(seededRandom(seed + i + 100) * 80) + 30
-    //     );
-    //     setTimeLineData({ labels, received, processed });
-    // }, [startDate, endDate]);
-
-    // // بيانات Pie Chart
+    // بيانات Pie Chart
     const dynamicPieData = {
         labels: departments.map(d => d.name),
         datasets: [
@@ -242,26 +227,6 @@ const ReportsDashboard = () => {
     // بيانات Line Chart - عدد الطلبات المنشأة
     const createdRequestsLineLabels = createdLineData.labels || [];
     const createdRequestsLineData = createdLineData.data || [];
-    // بيانات Line Chart - التحليل الزمني
-    // const timeAnalysisData = {
-    //     labels: timeLineData.labels || [],
-    //     datasets: [
-    //         {
-    //             label: 'الطلبات المستلمة',
-    //             data: timeLineData.received || [],
-    //             borderColor: colors.primary,
-    //             backgroundColor: `${colors.primary}33`,
-    //             fill: true,
-    //         },
-    //         {
-    //             label: 'الطلبات المعالجة',
-    //             data: timeLineData.processed || [],
-    //             borderColor: colors.secondary,
-    //             backgroundColor: `${colors.secondary}33`,
-    //             fill: true,
-    //         },
-    //     ],
-    // };
 
     // خيارات المخططات
     const chartOptions = {
@@ -453,12 +418,31 @@ const ReportsDashboard = () => {
                 }
             });
 
-            // استخراج بيانات الإدارات من departmentRequestsData
-            const departmentCounts = departmentRequestsData.datasets[0].data;
+            // تحديث بيانات الإدارات مع إضافة الإحصائيات من البيانات الفعلية
+            const updatedDepartments = departments.map(dept => ({
+                ...dept,
+                stats: {
+                    pendingCount: dept.pending,
+                    delayedCount: dept.delayed,
+                    approvedCount: dept.approved,
+                    rejectedCount: dept.rejected,
+                    totalCount: dept.requests,
+                    processingTime: dept.processingTime
+                }
+            }));
+
+            // تحديث إحصائيات الطلبات من البيانات الفعلية
+            const updatedRequestStats = {
+                totalRequests: requestStats.totalRequests,
+                pendingRequests: requestStats.pendingRequests,
+                delayedRequests: requestStats.delayedRequests,
+                approvedRequests: requestStats.approvedRequests,
+                rejectedRequests: requestStats.rejectedRequests
+            };
 
             await generateDashboardReport(
                 dateRange,
-                departments,
+                updatedDepartments,
                 chartRefs,
                 pieStatus,
                 {
@@ -468,12 +452,11 @@ const ReportsDashboard = () => {
                     lineReceived: timeLineData.received,
                     lineProcessed: timeLineData.processed,
                     periods: periods,
-                    departmentCounts: departmentCounts, // إضافة بيانات عدد الطلبات لكل إدارة
-                    totalRequests: requestStats.totalRequests,
-                    pendingRequests: requestStats.pendingRequests,
-                    delayedRequests: requestStats.delayedRequests,
-                    approvedRequests: requestStats.approvedRequests,
-                    rejectedRequests: requestStats.rejectedRequests
+                    departmentStats: updatedDepartments.reduce((acc, dept) => {
+                        acc[dept.id] = dept.stats;
+                        return acc;
+                    }, {}),
+                    ...updatedRequestStats
                 }
             );
         } catch (error) {

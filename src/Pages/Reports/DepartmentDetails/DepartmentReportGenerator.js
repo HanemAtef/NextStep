@@ -136,7 +136,8 @@ const createSingleTable = (headers, rows, title = '', pageNum = 1, totalPages = 
         color: #2c3e50;
         font-size: ${fontSize - 2}px;
       `;
-      td.textContent = String(cell || '');
+      // تحويل القيم الرقمية إلى نص مع التأكد من عرضها بشكل صحيح
+      td.textContent = typeof cell === 'number' ? cell.toString() : String(cell || '');
       tr.appendChild(td);
     });
 
@@ -303,11 +304,12 @@ export const generateDepartmentReport = async (
 
       // إنشاء جدول النسب
       const statusHeaders = ['حالة الطلب', 'العدد', 'النسبة'];
+      const totalRequests = stats.totalRequests || 1; // تجنب القسمة على صفر
       const statusRows = [
-        ['قيد التنفيذ', stats.pendingRequests, `${Math.round(stats.pendingRequests / stats.totalRequests * 100)}%`],
-        ['متأخرة', stats.delayedRequests, `${Math.round(stats.delayedRequests / stats.totalRequests * 100)}%`],
-        ['مقبولة', stats.approvedRequests, `${Math.round(stats.approvedRequests / stats.totalRequests * 100)}%`],
-        ['مرفوضة', stats.rejectedRequests, `${Math.round(stats.rejectedRequests / stats.totalRequests * 100)}%`]
+        ['قيد التنفيذ', stats.pendingRequests, `${Math.round((stats.pendingRequests / totalRequests) * 100)}%`],
+        ['متأخرة', stats.delayedRequests, `${Math.round((stats.delayedRequests / totalRequests) * 100)}%`],
+        ['مقبولة', stats.approvedRequests, `${Math.round((stats.approvedRequests / totalRequests) * 100)}%`],
+        ['مرفوضة', stats.rejectedRequests, `${Math.round((stats.rejectedRequests / totalRequests) * 100)}%`]
       ];
 
       const statusTableElement = createSingleTable(
@@ -350,8 +352,9 @@ export const generateDepartmentReport = async (
 
       const processingHeaders = ['نوع الطلب', 'متوسط الوقت (يوم)'];
       const processingRows = chartData.processingTimes.map((time, index) => {
-        const requestTypes = ['طلب التحاق', 'ايقاف قيد', 'الغاء تسجيل', 'طلب مد', 'طلب منح'];
-        return [requestTypes[index] || `نوع ${index + 1}`, time];
+        const requestType = chartData.requestTypes[index] || `نوع ${index + 1}`;
+        const formattedTime = parseFloat(time).toFixed(1);
+        return [requestType, `${formattedTime} يوم`];
       });
 
       const processingTableElement = createSingleTable(
@@ -537,44 +540,41 @@ export const generateDepartmentReport = async (
         pdf.addPage();
         yPos = 20;
 
-        const chartCanvas = await html2canvas(chartRefs.rejectionChartRef.current, {
-          scale: 3,
-          logging: false,
-          useCORS: true,
-          allowTaint: true,
-          backgroundColor: '#ffffff'
-        });
         // إضافة عنوان القسم
         const rejectionTitleElement = createTextElement('نسب أسباب الرفض', 26, true, 'right');
         const rejectionTitleImage = await elementToImage(rejectionTitleElement);
         pdf.addImage(rejectionTitleImage, 'jpeg', 10, yPos, 190, 15);
         yPos += 25;
 
-        // الحصول على canvas المخطط من خلال Chart.js
-        const chart = chartRefs.rejectionChartRef.current;
+        // تحويل المخطط إلى صورة باستخدام html2canvas
+        const chartCanvas = await html2canvas(chartRefs.rejectionChartRef.current, {
+          scale: 3,
+          logging: false,
+          useCORS: true,
+          allowTaint: true,
+          backgroundColor: '#ffffff',
+          onclone: (clonedDoc) => {
+            // التأكد من أن المخطط مرئي في النسخة المستنسخة
+            const clonedElement = clonedDoc.querySelector(`[data-ref="${chartRefs.rejectionChartRef.current.getAttribute('data-ref')}"]`);
+            if (clonedElement) {
+              clonedElement.style.display = 'block';
+              clonedElement.style.visibility = 'visible';
+            }
+          }
+        });
 
-        // التحقق من وجود المخطط وcanvas الخاص به
-        if (!chart || !chart.chartCanvas) {
-          throw new Error('لم يتم العثور على canvas المخطط');
-        }
-
-        // تحويل المخطط إلى صورة مباشرة
-        const chartImage = chart.chartCanvas.toDataURL('image/jpeg', 6.0);
-
-        // إضافة المخطط مباشرة إلى PDF
+        // إضافة المخطط إلى PDF
         const imgWidth = 140;
-        const imgHeight = Math.min((chart.chartCanvas.height * imgWidth) / chart.chartCanvas.width, 120);
-        pdf.addImage(chartImage, 'jpeg', 35, yPos, imgWidth, imgHeight);
+        const imgHeight = Math.min((chartCanvas.height * imgWidth) / chartCanvas.width, 120);
+        pdf.addImage(chartCanvas.toDataURL('image/jpeg', 6.0), 'jpeg', 35, yPos, imgWidth, imgHeight);
         yPos += imgHeight + 20;
 
         // إضافة جدول البيانات
         const rejectionHeaders = ['سبب الرفض', 'النسبة المئوية'];
-        const rejectionRows = [
-          ['نقص في الأوراق', '40%'],
-          ['انتهاء معاد القيد', '25%'],
-          ['لم يجتاز', '20%'],
-          ['أسباب أخرى', '15%']
-        ];
+        const rejectionRows = chartData.rejectionData.labels.map((label, index) => [
+          label,
+          `${chartData.rejectionData.data[index]}%`
+        ]);
 
         const rejectionTableElement = createSingleTable(
           rejectionHeaders,
