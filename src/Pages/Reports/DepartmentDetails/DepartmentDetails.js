@@ -706,7 +706,7 @@ const DepartmentDetails = () => {
                 </div>
                 <Link to="/reports" className={styles.backButton}>
                     <FaArrowRight />
-                    <span>العودة للتقارير</span>
+                    <span>العودة للصفحه الرئيسيه</span>
                 </Link>
             </div>
 
@@ -728,7 +728,9 @@ const DepartmentDetails = () => {
 
 
 
-                <button className={styles.generateReportButton} onClick={handleGenerateReport}>
+                <button className={styles.generateReportButton}
+                //  onClick={handleGenerateReport}
+                >
                     <FaFileExport className={styles.buttonIcon} /> إنشاء تقرير
                 </button>
             </div>

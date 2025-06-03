@@ -400,20 +400,25 @@
     max-width: 100%;
 }
 
+/* Override Chart.js legend styles */
 :global(.chartjs-legend) {
-    margin-top: 20px !important;
-    padding: 10px !important;
+    margin-top: 16px !important;
+    padding: 8px !important;
     display: flex !important;
     flex-wrap: wrap !important;
     justify-content: center !important;
-    gap: 16px !important;
-    max-width: 100% !important;
-    width: 100% !important;
+    gap: 12px !important;
 }
 
 :global(.chartjs-legend li) {
-    white-space: normal !important;
-    margin-bottom: 8px !important;
+    display: flex !important;
+    align-items: center !important;
+    margin: 0 8px !important;
+    white-space: nowrap !important;
+}
+
+:global(.chartjs-legend li span) {
+    margin-right: 4px !important;
 }
 
 /* Loading State */
@@ -446,6 +451,18 @@
 }
 
 /* Responsive Adjustments */
+@media (max-width: 1400px) {
+    .chartsGrid {
+        gap: 20px;
+    }
+}
+
+@media (max-width: 1200px) {
+    .chartCard {
+        padding: 20px;
+    }
+}
+
 @media (max-width: 992px) {
     .container {
         padding: 0 12px;
@@ -493,6 +510,10 @@
     .statsCardsContainer {
         grid-template-columns: repeat(3, 1fr);
     }
+
+    .chartCard {
+        padding: 15px;
+    }
 }
 
 @media (max-width: 576px) {
@@ -511,5 +532,15 @@
     .chartsGrid {
         gap: 24px;
         padding: 8px;
+    }
+}
+
+@media (max-width: 480px) {
+    .chartCard {
+        min-height: 300px;
+    }
+
+    .chartWrapper {
+        min-height: 220px;
     }
 }

@@ -236,7 +236,6 @@ const ReportsDashboard = () => {
             legend: {
                 position: 'bottom',
                 align: 'center',
-                onClick: null,
                 display: true,
                 labels: {
                     font: {
@@ -246,19 +245,9 @@ const ReportsDashboard = () => {
                     },
                     color: '#000000',
                     boxWidth: 15,
-                    padding: 20,
+                    padding: 15,
                     usePointStyle: true,
                     pointStyle: 'circle'
-                },
-                title: {
-                    display: true,
-                    font: {
-                        family: 'Cairo, sans-serif',
-                        size: 14,
-                        weight: 'bold'
-                    },
-                    color: '#000000',
-                    padding: 20
                 }
             },
             tooltip: {
@@ -283,7 +272,7 @@ const ReportsDashboard = () => {
                 left: 20,
                 right: 20,
                 top: 20,
-                bottom: 60 // زيادة المساحة أسفل المخطط للـ legend
+                bottom: 120 // زيادة المساحة للـ legend
             }
         }
     };
@@ -308,7 +297,7 @@ const ReportsDashboard = () => {
                 ticks: {
                     font: {
                         family: 'Cairo, sans-serif',
-                        size: 13,
+                        size: 14,
                         weight: 'bold'
                     },
                     color: '#000000'
@@ -321,7 +310,7 @@ const ReportsDashboard = () => {
                 ticks: {
                     font: {
                         family: 'Cairo, sans-serif',
-                        size: 13,
+                        size: 14,
                         weight: 'bold'
                     },
                     color: '#000000'
@@ -347,8 +336,8 @@ const ReportsDashboard = () => {
                         weight: 'bold'
                     },
                     color: '#000000',
-                    boxWidth: 15,
-                    padding: 15,
+                    boxWidth: 12,
+                    padding: 10,
                     usePointStyle: true,
                     pointStyle: 'circle'
                 }
@@ -616,7 +605,9 @@ const ReportsDashboard = () => {
                     />
                 </div>
 
-                <button className={styles.generateReportButton} onClick={handleGenerateReport}>
+                <button className={styles.generateReportButton}
+                // onClick={handleGenerateReport}
+                >
                     <FaFileExport className={styles.buttonIcon} /> توليد تقرير
                 </button>
             </div>
@@ -645,6 +636,7 @@ const ReportsDashboard = () => {
                         <Pie ref={pieChartRef} data={dynamicPieData} options={pieChartOptions} />
                     </div>
                 </div>
+
                 {/* Bar Chart - متوسط وقت المعالجة */}
                 <div className={styles.chartCard} style={{ margin: '0 auto', maxWidth: 600 }}>
                     <div className={styles.chartTitle}>
