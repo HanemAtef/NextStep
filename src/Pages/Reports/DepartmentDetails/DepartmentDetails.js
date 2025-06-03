@@ -405,12 +405,40 @@ const DepartmentDetails = () => {
     // أنواع الطلبات المحددة
     const requestTypes = ['طلب التحاق', 'ايقاف قيد', 'الغاء تسجيل', 'طلب مد', 'طلب منح'];
 
-    // أسباب الرفض وبياناتها
-    const rejectionData = {
+    // State لبيانات أسباب الرفض
+    const [rejectionReasons, setRejectionReasons] = useState({
         labels: ['نقص في الأوراق', 'انتهاء معاد القيد', 'لم يجتاز', 'أسباب أخرى'],
+        data: [40, 25, 20, 15]
+    });
+
+    // تحديث بيانات أسباب الرفض عند تغيير التاريخ
+    useEffect(() => {
+        const updateRejectionData = () => {
+            const seed = getDateSeed();
+            // توليد بيانات جديدة بناءً على التاريخ
+            const newData = rejectionReasons.labels.map((_, index) => {
+                return Math.floor(seededRandom(seed + index + 1000) * 40) + 10;
+            });
+
+            // تحويل البيانات إلى نسب مئوية
+            const total = newData.reduce((a, b) => a + b, 0);
+            const percentages = newData.map(value => Math.round((value / total) * 100));
+
+            setRejectionReasons(prev => ({
+                ...prev,
+                data: percentages
+            }));
+        };
+
+        updateRejectionData();
+    }, [startDate, endDate]);
+
+    // تحديث بيانات مخطط أسباب الرفض
+    const rejectionData = {
+        labels: rejectionReasons.labels,
         datasets: [
             {
-                data: [40, 25, 20, 15], // النسب المئوية لكل سبب
+                data: rejectionReasons.data,
                 backgroundColor: [palette[0], palette[2], palette[4], palette[6]],
                 borderWidth: 1,
             },
