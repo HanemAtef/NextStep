@@ -3,10 +3,9 @@ import axios from 'axios';
 
 const API_URL = 'https://nextstep.runasp.net/api/ApplicationTypes';
 
-
-const token = sessionStorage.getItem('token');
-
+// ✅ تعديل هنا: التوكن يُجلب داخل الدالة
 const getHeaders = () => {
+    const token = sessionStorage.getItem('token');
     if (!token) {
         throw new Error("Token is missing");
     }
