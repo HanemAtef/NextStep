@@ -37,7 +37,7 @@ const CreateReq = () => {
     const [studentIdError, setStudentIdError] = useState("");
     const [formErrors, setFormErrors] = useState({});
     const [successMessage, setSuccessMessage] = useState("");
-    const [errorMessage, setError] = useState(null);
+    const [errorMessage, setErrorMessage] = useState(null);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -132,7 +132,7 @@ const CreateReq = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setError(null);
+        setErrorMessage(null);
 
         if (!validateForm()) {
             return;
@@ -140,7 +140,7 @@ const CreateReq = () => {
 
         // التحقق من وجود خطأ في الرقم القومي
         if (studentIdError) {
-            setError(studentIdError);
+            setErrorMessage(studentIdError);
             return;
         }
 
@@ -157,7 +157,7 @@ const CreateReq = () => {
                 console.log("National ID validated successfully");
             } catch (error) {
                 console.error("Error validating national ID:", error);
-                setError(error || "حدث خطأ أثناء التحقق من الرقم القومي");
+                setErrorMessage(error || "حدث خطأ أثناء التحقق من الرقم القومي");
                 return;
             }
         }
@@ -165,12 +165,12 @@ const CreateReq = () => {
 
         const hasSelectedCondition = conditions.some(condition => condition.checked);
         if (!hasSelectedCondition) {
-            setError("يجب اختيار شرط واحد على الأقل");
+            setErrorMessage("يجب اختيار شرط واحد على الأقل");
             return;
         }
 
         if (!currentFile) {
-            setError("يجب رفع الملف المطلوب");
+            setErrorMessage("يجب رفع الملف المطلوب");
             return;
         }
 
@@ -180,7 +180,7 @@ const CreateReq = () => {
             // تحويل نوع الطلب إلى رقم
             const applicationTypeId = parseInt(formData.applicationType);
             if (!applicationTypeId) {
-                setError("نوع الطلب غير صالح");
+                setErrorMessage("نوع الطلب غير صالح");
                 return;
             }
 
@@ -209,17 +209,8 @@ const CreateReq = () => {
             }, 2000);
         } catch (error) {
             console.error("حدث خطأ أثناء إرسال الطلب", error);
-            if (error.response?.data) {
-                const errorData = error.response.data;
-                const errorMessage = typeof errorData === 'object' ?
-                    (errorData.message || JSON.stringify(errorData)) :
-                    errorData;
-                setError(errorMessage);
-            } else if (typeof error === 'object') {
-                setError(error.message || "حدث خطأ أثناء إرسال الطلب، يرجى المحاولة مرة أخرى");
-            } else {
-                setError("حدث خطأ أثناء إرسال الطلب، يرجى المحاولة مرة أخرى");
-            }
+            // إذا كانت الرسالة سلسلة نصية مباشرة من Redux
+            setErrorMessage(error);
         }
     };
 

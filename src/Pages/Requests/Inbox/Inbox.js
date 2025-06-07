@@ -350,7 +350,7 @@ export default function Inbox() {
                 <tr>
                   <th>رقم الطلب</th>
                   <th>نوع الطلب</th>
-                  <th>الجهة المرسلة</th>
+                  <th>الجهة المنشأه</th>
                   <th>تاريخ الاستلام</th>
                   <th>الحالة</th>
                   <th>التفاصيل</th>

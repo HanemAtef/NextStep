@@ -43,9 +43,15 @@ const History = ({ request }) => {
                     <strong>الإجراء:</strong> {item.action || "لا يوجد إجراء"}
                   </ListGroup.Item>
                   <ListGroup.Item className={HistoryCSS.cardItem}>
-                    <strong>التاريخ:</strong>{" "}
-                    {item.actionDate
-                      ? new Date(item.actionDate).toLocaleDateString()
+                    <strong>تاريخ الدخول:</strong>{" "}
+                    {item.inDate
+                      ? new Date(item.inDate).toLocaleDateString()
+                      : "غير محدد"}
+                  </ListGroup.Item>
+                  <ListGroup.Item className={HistoryCSS.cardItem}>
+                    <strong>تاريخ الخروج:</strong>{" "}
+                    {item.outDate
+                      ? new Date(item.outDate).toLocaleDateString()
                       : "غير محدد"}
                   </ListGroup.Item>
                   <ListGroup.Item className={HistoryCSS.cardItem}>
