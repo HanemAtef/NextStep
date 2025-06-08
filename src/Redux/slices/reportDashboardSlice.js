@@ -312,14 +312,45 @@ export const fetchDepartmentStatus = createAsyncThunk(
             }
 
             const response = await axios.get(url, { headers });
-            // console.log("✅ Response data structure:", {
-            //     labels: Array.isArray(response.data.labels) ?
-            //         `Array with ${response.data.labels.length} items: ${JSON.stringify(response.data.labels)}` :
-            //         `Not an array: ${typeof response.data.labels}`,
-            //     data: Array.isArray(response.data.data) ?
-            //         `Array with ${response.data.data.length} items: ${JSON.stringify(response.data.data)}` :
-            //         `Not an array: ${typeof response.data.data}`
-            // });
+
+            // إذا كانت الحالة هي "قيد التنفيذ"، نحتاج إلى استدعاء API آخر للحصول على الطلبات المتأخرة
+            if (status === 'pending') {
+                // استدعاء API للحصول على الطلبات المتأخرة
+                const delayedUrl = `${API_URL}/Reports/departments/status`;
+                const delayedParams = [];
+                delayedParams.push(`status=متأخره`);
+
+                if (startDate && endDate) {
+                    try {
+                        const formattedStartDate = formatDateForAPI(startDate);
+                        const formattedEndDate = formatDateForAPI(endDate);
+                        delayedParams.push(`startDate=${formattedStartDate}`);
+                        delayedParams.push(`endDate=${formattedEndDate}`);
+                    } catch (dateError) {
+                        console.error('Error formatting date parameters for delayed requests:', dateError);
+                    }
+                }
+
+                const delayedRequestsUrl = `${delayedUrl}?${delayedParams.join('&')}`;
+                const delayedResponse = await axios.get(delayedRequestsUrl, { headers });
+
+                // تعديل البيانات: طرح عدد الطلبات المتأخرة من عدد الطلبات قيد التنفيذ
+                if (response.data && response.data.data && delayedResponse.data && delayedResponse.data.data) {
+                    const pendingData = [...response.data.data];
+                    const delayedData = delayedResponse.data.data;
+
+                    // تأكد من أن المصفوفتين لهما نفس الطول
+                    const minLength = Math.min(pendingData.length, delayedData.length);
+
+                    for (let i = 0; i < minLength; i++) {
+                        // طرح عدد الطلبات المتأخرة من عدد الطلبات قيد التنفيذ
+                        pendingData[i] = Math.max(0, pendingData[i] - delayedData[i]);
+                    }
+
+                    // تحديث البيانات
+                    response.data.data = pendingData;
+                }
+            }
 
             return response.data;
         } catch (error) {

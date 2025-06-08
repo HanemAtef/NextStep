@@ -197,10 +197,14 @@ export const fetchStatusPieChart = createAsyncThunk(
 
             // تحويل البيانات إلى التنسيق المطلوب للمخطط الدائري
             const statusData = response.data;
+
+            // حساب عدد الطلبات قيد التنفيذ بطرح عدد الطلبات المتأخرة من إجمالي عدد الطلبات قيد التنفيذ
+            const pendingCount = Math.max(0, (statusData.pending || 0) - (statusData.delayed || 0));
+
             return {
                 labels: ['قيد التنفيذ', 'متأخر', 'مقبول', 'مرفوض'],
                 data: [
-                    statusData.pending || 0,
+                    pendingCount,
                     statusData.delayed || 0,
                     statusData.approved || 0,
                     statusData.rejected || 0

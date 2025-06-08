@@ -360,28 +360,36 @@ const ReportsDashboard = () => {
             };
         }
 
+        // تعديل البيانات إذا كانت الحالة هي "قيد التنفيذ"
+        let displayLabels = departmentStatus.labels || departmentNames;
+        let displayValues = [...(departmentStatus.data || [])];
+
+        // إذا كانت الحالة هي "قيد التنفيذ"، نحتاج إلى الحصول على عدد الطلبات المتأخرة لكل إدارة
+        if (pieStatus === 'pending') {
+            // هنا نفترض أن البيانات الواردة من API تشمل بالفعل الطلبات المتأخرة
+            // لذلك لا نحتاج إلى تعديل البيانات، لأن الخدمة الخلفية يجب أن تكون قد قامت بالفعل بالحساب الصحيح
+            // إذا كنت تريد تعديل البيانات هنا، فأنت بحاجة إلى بيانات إضافية عن الطلبات المتأخرة لكل إدارة
+        }
+
         // تحقق مما إذا كانت جميع البيانات صفرية
-        const isAllZeros = departmentStatus.data && departmentStatus.data.every(value => value === 0);
+        const isAllZeros = displayValues && displayValues.every(value => value === 0);
 
         // إذا كانت كل القيم صفراً، استخدم قيمة 1 لكل عنصر لإظهار المخطط بشكل متساوٍ مع نمط شفاف
-        const displayData = isAllZeros ?
-            (departmentStatus.data || []).map(() => 1) :
-            departmentStatus.data || [];
-
+        if (isAllZeros) {
+            displayValues = displayValues.map(() => 1);
+        }
 
         // تخصيص ألوان للإدارات - إذا كانت جميع القيم صفرية استخدم ألوان باهتة
-        const departmentColors = (departmentStatus.labels || departmentNames).map((_, index) => {
+        const departmentColors = displayLabels.map((_, index) => {
             const color = palette[index % palette.length];
             return isAllZeros ? `${color}50` : color; // إضافة شفافية للألوان إذا كانت جميع القيم صفرية
         });
 
-
-
         // إنشاء بيانات المخطط
         const chartData = {
-            labels: departmentStatus.labels || departmentNames,
+            labels: displayLabels,
             datasets: [{
-                data: displayData,
+                data: displayValues,
                 backgroundColor: departmentColors,
                 borderWidth: isAllZeros ? 0.5 : 1,
                 borderColor: isAllZeros ? '#e0e0e0' : 'white',
@@ -389,7 +397,6 @@ const ReportsDashboard = () => {
                 hoverBorderWidth: isAllZeros ? 1 : 2,
             }]
         };
-
 
         return chartData;
     };
@@ -652,7 +659,7 @@ const ReportsDashboard = () => {
 
     // خيارات حالة الطلبات
     const statusOptions = [
-        { value: 'delayed', label: 'متاخر' },
+        { value: 'delayed', label: 'متأخره' },
         { value: 'rejected', label: 'مرفوض' },
         { value: 'approved', label: 'مقبول' },
         { value: 'pending', label: 'قيد التنفيذ' },
@@ -865,7 +872,7 @@ const ReportsDashboard = () => {
                 {/* Pie Chart */}
                 <div className={styles.chartCard} style={{ margin: '0 auto', maxWidth: 600 }}>
                     <div className={styles.chartTitle}>
-                        <FaChartPie className={styles.chartIcon} /> توزيع الطلبات {pieStatus === 'delayed' ? 'متاخر' : pieStatus === 'rejected' ? 'مرفوض' : pieStatus === 'approved' ? 'مقبول' : 'قيد التنفيذ'} حسب الإدارة
+                        <FaChartPie className={styles.chartIcon} /> توزيع الطلبات {pieStatus === 'delayed' ? 'المتأخره' : pieStatus === 'rejected' ? 'المرفوضه' : pieStatus === 'approved' ? 'المقبوله' : 'قيد التنفيذ'} حسب الإدارة
                     </div>
 
                     {/* عنوان فرعي يوضح حالة البيانات */}
