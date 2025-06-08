@@ -9,6 +9,9 @@ export default function ReportsDash({ title }) {
             <Nav />
 
             <div className={styles.contentWrapper}>
+                <header className={styles.dashboardHeader}>
+                    {/* <h1>{title || "إدارة التقارير"}</h1> */}
+                </header>
                 <main className={styles.mainContent}>
                     <Outlet />
                 </main>

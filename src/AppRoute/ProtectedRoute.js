@@ -30,6 +30,30 @@ const ProtectedRoute = ({ allowedRole, redirectPath = "/login" }) => {
             return <Outlet />;
         }
 
+        if (allowedRole === "ReportsManager") {
+            if (userRole !== "مدير التقارير") {
+                console.log("Role mismatch: User is not a Reports Manager");
+                const defaultPath = userRole === "ادمن" ? "/admin" :
+                    userRole?.includes("موظف") ? "/inbox" : "/login";
+                return <Navigate to={defaultPath} replace />;
+            }
+            return <Outlet />;
+        }
+
+        if (allowedRole === "مدير التقارير") {
+            console.log("Checking Reports Manager access for role:", userRole);
+            console.log("Is role matching?", userRole === "مدير التقارير" || userRole === "اداره التقارير");
+
+            if (userRole !== "مدير التقارير" && userRole !== "اداره التقارير") {
+                console.log("Role mismatch: User is not a Reports Manager");
+                const defaultPath = userRole === "ادمن" ? "/admin" :
+                    userRole?.includes("موظف") ? "/inbox" : "/login";
+                return <Navigate to={defaultPath} replace />;
+            }
+            console.log("Access granted to Reports Manager route");
+            return <Outlet />;
+        }
+
         if (allowedRole === "RegularEmployee") {
             console.log("Checking RegularEmployee access for role:", userRole);
 

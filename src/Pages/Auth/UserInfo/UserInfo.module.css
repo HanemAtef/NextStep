@@ -16,29 +16,6 @@
     box-sizing: border-box;
 }
 
-/* .leftSection {
-    width: 45%;
-    height: 100%;
-    background: linear-gradient(135deg, #e3f2fd, #bbdefb);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-    position: relative;
-    overflow: hidden;
-}
-
-.leftSection::after {
-    content: '';
-    position: absolute;
-    top: -50px;
-    left: -50px;
-    width: 100px;
-    height: 100px;
-    border-radius: 50%;
-    background-color: rgba(255, 255, 255, 0.1);
-    box-shadow: 0 0 30px 100px rgba(255, 255, 255, 0.1);
-} */
 
 .leftSection img {
     width: 100%;

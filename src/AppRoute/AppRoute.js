@@ -24,6 +24,17 @@ import { selectCurrentInboxRequest } from "../Redux/slices/inboxSlice";
 import ReportsDashboard from '../Pages/Reports/Dashboard/ReportsDashboard';
 import DepartmentDetails from '../Pages/Reports/DepartmentDetails/DepartmentDetails';
 import ReportsDash from '../Pages/Dashboards/Reports/Dashboard/ReportsDash';
+import Nav from "../Component/Nav/Nav";
+
+// مكون مستقل لصفحة المستخدم مع شريط التنقل فقط
+const UserPageWithNav = () => (
+    <>
+        <Nav />
+        <div style={{ marginTop: "80px" }}>
+            <UserInfo />
+        </div>
+    </>
+);
 
 export default function AppRoutes() {
     const navigate = useNavigate();
@@ -56,7 +67,9 @@ export default function AppRoutes() {
 
             <Route path="/" element={
                 role ? (
-                    role === "ادمن" ? <Navigate to="/admin" replace /> : <Navigate to="/inbox" replace />
+                    role === "ادمن" ? <Navigate to="/admin" replace /> :
+                        role === "مدير التقارير" || role === "اداره التقارير" ? <Navigate to="/reports" replace /> :
+                            <Navigate to="/inbox" replace />
                 ) : <Navigate to="/login" replace />
             } />
 
@@ -76,12 +89,20 @@ export default function AppRoutes() {
             </Route>
 
             {/* مسارات إدارة التقارير - مستقلة مثل الأدمن */}
-            <Route element={<ProtectedRoute allowedRole="Employee" />}>
+            <Route element={<ProtectedRoute allowedRole="مدير التقارير" />}>
                 <Route path="/reports" element={<ReportsDash title=" إدارة التقارير " />}>
                     <Route index element={<ReportsDashboard />} />
                     <Route path="department/:id" element={<DepartmentDetails />} />
                 </Route>
+                {/* صفحة المستخدم لمدير التقارير - مع شريط التنقل فقط */}
+                <Route path="/reports/user" element={<UserPageWithNav />} />
             </Route>
+
+            {/* مسار مباشر لصفحة تقارير الإدارة للتأكد من أنها تعمل */}
+            <Route path="/reports-direct" element={<ReportsDashboard />} />
+
+            {/* مسار مباشر لصفحة المستخدم */}
+            <Route path="/user-direct" element={<UserInfo />} />
 
             <Route element={<ProtectedRoute allowedRole="Employee" />}>
                 <Route element={<DashLayout title={userRole} />}>

@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { FaArrowRight, FaChartBar, FaChartLine, FaChartPie, FaFileAlt, FaExclamationTriangle, FaCheckCircle, FaTimesCircle, FaRegClock, FaInbox, FaShare, FaFileExport, FaSync } from 'react-icons/fa';
 import { Bar, Line, Pie } from 'react-chartjs-2';
 import { Chart, registerables } from 'chart.js';
+import { FaList } from 'react-icons/fa';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import styles from './DepartmentDetails.module.css';
@@ -57,19 +58,16 @@ const DepartmentDetails = () => {
     const timeAnalysis = useSelector(state => state.departmentDetails ? selectTimeAnalysis(state) : { labels: [], receivedData: [], processedData: [] });
     const statusPieChart = useSelector(state => state.departmentDetails ? selectStatusPieChart(state) : { labels: [], data: [] });
     const dateRangeFromRedux = useSelector(state => state.departmentDetails ? selectDateRange(state) : {
-        startDate: new Date(new Date().setMonth(new Date().getMonth() - 1)),
-        endDate: new Date()
+        startDate: null,
+        endDate: null
     });
     const loading = useSelector(state => state.departmentDetails ? selectLoading(state) : {});
     const errors = useSelector(state => state.departmentDetails ? selectError(state) : {});
 
     // حالة محلية لتاريخ البداية والنهاية مع التحقق من صحة البيانات
-    const defaultStartDate = new Date(new Date().setMonth(new Date().getMonth() - 1));
-    const defaultEndDate = new Date();
-
     const [dateRange, setLocalDateRange] = useState([
-        dateRangeFromRedux?.startDate || defaultStartDate,
-        dateRangeFromRedux?.endDate || defaultEndDate
+        dateRangeFromRedux?.startDate ? new Date(dateRangeFromRedux.startDate) : null,
+        dateRangeFromRedux?.endDate ? new Date(dateRangeFromRedux.endDate) : null
     ]);
     const [startDate, endDate] = dateRange;
 
@@ -85,7 +83,7 @@ const DepartmentDetails = () => {
 
     // تحديث حالة التاريخ في Redux عند تغييرها محلياً
     useEffect(() => {
-        if (startDate && endDate && dispatch) {
+        if (dispatch) {
             // تحويل كائنات Date إلى سلاسل نصية قبل إرسالها إلى Redux
             const serializedDateRange = {
                 startDate: startDate instanceof Date ? startDate.toISOString() : startDate,
@@ -149,9 +147,7 @@ const DepartmentDetails = () => {
 
     // إعادة تعيين نطاق التاريخ
     const handleResetDateRange = () => {
-        const newStartDate = new Date(new Date().setMonth(new Date().getMonth() - 1));
-        const newEndDate = new Date();
-        setLocalDateRange([newStartDate, newEndDate]);
+        setLocalDateRange([null, null]);
     };
 
     // باليت الألوان
@@ -390,7 +386,7 @@ const DepartmentDetails = () => {
             id: 1,
             title: 'إجمالي الطلبات',
             value: stats?.totalRequests || 0,
-            icon: <FaInbox />,
+            icon: <FaList />,
             color: colors.primary
         },
         {

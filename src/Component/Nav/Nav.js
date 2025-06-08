@@ -9,7 +9,11 @@ import user from './image.png';
 export default function Nav() {
   const userRole = sessionStorage.getItem("role");
 
-  const userProfilePath = userRole === "ادمن" ? "/admin/user" : "/user";
+  // تحديد مسار الملف الشخصي حسب دور المستخدم
+  const userProfilePath =
+    userRole === "ادمن" ? "/admin/user" :
+      userRole === "مدير التقارير" || userRole === "اداره التقارير" ? "/reports/user" :
+        "/user";
 
   return (
     <div className={styles.navbar}>
@@ -18,7 +22,7 @@ export default function Nav() {
         <h2 className={styles.title}>نظام رابط</h2>
       </div>
       <div className={styles.userSection}>
-        <Link to={userProfilePath} className={styles.avatarContainer}>
+        <Link to={userProfilePath} className={styles.avatarContainer} title="الملف الشخصي">
           <img
             src={user}
             alt='user'
@@ -26,9 +30,7 @@ export default function Nav() {
           />
         </Link>
         <img src={logo} alt='logo' className={styles.logo} />
-
       </div>
-
     </div>
   );
 }

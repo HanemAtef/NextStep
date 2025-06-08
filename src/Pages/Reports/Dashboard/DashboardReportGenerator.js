@@ -447,11 +447,11 @@ export const generateDashboardReport = async (
     try {
       const statsHeaders = ['البيان', 'العدد'];
       const statsRows = [
-        ['إجمالي الطلبات', chartsData.totalRequests || 0],
-        ['الطلبات قيد التنفيذ', chartsData.pendingRequests || 0],
-        ['الطلبات متاخر', chartsData.delayedRequests || 0],
-        ['الطلبات مقبول', chartsData.approvedRequests || 0],
-        ['الطلبات مرفوض', chartsData.rejectedRequests || 0]
+        ['إجمالي الطلبات', chartsData.stats?.totalRequests || 0],
+        ['الطلبات قيد التنفيذ', chartsData.stats?.pendingRequests || 0],
+        ['الطلبات متاخر', chartsData.stats?.delayedRequests || 0],
+        ['الطلبات مقبول', chartsData.stats?.approvedRequests || 0],
+        ['الطلبات مرفوض', chartsData.stats?.rejectedRequests || 0]
       ];
 
       console.log('إحصائيات عامة:', statsRows);

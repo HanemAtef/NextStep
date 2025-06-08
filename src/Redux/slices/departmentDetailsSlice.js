@@ -220,7 +220,7 @@ export const fetchStatusPieChart = createAsyncThunk(
 const initialState = {
     department: null,
     stats: {
-        totalRequests: 0,
+        totalRequests: 0,   
         pendingRequests: 0,
         delayedRequests: 0,
         approvedRequests: 0,

@@ -22,6 +22,8 @@ const Login = () => {
       console.log("Token found in storage, redirecting...");
       if (role === "ادمن") {
         navigate("/admin");
+      } else if (role === "اداره التقارير" || role === "مدير التقارير") {
+        navigate("/reports");
       } else {
         navigate("/inbox");
       }
@@ -60,6 +62,8 @@ const Login = () => {
 
           if (role === "ادمن") {
             navigate("/admin");
+          } else if (role === "اداره التقارير" || role === "مدير التقارير") {
+            navigate("/reports");
           } else {
             navigate("/inbox");
           }

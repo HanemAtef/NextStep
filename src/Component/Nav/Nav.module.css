@@ -32,6 +32,36 @@
     margin: 3px;
 }
 
+.navLinks {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-right: auto;
+    margin-left: 20px;
+}
+
+.navLink {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    color: #333;
+    background-color: #f5f5f5;
+    transition: all 0.2s ease;
+    text-decoration: none;
+}
+
+.navLink:hover {
+    background-color: #e0e0e0;
+    transform: scale(1.05);
+}
+
+.navLink svg {
+    font-size: 18px;
+}
+
 .userSection {
     display: flex;
     align-items: center;

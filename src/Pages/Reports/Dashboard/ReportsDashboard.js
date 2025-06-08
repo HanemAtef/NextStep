@@ -31,15 +31,10 @@ const ReportsDashboard = () => {
     const dispatch = useDispatch();
     const { stats, dateRange, loading, error, pieStatus, departmentStatus, departments, timeAnalysis, requestsCount, createdRequests } = useSelector(state => state.reportDashboard);
 
-    // إعداد تواريخ افتراضية
-    const defaultStartDate = new Date();
-    defaultStartDate.setMonth(defaultStartDate.getMonth() - 1);
-    const defaultEndDate = new Date();
-
     // تحويل سلاسل التواريخ إلى كائنات Date للاستخدام في DatePicker
     const [localDateRange, setLocalDateRange] = useState({
-        startDate: dateRange.startDate ? new Date(dateRange.startDate) : defaultStartDate,
-        endDate: dateRange.endDate ? new Date(dateRange.endDate) : defaultEndDate
+        startDate: dateRange.startDate ? new Date(dateRange.startDate) : null,
+        endDate: dateRange.endDate ? new Date(dateRange.endDate) : null
     });
 
     // تتبع حالة إعادة ضبط البيانات
@@ -117,7 +112,6 @@ const ReportsDashboard = () => {
             newDateRange.endDate = endDay;
         }
 
-
         setLocalDateRange(newDateRange);
 
         // تحويل التواريخ إلى سلاسل نصية قبل إرسالها إلى Redux
@@ -136,31 +130,24 @@ const ReportsDashboard = () => {
         setIsResetting(true);
         setResetMessage('جاري إعادة تحميل البيانات الافتراضية...');
 
-        // إعداد تواريخ افتراضية
-        const defaultStartDate = new Date();
-        defaultStartDate.setMonth(defaultStartDate.getMonth() - 1);
-        defaultStartDate.setHours(0, 0, 0, 0);
-
-        const defaultEndDate = new Date();
-        defaultEndDate.setHours(23, 59, 59, 999);
+        // إعداد تواريخ افتراضية - تاريخ اليوم فقط
+        const currentDate = new Date();
+        currentDate.setHours(0, 0, 0, 0);
 
         const defaultRange = {
-            startDate: defaultStartDate,
-            endDate: defaultEndDate
+            startDate: null,
+            endDate: null
         };
-
 
         setLocalDateRange(defaultRange);
 
         // تحويل التواريخ إلى سلاسل نصية قبل إرسالها إلى Redux
         dispatch(setDateRange({
-            startDate: defaultRange.startDate.toISOString(),
-            endDate: defaultRange.endDate.toISOString()
+            startDate: null,
+            endDate: null
         }));
 
-        // إعادة تحميل جميع البيانات مع نطاق التاريخ الافتراضي
-
-        // إعادة تحميل البيانات بدون معايير تصفية
+        // إعادة تحميل جميع البيانات بدون معايير تصفية
         dispatch(fetchStats());
         dispatch(fetchDepartments());
         dispatch(fetchTimeAnalysis());
@@ -859,7 +846,7 @@ const ReportsDashboard = () => {
 
                 <button
                     className={styles.generateReportButton}
-                    onClick={handleGenerateReport}
+                    // onClick={handleGenerateReport} // تم تعطيل دالة توليد التقرير مؤقتًا
                     disabled={isResetting}
                 >
                     <FaFileExport className={styles.buttonIcon} /> توليد تقرير
