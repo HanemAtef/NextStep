@@ -98,13 +98,13 @@ export const fetchDepartments = createAsyncThunk(
             }
 
             const response = await axios.get(url, { headers });
-            console.log(" Department data structure:",
-                {
-                    isArray: Array.isArray(response.data),
-                    length: response.data.length,
-                    firstItem: response.data.length > 0 ? response.data[0] : null,
-                    keys: response.data.length > 0 ? Object.keys(response.data[0]) : []
-                });
+            // console.log(" Department data structure:",
+            //     {
+            //         isArray: Array.isArray(response.data),
+            //         length: response.data.length,
+            //         firstItem: response.data.length > 0 ? response.data[0] : null,
+            //         keys: response.data.length > 0 ? Object.keys(response.data[0]) : []
+            //     });
 
             // تنسيق البيانات للتأكد من وجود اسم للإدارة بغض النظر عن تسمية الخاصية في API
             if (Array.isArray(response.data)) {
@@ -258,7 +258,7 @@ export const fetchDepartmentStatus = createAsyncThunk(
             if (status) {
                 // تحويل حالات باللغة الإنجليزية إلى مقابلها بالعربية للـ API
                 let arabicStatus = status;
-                if (status === 'delayed') arabicStatus = 'متاخر';
+                if (status === 'delayed') arabicStatus = 'متأخره';
                 else if (status === 'rejected') arabicStatus = 'مرفوض';
                 else if (status === 'approved') arabicStatus = 'مقبول';
                 else if (status === 'pending') arabicStatus = 'قيد التنفيذ';
@@ -360,7 +360,7 @@ const initialState = {
         data: []
     },
     dateRange: {
-        startDate: new Date(new Date().setMonth(new Date().getMonth() - 1)).toISOString(),
+        startDate: new Date(new Date().setDate(new Date().getDate() - 7)).toISOString(),
         endDate: new Date().toISOString()
     },
     pieStatus: 'delayed', // حالة افتراضية لمخطط الدائرة
@@ -502,7 +502,10 @@ export const selectTimeAnalysis = (state) => state.reportDashboard.timeAnalysis;
 export const selectRequestsCount = (state) => state.reportDashboard.requestsCount;
 export const selectCreatedRequests = (state) => state.reportDashboard.createdRequests;
 export const selectDepartmentStatus = (state) => state.reportDashboard.departmentStatus;
-export const selectDateRange = (state) => state.reportDashboard.dateRange;
+export const selectDateRange = (state) => state.reportDashboard?.dateRange || {
+    startDate: new Date(new Date().setDate(new Date().getDate() - 7)).toISOString(),
+    endDate: new Date().toISOString()
+};
 export const selectPieStatus = (state) => state.reportDashboard.pieStatus;
 export const selectLoading = (state) => state.reportDashboard.loading;
 export const selectError = (state) => state.reportDashboard.error;

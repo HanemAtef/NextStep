@@ -15,7 +15,7 @@ import {
     fetchRequestsCountByType,
     fetchRejectionReasons,
     fetchTimeAnalysis,
-    fetchRequestStatusPieChart,
+    fetchStatusPieChart,
     setDateRange as setReduxDateRange,
     selectDepartment,
     selectStats,
@@ -86,10 +86,12 @@ const DepartmentDetails = () => {
     // تحديث حالة التاريخ في Redux عند تغييرها محلياً
     useEffect(() => {
         if (startDate && endDate && dispatch) {
-            dispatch(setReduxDateRange({
-                startDate,
-                endDate
-            }));
+            // تحويل كائنات Date إلى سلاسل نصية قبل إرسالها إلى Redux
+            const serializedDateRange = {
+                startDate: startDate instanceof Date ? startDate.toISOString() : startDate,
+                endDate: endDate instanceof Date ? endDate.toISOString() : endDate
+            };
+            dispatch(setReduxDateRange(serializedDateRange));
         }
     }, [dispatch, startDate, endDate]);
 
@@ -105,8 +107,8 @@ const DepartmentDetails = () => {
                 // جلب باقي البيانات مع نطاق التاريخ
                 const params = {
                     departmentId: id,
-                    startDate,
-                    endDate
+                    startDate: startDate instanceof Date ? startDate.toISOString() : startDate,
+                    endDate: endDate instanceof Date ? endDate.toISOString() : endDate
                 };
 
                 dispatch(fetchDepartmentStats(params));
@@ -114,7 +116,7 @@ const DepartmentDetails = () => {
                 dispatch(fetchRequestsCountByType(params));
                 dispatch(fetchRejectionReasons(params));
                 dispatch(fetchTimeAnalysis(params));
-                dispatch(fetchRequestStatusPieChart(params));
+                dispatch(fetchStatusPieChart(params));
             } catch (error) {
                 console.error("خطأ في جلب البيانات:", error);
             }
@@ -130,8 +132,8 @@ const DepartmentDetails = () => {
         try {
             const params = {
                 departmentId: id,
-                startDate,
-                endDate
+                startDate: startDate instanceof Date ? startDate.toISOString() : startDate,
+                endDate: endDate instanceof Date ? endDate.toISOString() : endDate
             };
 
             dispatch(fetchDepartmentStats(params));
@@ -139,7 +141,7 @@ const DepartmentDetails = () => {
             dispatch(fetchRequestsCountByType(params));
             dispatch(fetchRejectionReasons(params));
             dispatch(fetchTimeAnalysis(params));
-            dispatch(fetchRequestStatusPieChart(params));
+            dispatch(fetchStatusPieChart(params));
         } catch (error) {
             console.error("خطأ في تحديث البيانات:", error);
         }

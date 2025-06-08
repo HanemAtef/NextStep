@@ -37,6 +37,20 @@ const formatDateForAPI = (date) => {
 };
 
 // جلب تفاصيل الإدارة
+export const fetchDepartment = createAsyncThunk(
+    'departmentDetails/fetchDepartment',
+    async (id, { rejectWithValue }) => {
+        try {
+            const response = await axios.get(`${API_URL}/departments/${id}`, { headers: getHeaders() });
+            return response.data;
+        } catch (error) {
+            console.error(" خطأ في جلب بيانات الإدارة:", error);
+            return rejectWithValue(error.response?.data || "حدث خطأ في جلب بيانات الإدارة");
+        }
+    }
+);
+
+// جلب تفاصيل الإدارة
 export const fetchDepartmentDetails = createAsyncThunk(
     'departmentDetails/fetchDepartmentDetails',
     async (id, { rejectWithValue }) => {
@@ -166,16 +180,16 @@ export const fetchTimeAnalysis = createAsyncThunk(
 );
 
 // جلب بيانات حالات الطلبات للمخطط الدائري
-export const fetchRequestStatusPieChart = createAsyncThunk(
-    'departmentDetails/fetchRequestStatusPieChart',
-    async ({ departmentId, startDate, endDate }, { rejectWithValue }) => {
+export const fetchStatusPieChart = createAsyncThunk(
+    'departmentDetails/fetchStatusPieChart',
+    async ({ departmentId, dateRange }, { rejectWithValue }) => {
         try {
             let url = `${API_URL}/departments/${departmentId}/requests/status`;
 
             // إضافة معاملات التاريخ إذا كانت متوفرة
-            if (startDate && endDate) {
-                const formattedStartDate = formatDateForAPI(startDate);
-                const formattedEndDate = formatDateForAPI(endDate);
+            if (dateRange && dateRange.startDate && dateRange.endDate) {
+                const formattedStartDate = formatDateForAPI(dateRange.startDate);
+                const formattedEndDate = formatDateForAPI(dateRange.endDate);
                 url += `?startDate=${formattedStartDate}&endDate=${formattedEndDate}`;
             }
 
@@ -230,7 +244,7 @@ const initialState = {
         data: [0, 0, 0, 0]
     },
     dateRange: {
-        startDate: new Date(new Date().setMonth(new Date().getMonth() - 1)).toISOString(),
+        startDate: new Date(new Date().setDate(new Date().getDate() - 7)).toISOString(),
         endDate: new Date().toISOString()
     },
     loading: {
@@ -275,6 +289,20 @@ const departmentDetailsSlice = createSlice({
     },
     extraReducers: (builder) => {
         builder
+            // Department
+            .addCase(fetchDepartment.pending, (state) => {
+                state.loading.department = true;
+                state.error.department = null;
+            })
+            .addCase(fetchDepartment.fulfilled, (state, action) => {
+                state.loading.department = false;
+                state.department = action.payload;
+            })
+            .addCase(fetchDepartment.rejected, (state, action) => {
+                state.loading.department = false;
+                state.error.department = action.payload;
+            })
+
             // Department Details
             .addCase(fetchDepartmentDetails.pending, (state) => {
                 state.loading.department = true;
@@ -360,15 +388,15 @@ const departmentDetailsSlice = createSlice({
             })
 
             // Status Pie Chart
-            .addCase(fetchRequestStatusPieChart.pending, (state) => {
+            .addCase(fetchStatusPieChart.pending, (state) => {
                 state.loading.statusPieChart = true;
                 state.error.statusPieChart = null;
             })
-            .addCase(fetchRequestStatusPieChart.fulfilled, (state, action) => {
+            .addCase(fetchStatusPieChart.fulfilled, (state, action) => {
                 state.loading.statusPieChart = false;
                 state.statusPieChart = action.payload;
             })
-            .addCase(fetchRequestStatusPieChart.rejected, (state, action) => {
+            .addCase(fetchStatusPieChart.rejected, (state, action) => {
                 state.loading.statusPieChart = false;
                 state.error.statusPieChart = action.payload;
             });
@@ -392,7 +420,7 @@ export const selectRejectionReasons = (state) => state.departmentDetails?.reject
 export const selectTimeAnalysis = (state) => state.departmentDetails?.timeAnalysis || { labels: [], receivedData: [], processedData: [] };
 export const selectStatusPieChart = (state) => state.departmentDetails?.statusPieChart || { labels: ['قيد التنفيذ', 'متأخر', 'مقبول', 'مرفوض'], data: [0, 0, 0, 0] };
 export const selectDateRange = (state) => state.departmentDetails?.dateRange || {
-    startDate: new Date(new Date().setMonth(new Date().getMonth() - 1)).toISOString(),
+    startDate: new Date(new Date().setDate(new Date().getDate() - 7)).toISOString(),
     endDate: new Date().toISOString()
 };
 export const selectLoading = (state) => state.departmentDetails?.loading || {};

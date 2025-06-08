@@ -73,7 +73,12 @@ function DepartmentDetails() {
 
     // التعامل مع تغيير نطاق التاريخ
     const handleDateRangeChange = (newDateRange) => {
-        dispatch(setDateRange(newDateRange));
+        // تحويل كائنات Date إلى سلاسل نصية قبل إرسالها إلى Redux
+        const serializedDateRange = {
+            startDate: newDateRange.startDate instanceof Date ? newDateRange.startDate.toISOString() : newDateRange.startDate,
+            endDate: newDateRange.endDate instanceof Date ? newDateRange.endDate.toISOString() : newDateRange.endDate
+        };
+        dispatch(setDateRange(serializedDateRange));
     };
 
     if (loading.department) {
