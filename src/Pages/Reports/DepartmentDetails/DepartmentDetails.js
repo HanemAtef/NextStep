@@ -1,12 +1,33 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { FaArrowRight, FaChartBar, FaChartLine, FaChartPie, FaFileAlt, FaExclamationTriangle, FaCheckCircle, FaTimesCircle, FaRegClock, FaInbox, FaShare, FaFileExport } from 'react-icons/fa';
+import { useDispatch, useSelector } from 'react-redux';
+import { FaArrowRight, FaChartBar, FaChartLine, FaChartPie, FaFileAlt, FaExclamationTriangle, FaCheckCircle, FaTimesCircle, FaRegClock, FaInbox, FaShare, FaFileExport, FaSync } from 'react-icons/fa';
 import { Bar, Line, Pie } from 'react-chartjs-2';
 import { Chart, registerables } from 'chart.js';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import styles from './DepartmentDetails.module.css';
 import { generateDepartmentReport } from './DepartmentReportGenerator';
+import {
+    fetchDepartmentDetails,
+    fetchDepartmentStats,
+    fetchProcessingTimeStats,
+    fetchRequestsCountByType,
+    fetchRejectionReasons,
+    fetchTimeAnalysis,
+    fetchRequestStatusPieChart,
+    setDateRange as setReduxDateRange,
+    selectDepartment,
+    selectStats,
+    selectProcessingTimeStats,
+    selectRequestsCountByType,
+    selectRejectionReasons,
+    selectTimeAnalysis,
+    selectStatusPieChart,
+    selectDateRange,
+    selectLoading,
+    selectError
+} from '../../../Redux/slices/departmentDetailsSlice';
 
 // تسجيل جميع مكونات Chart.js
 Chart.register(...registerables);
@@ -18,31 +39,120 @@ const DepartmentDetails = () => {
     const requestsCountChartRef = useRef(null);
     const timeAnalysisChartRef = useRef(null);
     const rejectionChartRef = useRef(null);
+
     const { id } = useParams();
     const navigate = useNavigate();
-    const [loading, setLoading] = useState(true);
-    const [department, setDepartment] = useState(null);
-    const [dateRange, setDateRange] = useState([new Date(new Date().setMonth(new Date().getMonth() - 1)), new Date()]);
+    const dispatch = useDispatch();
+
+    // حالة تحميل محلية قبل استخدام React-Redux
+    const [isInitialLoading, setIsInitialLoading] = useState(true);
+
+    // استخدام React-Redux للوصول إلى البيانات من المخزن مع التحقق من وجود المخزن
+    const reduxState = useSelector(state => state);
+    const department = useSelector(state => state.departmentDetails ? selectDepartment(state) : null);
+    const stats = useSelector(state => state.departmentDetails ? selectStats(state) : {});
+    const processingTimeStats = useSelector(state => state.departmentDetails ? selectProcessingTimeStats(state) : { labels: [], data: [] });
+    const requestsCountByType = useSelector(state => state.departmentDetails ? selectRequestsCountByType(state) : { labels: [], data: [] });
+    const rejectionReasons = useSelector(state => state.departmentDetails ? selectRejectionReasons(state) : { labels: [], data: [] });
+    const timeAnalysis = useSelector(state => state.departmentDetails ? selectTimeAnalysis(state) : { labels: [], receivedData: [], processedData: [] });
+    const statusPieChart = useSelector(state => state.departmentDetails ? selectStatusPieChart(state) : { labels: [], data: [] });
+    const dateRangeFromRedux = useSelector(state => state.departmentDetails ? selectDateRange(state) : {
+        startDate: new Date(new Date().setMonth(new Date().getMonth() - 1)),
+        endDate: new Date()
+    });
+    const loading = useSelector(state => state.departmentDetails ? selectLoading(state) : {});
+    const errors = useSelector(state => state.departmentDetails ? selectError(state) : {});
+
+    // حالة محلية لتاريخ البداية والنهاية مع التحقق من صحة البيانات
+    const defaultStartDate = new Date(new Date().setMonth(new Date().getMonth() - 1));
+    const defaultEndDate = new Date();
+
+    const [dateRange, setLocalDateRange] = useState([
+        dateRangeFromRedux?.startDate || defaultStartDate,
+        dateRangeFromRedux?.endDate || defaultEndDate
+    ]);
     const [startDate, endDate] = dateRange;
-    const [stats, setStats] = useState({
-        totalRequests: 142,
-        pendingRequests: 45,
-        delayedRequests: 12,
-        approvedRequests: 67,
-        rejectedRequests: 18,
-        createdRequests: 53,
-        receivedRequests: 89
-    });
 
-    // إضافة state جديد لبيانات مخطط الدائرة
-    const [pieChartData, setPieChartData] = useState({
-        pending: 45,
-        delayed: 12,
-        approved: 67,
-        rejected: 18
-    });
+    // حالة تحميل محلية
+    const [isGeneratingReport, setIsGeneratingReport] = useState(false);
 
-    // باليت الألوان الجديدة (نفس ألوان الإدارات في Dashboard)
+    // التحقق من وجود شريحة departmentDetails في المخزن
+    useEffect(() => {
+        if (reduxState && reduxState.departmentDetails) {
+            setIsInitialLoading(false);
+        }
+    }, [reduxState]);
+
+    // تحديث حالة التاريخ في Redux عند تغييرها محلياً
+    useEffect(() => {
+        if (startDate && endDate && dispatch) {
+            dispatch(setReduxDateRange({
+                startDate,
+                endDate
+            }));
+        }
+    }, [dispatch, startDate, endDate]);
+
+    // جلب البيانات من API عند تحميل الصفحة أو تغيير التاريخ
+    useEffect(() => {
+        const fetchAllData = async () => {
+            if (!id || !dispatch) return;
+
+            try {
+                // جلب تفاصيل الإدارة
+                dispatch(fetchDepartmentDetails(id));
+
+                // جلب باقي البيانات مع نطاق التاريخ
+                const params = {
+                    departmentId: id,
+                    startDate,
+                    endDate
+                };
+
+                dispatch(fetchDepartmentStats(params));
+                dispatch(fetchProcessingTimeStats(params));
+                dispatch(fetchRequestsCountByType(params));
+                dispatch(fetchRejectionReasons(params));
+                dispatch(fetchTimeAnalysis(params));
+                dispatch(fetchRequestStatusPieChart(params));
+            } catch (error) {
+                console.error("خطأ في جلب البيانات:", error);
+            }
+        };
+
+        fetchAllData();
+    }, [dispatch, id, startDate, endDate]);
+
+    // إعادة تحميل البيانات
+    const handleRefreshData = () => {
+        if (!id || !dispatch) return;
+
+        try {
+            const params = {
+                departmentId: id,
+                startDate,
+                endDate
+            };
+
+            dispatch(fetchDepartmentStats(params));
+            dispatch(fetchProcessingTimeStats(params));
+            dispatch(fetchRequestsCountByType(params));
+            dispatch(fetchRejectionReasons(params));
+            dispatch(fetchTimeAnalysis(params));
+            dispatch(fetchRequestStatusPieChart(params));
+        } catch (error) {
+            console.error("خطأ في تحديث البيانات:", error);
+        }
+    };
+
+    // إعادة تعيين نطاق التاريخ
+    const handleResetDateRange = () => {
+        const newStartDate = new Date(new Date().setMonth(new Date().getMonth() - 1));
+        const newEndDate = new Date();
+        setLocalDateRange([newStartDate, newEndDate]);
+    };
+
+    // باليت الألوان
     const palette = [
         '#5bbefa', // أزرق فاتح
         '#b6b6f7', // بنفسجي فاتح
@@ -52,6 +162,7 @@ const DepartmentDetails = () => {
         '#00b894', // أخضر زمردي
         '#e17055', // أحمر برتقالي
     ];
+
     const colors = {
         primary: palette[0],
         secondary: palette[1],
@@ -63,277 +174,185 @@ const DepartmentDetails = () => {
         background: '#f8fafc',
     };
 
-    // قائمة الإدارات بنفس ترتيب الألوان الجديد
-    const departments = [
-        { id: "1", name: 'إدارة الدراسات العليا', requests: 78, delayed: 12, color: palette[0] },
-        { id: "2", name: 'لجنة الدراسات العليا', requests: 65, delayed: 8, color: palette[1] },
-        { id: "3", name: 'قسم علوم الحاسب', requests: 94, delayed: 15, color: palette[2] },
-        { id: "4", name: 'قسم نظم المعلومات', requests: 56, delayed: 9, color: palette[3] },
-        { id: "5", name: 'قسم حسابات علمية', requests: 42, delayed: 5, color: palette[4] },
-        { id: "6", name: 'قسم الذكاء الاصطناعي', requests: 36, delayed: 4, color: palette[5] },
-        { id: "7", name: 'مجلس الكلية', requests: 27, delayed: 3, color: palette[6] },
-    ];
-
-    // تحديث بيانات مخطط الدائرة عند تغيير التاريخ
-    useEffect(() => {
-        const updatePieChartData = () => {
-            // استخدام نفس دالة توليد البيانات العشوائية
-            const seed = getDateSeed();
-
-            // توليد بيانات جديدة بناءً على التاريخ
-            const newData = {
-                pending: Math.floor(seededRandom(seed + 1) * 50) + 20,
-                delayed: Math.floor(seededRandom(seed + 2) * 30) + 10,
-                approved: Math.floor(seededRandom(seed + 3) * 70) + 40,
-                rejected: Math.floor(seededRandom(seed + 4) * 25) + 15
-            };
-
-            setPieChartData(newData);
-
-            // تحديث الإحصائيات العامة أيضاً
-            setStats(prevStats => ({
-                ...prevStats,
-                pendingRequests: newData.pending,
-                delayedRequests: newData.delayed,
-                approvedRequests: newData.approved,
-                rejectedRequests: newData.rejected,
-                totalRequests: newData.pending + newData.delayed + newData.approved + newData.rejected
-            }));
-        };
-
-        updatePieChartData();
-    }, [startDate, endDate]);
-
     // تحديث بيانات مخطط الدائرة
     const statusData = {
-        labels: ['قيد التنفيذ', 'متأخر', 'مقبول', 'مرفوض'],
+        labels: statusPieChart?.labels || ['قيد التنفيذ', 'متاخر', 'مقبول', 'مرفوض'],
         datasets: [
             {
-                data: [
-                    pieChartData.pending,
-                    pieChartData.delayed,
-                    pieChartData.approved,
-                    pieChartData.rejected
-                ],
+                data: statusPieChart?.data || [0, 0, 0, 0],
                 backgroundColor: ['#ffe066', '#b6b6f7', '#00b894', '#f4511e'],
                 borderWidth: 1,
             },
         ],
     };
 
-    // بيانات المخططات
-    const monthlyLabels = ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'];
-
-    // دالة لتوليد بيانات عشوائية ثابتة بناءً على البذرة
-    function getDateSeed() {
-        // استخدم تاريخ البداية والنهاية كـ seed لتوليد بيانات مختلفة
-        return (startDate?.getTime() || 0) + (endDate?.getTime() || 0);
-    }
-
-    function seededRandom(seed) {
-        // دالة توليد رقم عشوائي ثابت بناءً على seed
-        var x = Math.sin(seed++) * 10000;
-        return x - Math.floor(x);
-    }
-
-    // توليد بيانات عشوائية
-    const getRandomArray = (len, min = 10, max = 100, seed = 0) =>
-        Array.from({ length: len }, (_, i) => Math.floor(seededRandom(seed + i) * (max - min + 1)) + min);
-
-    // بذرة ثابتة للأرقام العشوائية
-    const staticSeed = 12345;
-
-    // دالة لتوليد تسميات محور X بناءً على نطاق التاريخ
-    const generateTimeLabels = (start, end) => {
-        if (!start || !end) return monthlyLabels;
-
-        const startDate = new Date(start);
-        const endDate = new Date(end);
-        const diffMonths = (endDate.getFullYear() - startDate.getFullYear()) * 12 + endDate.getMonth() - startDate.getMonth() + 1;
-
-        if (diffMonths <= 1) {
-            // إذا كان الفرق شهر أو أقل، اعرض الأيام
-            const days = [];
-            const currentDate = new Date(startDate);
-            while (currentDate <= endDate) {
-                days.push(currentDate.getDate().toString());
-                currentDate.setDate(currentDate.getDate() + 1);
-            }
-            return days;
-        } else if (diffMonths <= 12) {
-            // إذا كان الفرق سنة أو أقل، اعرض الشهور
-            const months = [];
-            const currentDate = new Date(startDate);
-            while (currentDate <= endDate) {
-                months.push(monthlyLabels[currentDate.getMonth()]);
-                currentDate.setMonth(currentDate.getMonth() + 1);
-            }
-            return months;
-        } else {
-            // إذا كان الفرق أكثر من سنة، اعرض السنوات
-            const years = [];
-            const currentDate = new Date(startDate);
-            while (currentDate <= endDate) {
-                const year = currentDate.getFullYear().toString();
-                if (!years.includes(year)) {
-                    years.push(year);
-                }
-                currentDate.setMonth(currentDate.getMonth() + 1);
-            }
-            return years;
-        }
-    };
-
-    // استخدام useMemo لتوليد البيانات بناءً على نطاق التاريخ
-    const chartData = useMemo(() => {
-        // بيانات افتراضية إذا لم يتم تحديد نطاق التاريخ
-        if (!startDate || !endDate) {
-            return {
-                timeLabels: monthlyLabels,
-                receivedData: getRandomArray(12, 40, 90, staticSeed),
-                processedData: getRandomArray(12, 30, 80, staticSeed + 100),
-                processingTimes: Array.from({ length: 5 }, (_, i) =>
-                    (seededRandom(staticSeed + i + 500) * 7 + 2).toFixed(1)),
-                requestsCount: Array.from({ length: 5 }, (_, i) =>
-                    Math.floor(seededRandom(staticSeed + i + 800) * 100) + 20)
-            };
-        }
-
-        // توليد تسميات وبيانات جديدة بناءً على نطاق التاريخ
-        const labels = generateTimeLabels(startDate, endDate);
-        const dateSeed = new Date(startDate).getTime() + new Date(endDate).getTime();
-
-        return {
-            timeLabels: labels,
-            receivedData: getRandomArray(labels.length, 40, 90, dateSeed),
-            processedData: getRandomArray(labels.length, 30, 80, dateSeed + 100),
-            processingTimes: Array.from({ length: 5 }, (_, i) =>
-                (seededRandom(dateSeed + i + 500) * 7 + 2).toFixed(1)),
-            requestsCount: Array.from({ length: 5 }, (_, i) =>
-                Math.floor(seededRandom(dateSeed + i + 800) * 100) + 20)
-        };
-    }, [startDate, endDate, monthlyLabels]); // إعادة حساب البيانات فقط عند تغيير نطاق التاريخ
-
-    // بيانات مخطط الخط للتحليل الزمني - تتغير بناءً على نطاق التاريخ
-    const timeAnalysisData = {
-        labels: chartData.timeLabels,
+    // بيانات مخطط أوقات المعالجة
+    const processingTimeData = {
+        labels: processingTimeStats?.labels || [],
         datasets: [
             {
-                label: 'الطلبات المستلمة',
-                data: chartData.receivedData,
-                borderColor: colors.primary,
-                backgroundColor: `${colors.primary}20`,
-                borderWidth: 2,
-                tension: 0.4,
-                fill: true,
-                pointRadius: 4,
-                pointHoverRadius: 6,
-            },
-            {
-                label: 'الطلبات المعالجة',
-                data: chartData.processedData,
-                borderColor: colors.success,
-                backgroundColor: `${colors.success}20`,
-                borderWidth: 2,
-                tension: 0.4,
-                fill: true,
-                pointRadius: 4,
-                pointHoverRadius: 6,
+                label: 'متوسط وقت المعالجة (بالأيام)',
+                data: processingTimeStats?.data || [],
+                backgroundColor: palette[1],
+                borderColor: 'rgba(75, 192, 192, 1)',
+                borderWidth: 1,
             },
         ],
     };
 
-    // الخيارات المشتركة لجميع المخططات
-    const chartOptions = {
+    // بيانات مخطط عدد الطلبات لكل نوع
+    const requestsCountData = {
+        labels: requestsCountByType?.labels || [],
+        datasets: [
+            {
+                label: 'عدد الطلبات',
+                data: requestsCountByType?.data || [],
+                backgroundColor: palette[2],
+                borderColor: 'rgba(153, 102, 255, 1)',
+                borderWidth: 1,
+            },
+        ],
+    };
+
+    // بيانات مخطط أسباب الرفض
+    const rejectionData = {
+        labels: rejectionReasons?.labels || [],
+        datasets: [
+            {
+                data: rejectionReasons?.data || [],
+                backgroundColor: [
+                    '#f4511e',
+                    '#e17055',
+                    '#d63031',
+                    '#e84393',
+                    '#6c5ce7'
+                ],
+                borderWidth: 1,
+            },
+        ],
+    };
+
+    // بيانات مخطط التحليل الزمني
+    const timeAnalysisData = {
+        labels: timeAnalysis?.labels || [],
+        datasets: [
+            {
+                label: 'الطلبات المستلمة',
+                data: timeAnalysis?.receivedData || [],
+                borderColor: palette[0],
+                backgroundColor: 'rgba(91, 190, 250, 0.2)',
+                tension: 0.4,
+                fill: true
+            },
+            {
+                label: 'الطلبات المعالجة',
+                data: timeAnalysis?.processedData || [],
+                borderColor: palette[5],
+                backgroundColor: 'rgba(0, 184, 148, 0.2)',
+                tension: 0.4,
+                fill: true
+            }
+        ],
+    };
+
+    // خيارات المخطط الدائري
+    const pieChartOptions = {
         responsive: true,
-        maintainAspectRatio: false,
         plugins: {
             legend: {
-                position: 'top',
-                align: 'start',
+                position: 'right',
                 labels: {
-                    boxWidth: 15,
-                    padding: 15,
                     font: {
-                        family: 'Cairo, sans-serif',
-                        size: 12,
-                        weight: 'bold'
-                    },
-                    color: '#000000'
+                        size: 14,
+                    }
                 }
             },
-            title: {
-                display: false,
-                text: 'العنوان',
-                font: {
-                    family: 'Cairo, sans-serif',
-                    size: 14,
-                    weight: 'bold'
-                },
-                color: '#000000',
-                padding: 10
-            },
             tooltip: {
-                titleFont: {
-                    family: 'Cairo, sans-serif'
-                },
-                bodyFont: {
-                    family: 'Cairo, sans-serif'
-                },
-                backgroundColor: 'rgba(44, 62, 80, 0.9)',
-                titleColor: 'white',
-                bodyColor: 'white',
-                borderColor: colors.primary,
-                borderWidth: 1,
-                padding: 10,
-                displayColors: true
+                callbacks: {
+                    label: function (context) {
+                        const value = context.raw || 0;
+                        const total = context.dataset.data.reduce((acc, val) => acc + (val || 0), 0);
+                        const percentage = total > 0 ? Math.round((value / total) * 100) : 0;
+                        return `${context.label}: ${value} (${percentage}%)`;
+                    }
+                }
+            }
+        }
+    };
+
+    // خيارات مخطط الأعمدة
+    const barChartOptions = {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+            y: {
+                beginAtZero: true,
+                title: {
+                    display: true,
+                    text: 'متوسط وقت المعالجة (بالأيام)',
+                    font: {
+                        size: 14,
+                    }
+                }
+            },
+            x: {
+                ticks: {
+                    font: {
+                        size: 12,
+                    },
+                    maxRotation: 90,
+                    minRotation: 80
+                }
             }
         },
+        plugins: {
+            legend: {
+                display: false
+            }
+        }
     };
 
     // خيارات مخطط عدد الطلبات
     const requestsCountOptions = {
-        ...chartOptions,
-        indexAxis: 'x',
+        responsive: true,
+        maintainAspectRatio: false,
         scales: {
             y: {
                 beginAtZero: true,
-                grid: {
-                    color: `${colors.dark}20`,
-                },
-                ticks: {
+                title: {
+                    display: true,
+                    text: 'عدد الطلبات',
                     font: {
-                        family: 'Cairo, sans-serif',
-                        size: 12,
-                        weight: 'bold'
-                    },
-                    color: '#000000',
-                    padding: 10
+                        size: 14,
+                    }
                 }
             },
             x: {
-                grid: {
-                    color: `${colors.dark}10`,
-                    display: false,
-                },
                 ticks: {
                     font: {
-                        family: 'Cairo, sans-serif',
                         size: 12,
-                        weight: 'bold'
                     },
-                    color: '#000000',
-                    padding: 10
+                    maxRotation: 90,
+                    minRotation: 80
                 }
             }
         },
         plugins: {
-            ...chartOptions.plugins,
-            tooltip: {
-                ...chartOptions.plugins.tooltip,
-                callbacks: {
-                    label: function (context) {
-                        return `عدد الطلبات: ${context.parsed.y} طلب`;
+            legend: {
+                display: false
+            }
+        }
+    };
+
+    // خيارات مخطط أسباب الرفض
+    const rejectionChartOptions = {
+        responsive: true,
+        plugins: {
+            legend: {
+                position: 'right',
+                labels: {
+                    font: {
+                        size: 14,
                     }
                 }
             }
@@ -342,372 +361,126 @@ const DepartmentDetails = () => {
 
     // خيارات مخطط التحليل الزمني
     const timeAnalysisOptions = {
-        ...chartOptions,
+        responsive: true,
+        maintainAspectRatio: false,
         scales: {
             y: {
                 beginAtZero: true,
-                grid: {
-                    color: `${colors.dark}20`,
-                },
-                ticks: {
+                title: {
+                    display: true,
+                    text: 'عدد الطلبات',
                     font: {
-                        family: 'Cairo, sans-serif',
-                        size: 12,
-                        weight: 'bold'
-                    },
-                    color: '#000000',
-                    padding: 10
-                }
-            },
-            x: {
-                grid: {
-                    color: `${colors.dark}10`,
-                    display: false,
-                },
-                ticks: {
-                    font: {
-                        family: 'Cairo, sans-serif',
-                        size: 12,
-                        weight: 'bold'
-                    },
-                    color: '#000000',
-                    padding: 10,
-                    maxRotation: 45, // تدوير النص لتجنب التداخل
-                    autoSkip: true, // تخطي بعض التسميات لتجنب الازدحام
-                    autoSkipPadding: 10 // المسافة بين التسميات المعروضة
-                }
-            }
-        },
-        plugins: {
-            ...chartOptions.plugins,
-            tooltip: {
-                ...chartOptions.plugins.tooltip,
-                callbacks: {
-                    label: function (context) {
-                        let label = context.dataset.label || '';
-                        if (label) {
-                            label += ': ';
-                        }
-                        if (context.parsed.y !== null) {
-                            label += context.parsed.y + ' طلب';
-                        }
-                        return label;
+                        size: 14,
                     }
                 }
             }
         },
-        interaction: {
-            mode: 'index',
-            intersect: false
+        plugins: {
+            legend: {
+                position: 'top'
+            }
         }
     };
 
-    // أنواع الطلبات المحددة
-    const requestTypes = ['طلب التحاق', 'ايقاف قيد', 'الغاء تسجيل', 'طلب مد', 'طلب منح'];
-
-    // State لبيانات أسباب الرفض
-    const [rejectionReasons, setRejectionReasons] = useState({
-        labels: ['نقص في الأوراق', 'انتهاء معاد القيد', 'لم يجتاز', 'أسباب أخرى'],
-        data: [40, 25, 20, 15]
-    });
-
-    // تحديث بيانات أسباب الرفض عند تغيير التاريخ
-    useEffect(() => {
-        const updateRejectionData = () => {
-            const seed = getDateSeed();
-            // توليد بيانات جديدة بناءً على التاريخ
-            const newData = rejectionReasons.labels.map((_, index) => {
-                return Math.floor(seededRandom(seed + index + 1000) * 40) + 10;
-            });
-
-            // تحويل البيانات إلى نسب مئوية
-            const total = newData.reduce((a, b) => a + b, 0);
-            const percentages = newData.map(value => Math.round((value / total) * 100));
-
-            setRejectionReasons(prev => ({
-                ...prev,
-                data: percentages
-            }));
-        };
-
-        updateRejectionData();
-    }, [startDate, endDate]);
-
-    // تحديث بيانات مخطط أسباب الرفض
-    const rejectionData = {
-        labels: rejectionReasons.labels,
-        datasets: [
-            {
-                data: rejectionReasons.data,
-                backgroundColor: [palette[0], palette[2], palette[4], palette[6]],
-                borderWidth: 1,
-            },
-        ],
-    };
-
-    // بيانات مخطط الأعمدة لمتوسط وقت المعالجة وعدد الطلبات ستتحدث من خلال useEffect
-
-    // بيانات مخطط الأعمدة لمتوسط وقت المعالجة
-    const processingTimeData = {
-        labels: requestTypes,
-        datasets: [
-            {
-                label: 'متوسط وقت المعالجة ',
-                data: chartData.processingTimes,
-                backgroundColor: [palette[0], palette[2], palette[4], palette[3], palette[5]],
-                borderColor: [palette[0], palette[2], palette[4], palette[3], palette[5]],
-                borderWidth: 1,
-                barPercentage: 0.6,
-                categoryPercentage: 0.8,
-            },
-        ],
-    };
-
-    // بيانات مخطط الأعمدة لعدد الطلبات التي وصلت للإدارة
-    const requestsCountData = {
-        labels: requestTypes,
-        datasets: [
-            {
-                label: 'عدد الطلبات',
-                data: chartData.requestsCount,
-                backgroundColor: [palette[0], palette[2], palette[4], palette[3], palette[5]],
-                borderColor: [palette[0], palette[2], palette[4], palette[3], palette[5]],
-                borderWidth: 1,
-                barPercentage: 0.6,
-                categoryPercentage: 0.8,
-            },
-        ],
-    };
-
-    // إحصائيات سريعة بنفس الألوان الجديدة
+    // البيانات السريعة في بطاقات
     const quickStats = [
-        { id: 1, title: 'إجمالي الطلبات', value: stats.totalRequests, icon: <FaFileAlt />, color: palette[0] },
-        { id: 2, title: 'قيد التنفيذ', value: stats.pendingRequests, icon: <FaRegClock />, color: palette[3] },
-        { id: 3, title: 'متأخرة', value: stats.delayedRequests, icon: <FaExclamationTriangle />, color: palette[1] },
-        { id: 4, title: 'مقبولة', value: stats.approvedRequests, icon: <FaCheckCircle />, color: palette[5] },
-        { id: 5, title: 'مرفوضة', value: stats.rejectedRequests, icon: <FaTimesCircle />, color: palette[4] },
-        { id: 6, title: 'تم إنشاؤها', value: stats.createdRequests, icon: <FaShare />, color: palette[0] },
-        { id: 7, title: 'مستقبلة', value: stats.receivedRequests, icon: <FaInbox />, color: palette[2] },
+        {
+            id: 1,
+            title: 'إجمالي الطلبات',
+            value: stats?.totalRequests || 0,
+            icon: <FaInbox />,
+            color: colors.primary
+        },
+        {
+            id: 2,
+            title: 'قيد التنفيذ',
+            value: stats?.pendingRequests || 0,
+            icon: <FaRegClock />,
+            color: colors.warning
+        },
+        {
+            id: 3,
+            title: 'متأخرة',
+            value: stats?.delayedRequests || 0,
+            icon: <FaExclamationTriangle />,
+            color: colors.secondary
+        },
+        {
+            id: 4,
+            title: 'تمت الموافقة',
+            value: stats?.approvedRequests || 0,
+            icon: <FaCheckCircle />,
+            color: colors.success
+        },
+        {
+            id: 5,
+            title: 'مرفوضة',
+            value: stats?.rejectedRequests || 0,
+            icon: <FaTimesCircle />,
+            color: colors.danger
+        }
     ];
 
-    // خيارات مخطط الدائرة
-    const pieChartOptions = {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-            legend: {
-                position: 'bottom',
-                align: 'center',
-                onClick: null, // تعطيل وظيفة النقر التي تخفي البيانات
-                labels: {
-                    font: {
-                        family: 'Cairo, sans-serif',
-                        size: 12,
-                        weight: 'bold'
-                    },
-                    color: '#000000',
-                    boxWidth: 15,
-                    padding: 15,
-                    usePointStyle: true,
-                    pointStyle: 'circle'
-                },
-                title: {
-                    display: false,
-                    font: {
-                        family: 'Cairo, sans-serif',
-                        size: 14,
-                        weight: 'bold'
-                    },
-                    color: '#000000',
-                    padding: 10
-                }
-            },
-            tooltip: {
-                titleFont: {
-                    family: 'Cairo, sans-serif'
-                },
-                bodyFont: {
-                    family: 'Cairo, sans-serif'
-                },
-                backgroundColor: 'rgba(44, 62, 80, 0.9)',
-                titleColor: 'white',
-                bodyColor: 'white',
-                borderColor: colors.primary,
-                borderWidth: 1,
-                padding: 10,
-                displayColors: true
-            }
-        },
-    };
-
-    const barChartOptions = {
-        ...chartOptions,
-        indexAxis: 'x', // للتأكد من أنه عمودي (كولوم)
-        scales: {
-            y: {
-                beginAtZero: true,
-                grid: {
-                    color: `${colors.dark}20`,
-                },
-                ticks: {
-                    font: {
-                        family: 'Cairo, sans-serif',
-                        size: 12,
-                        weight: 'bold'
-                    },
-                    color: '#000000',
-                    padding: 10
-                }
-            },
-            x: {
-                grid: {
-                    color: `${colors.dark}10`,
-                    display: false,
-                },
-                ticks: {
-                    font: {
-                        family: 'Cairo, sans-serif',
-                        size: 12,
-                        weight: 'bold'
-                    },
-                    color: '#000000',
-                    padding: 10,
-                    maxRotation: 45, // تدوير النص لتجنب التداخل
-                    autoSkip: true, // تخطي بعض التسميات لتجنب الازدحام
-                    autoSkipPadding: 10 // المسافة بين التسميات المعروضة
-                }
-            }
-        },
-        plugins: {
-            ...chartOptions.plugins,
-            tooltip: {
-                ...chartOptions.plugins.tooltip,
-                callbacks: {
-                    label: function (context) {
-                        return `متوسط وقت المعالجة: ${context.parsed.y} يوم`;
-                    }
-                }
-            }
-        },
-        // إضافة خيارات لتحسين عرض المخطط
-        responsive: true,
-        maintainAspectRatio: false,
-        interaction: {
-            mode: 'index',
-            intersect: false
-        }
-    };
-
-    // خيارات مخطط أسباب الرفض
-    const rejectionChartOptions = {
-        ...chartOptions,
-        plugins: {
-            ...chartOptions.plugins,
-            legend: {
-                position: 'left',
-                align: 'start',
-                labels: {
-                    padding: 10,
-                    font: {
-                        size: 13,
-                        weight: 'bold',
-                        family: 'Cairo, sans-serif'
-                    },
-                    boxWidth: 15,
-                    usePointStyle: true,
-                    pointStyle: 'circle'
-                }
-            },
-            tooltip: {
-                callbacks: {
-                    label: function (context) {
-                        return `${context.label}: ${context.parsed}%`;
-                    }
-                }
-            }
-        }
-    };
-
+    // إنشاء تقرير بناءً على البيانات الحالية
     const handleGenerateReport = async () => {
-        // إظهار رسالة للمستخدم
-        alert('جاري إنشاء التقرير... قد يستغرق هذا بضع ثوان');
+        try {
+            if (!department) {
+                alert('لا يمكن إنشاء التقرير: بيانات الإدارة غير متوفرة');
+                return;
+            }
 
-        // إنشاء كائن يحتوي على جميع مراجع المخططات
-        const chartRefs = {
-            pieChartRef,
-            processingTimeChartRef,
-            requestsCountChartRef,
-            timeAnalysisChartRef,
-            rejectionChartRef
-        };
+            setIsGeneratingReport(true);
 
-        // إضافة بيانات مخطط أسباب الرفض إلى chartData
-        const updatedChartData = {
-            ...chartData,
-            rejectionData: {
-                labels: rejectionData.labels,
-                data: rejectionData.datasets[0].data
-            },
-            pieChartData: {
-                pending: stats.pendingRequests,
-                delayed: stats.delayedRequests,
-                approved: stats.approvedRequests,
-                rejected: stats.rejectedRequests,
-                total: stats.totalRequests
-            },
-            processingTimes: processingTimeData.datasets[0].data,
-            requestTypes: processingTimeData.labels,
-            departments: [
-                { id: "1", name: 'إدارة الدراسات العليا', requests: 78, delayed: 12, rejected: 7, approved: 50, pending: 9, processingTime: 3.2 },
-                { id: "2", name: 'لجنة الدراسات العليا', requests: 65, delayed: 8, rejected: 5, approved: 40, pending: 12, processingTime: 2.7 },
-                { id: "3", name: 'قسم علوم الحاسب', requests: 94, delayed: 15, rejected: 10, approved: 60, pending: 9, processingTime: 4.1 },
-                { id: "4", name: 'قسم نظم المعلومات', requests: 56, delayed: 9, rejected: 6, approved: 30, pending: 11, processingTime: 3.8 },
-                { id: "5", name: 'قسم حسابات علمية', requests: 42, delayed: 5, rejected: 3, approved: 28, pending: 6, processingTime: 2.3 },
-                { id: "6", name: 'قسم الذكاء الاصطناعي', requests: 36, delayed: 4, rejected: 2, approved: 25, pending: 5, processingTime: 3.5 },
-                { id: "7", name: 'مجلس الكلية', requests: 27, delayed: 3, rejected: 2, approved: 18, pending: 4, processingTime: 2.9 }
-            ]
-        };
+            // إظهار رسالة للمستخدم
+            alert('جاري إنشاء التقرير... قد يستغرق هذا بضع ثوان');
 
-        // استدعاء وظيفة إنشاء التقرير
-        const success = await generateDepartmentReport(
-            department,
-            stats,
-            chartRefs,
-            dateRange,
-            updatedChartData
-        );
+            // إنشاء كائن يحتوي على جميع مراجع المخططات
+            const chartRefs = {
+                pieChartRef,
+                processingTimeChartRef,
+                requestsCountChartRef,
+                timeAnalysisChartRef,
+                rejectionChartRef
+            };
 
-        // إظهار رسالة نجاح أو فشل
-        if (success) {
-            alert('تم إنشاء التقرير بنجاح وحفظه على جهازك');
-        } else {
+            // إضافة البيانات المطلوبة للتقرير
+            const reportData = {
+                pieChartData: statusPieChart || { labels: [], data: [] },
+                processingTimeStats: processingTimeStats || { labels: [], data: [] },
+                requestsCountByType: requestsCountByType || { labels: [], data: [] },
+                timeAnalysis: timeAnalysis || { labels: [], receivedData: [], processedData: [] },
+                rejectionReasons: rejectionReasons || { labels: [], data: [] }
+            };
+
+            // استدعاء وظيفة إنشاء التقرير
+            const success = await generateDepartmentReport(
+                department,
+                stats || {},
+                chartRefs,
+                [startDate, endDate],
+                reportData
+            );
+
+            // إظهار رسالة نجاح أو فشل
+            if (success) {
+                alert('تم إنشاء التقرير بنجاح وحفظه على جهازك');
+            } else {
+                alert('حدث خطأ أثناء إنشاء التقرير، يرجى المحاولة مرة أخرى');
+            }
+        } catch (error) {
+            console.error('خطأ في إنشاء التقرير:', error);
             alert('حدث خطأ أثناء إنشاء التقرير، يرجى المحاولة مرة أخرى');
+        } finally {
+            setIsGeneratingReport(false);
         }
     };
 
-    useEffect(() => {
-        // محاكاة جلب البيانات من API
-        const fetchDepartmentData = async () => {
-            try {
-                // جلب معلومات الإدارة باستخدام المعرف
-                const dept = departments.find(d => d.id === id);
+    // عرض شاشة التحميل إذا كانت البيانات قيد التحميل
+    const isPageLoading = isInitialLoading ||
+        (loading && (loading.department || loading.stats || loading.processingTime ||
+            loading.requestsCount || loading.timeAnalysis || loading.statusPieChart));
 
-                if (dept) {
-                    setDepartment(dept);
-                } else {
-                    console.error('الإدارة غير موجودة');
-                }
-            } catch (error) {
-                console.error('حدث خطأ أثناء جلب بيانات الإدارة', error);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchDepartmentData();
-    }, [id]);
-
-    if (loading) {
+    if (isPageLoading && !department) {
         return (
             <div className={styles.loadingContainer}>
                 <div className={styles.loader}></div>
@@ -716,17 +489,28 @@ const DepartmentDetails = () => {
         );
     }
 
-    if (!department) {
-        return <div>الإدارة غير موجودة</div>;
+    if (!department && !isPageLoading) {
+        return (
+            <div className={styles.errorContainer}>
+                <FaExclamationTriangle className={styles.errorIcon} />
+                <h2>الإدارة غير موجودة</h2>
+                <p>لم يتم العثور على بيانات لهذه الإدارة</p>
+                <button
+                    className={styles.backButton}
+                    onClick={() => navigate('/reports')}
+                >
+                    العودة للصفحه الرئيسيه
+                </button>
+            </div>
+        );
     }
 
     return (
         <div className={styles.container} style={{ marginTop: '10px' }}>
-            <div className={styles.pageHeader} style={{ borderColor: department.color }}>
-
+            <div className={styles.pageHeader} style={{ borderColor: department?.color || colors.primary }}>
                 <div>
                     <h1 className={styles.pageTitle}>
-                        تقارير {department.name}
+                        تقارير {department?.name || 'الإدارة'}
                     </h1>
                     <p className={styles.pageDescription}>
                         إحصائيات وتحليلات أداء الإدارة ومتابعة الطلبات
@@ -746,22 +530,50 @@ const DepartmentDetails = () => {
                         startDate={startDate}
                         endDate={endDate}
                         onChange={(update) => {
-                            setDateRange(update);
+                            setLocalDateRange(update);
                         }}
                         className={styles.datePicker}
                         dateFormat="dd/MM/yyyy"
                         placeholderText="اختر فترة زمنية"
                     />
+                    <button
+                        className={styles.resetButton}
+                        onClick={handleResetDateRange}
+                        title="إعادة تعيين الفترة الزمنية"
+                    >
+                        إعادة تعيين
+                    </button>
                 </div>
 
+                <div className={styles.actionsGroup}>
+                    <button
+                        className={styles.refreshButton}
+                        onClick={handleRefreshData}
+                        disabled={isPageLoading}
+                        title="تحديث البيانات"
+                    >
+                        <FaSync className={isPageLoading ? styles.spinning : ''} />
+                    </button>
 
-
-                <button className={styles.generateReportButton}
-                //  onClick={handleGenerateReport}
-                >
-                    <FaFileExport className={styles.buttonIcon} /> إنشاء تقرير
-                </button>
+                    <button
+                        className={styles.generateReportButton}
+                        onClick={handleGenerateReport}
+                        disabled={isGeneratingReport || isPageLoading || !department}
+                    >
+                        <FaFileExport className={styles.buttonIcon} /> إنشاء تقرير
+                    </button>
+                </div>
             </div>
+
+            {/* عرض أخطاء API إذا وجدت */}
+            {errors && Object.values(errors).some(error => error) && (
+                <div className={styles.errorAlert}>
+                    <FaExclamationTriangle />
+                    <span>
+                        حدثت مشكلة أثناء تحميل بعض البيانات. يرجى التحقق من اتصالك بالإنترنت والمحاولة مرة أخرى.
+                    </span>
+                </div>
+            )}
 
             <div className={styles.statsCards}>
                 {quickStats.map(stat => (
@@ -783,7 +595,14 @@ const DepartmentDetails = () => {
                         <FaChartPie className={styles.chartIcon} /> حالات الطلبات
                     </h3>
                     <div className={styles.chartWrapper} ref={pieChartRef}>
-                        <Pie data={statusData} options={pieChartOptions} />
+                        {loading?.statusPieChart ? (
+                            <div className={styles.chartLoading}>
+                                <div className={styles.loader}></div>
+                                <p>جاري تحميل البيانات...</p>
+                            </div>
+                        ) : (
+                            <Pie data={statusData} options={pieChartOptions} />
+                        )}
                     </div>
                 </div>
                 <div className={styles.chartCard}>
@@ -791,7 +610,14 @@ const DepartmentDetails = () => {
                         <FaChartBar className={styles.chartIcon} /> متوسط وقت المعالجة
                     </h3>
                     <div className={styles.chartWrapper} ref={processingTimeChartRef}>
-                        <Bar data={processingTimeData} options={barChartOptions} />
+                        {loading?.processingTime ? (
+                            <div className={styles.chartLoading}>
+                                <div className={styles.loader}></div>
+                                <p>جاري تحميل البيانات...</p>
+                            </div>
+                        ) : (
+                            <Bar data={processingTimeData} options={barChartOptions} />
+                        )}
                     </div>
                 </div>
                 <div className={styles.chartCard}>
@@ -799,7 +625,14 @@ const DepartmentDetails = () => {
                         <FaChartBar className={styles.chartIcon} /> عدد الطلبات التي وصلت للإدارة
                     </h3>
                     <div className={styles.chartWrapper} ref={requestsCountChartRef}>
-                        <Bar data={requestsCountData} options={requestsCountOptions} />
+                        {loading?.requestsCount ? (
+                            <div className={styles.chartLoading}>
+                                <div className={styles.loader}></div>
+                                <p>جاري تحميل البيانات...</p>
+                            </div>
+                        ) : (
+                            <Bar data={requestsCountData} options={requestsCountOptions} />
+                        )}
                     </div>
                 </div>
                 <div className={styles.chartCard}>
@@ -807,7 +640,14 @@ const DepartmentDetails = () => {
                         <FaChartPie className={styles.chartIcon} /> نسب أسباب الرفض
                     </h3>
                     <div className={styles.chartWrapper} style={{ height: '300px' }} ref={rejectionChartRef}>
-                        <Pie data={rejectionData} options={rejectionChartOptions} />
+                        {loading?.rejectionReasons ? (
+                            <div className={styles.chartLoading}>
+                                <div className={styles.loader}></div>
+                                <p>جاري تحميل البيانات...</p>
+                            </div>
+                        ) : (
+                            <Pie data={rejectionData} options={rejectionChartOptions} />
+                        )}
                     </div>
                 </div>
             </div>
@@ -818,7 +658,14 @@ const DepartmentDetails = () => {
                     <FaChartLine className={styles.chartIcon} /> تطور أعداد الطلبات خلال السنة
                 </h3>
                 <div className={styles.chartWrapper} style={{ height: '400px' }} ref={timeAnalysisChartRef}>
-                    <Line data={timeAnalysisData} options={timeAnalysisOptions} />
+                    {loading?.timeAnalysis ? (
+                        <div className={styles.chartLoading}>
+                            <div className={styles.loader}></div>
+                            <p>جاري تحميل البيانات...</p>
+                        </div>
+                    ) : (
+                        <Line data={timeAnalysisData} options={timeAnalysisOptions} />
+                    )}
                 </div>
             </div>
         </div>

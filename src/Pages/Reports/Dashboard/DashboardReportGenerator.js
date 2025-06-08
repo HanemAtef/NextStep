@@ -331,11 +331,11 @@ export const convertChartToImage = async (chartRef, scale = 3) => {
 const getStatusTitle = (status) => {
   switch (status) {
     case 'delayed':
-      return 'المتأخرة';
+      return 'متاخر';
     case 'rejected':
-      return 'المرفوضة';
+      return 'مرفوض';
     case 'approved':
-      return 'المقبولة';
+      return 'مقبول';
     case 'pending':
       return 'قيد التنفيذ';
     default:
@@ -449,9 +449,9 @@ export const generateDashboardReport = async (
       const statsRows = [
         ['إجمالي الطلبات', chartsData.totalRequests || 0],
         ['الطلبات قيد التنفيذ', chartsData.pendingRequests || 0],
-        ['الطلبات المتأخرة', chartsData.delayedRequests || 0],
-        ['الطلبات المقبولة', chartsData.approvedRequests || 0],
-        ['الطلبات المرفوضة', chartsData.rejectedRequests || 0]
+        ['الطلبات متاخر', chartsData.delayedRequests || 0],
+        ['الطلبات مقبول', chartsData.approvedRequests || 0],
+        ['الطلبات مرفوض', chartsData.rejectedRequests || 0]
       ];
 
       console.log('إحصائيات عامة:', statsRows);

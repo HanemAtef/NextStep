@@ -1,15 +1,51 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
 
-// Async Thunks
+// تعريف عنوان الـ API
+const API_URL = "https://nextstep.runasp.net/api";
+
+// دالة مساعدة للحصول على رأس التوثيق
+const getHeaders = () => {
+    const token = sessionStorage.getItem('token');
+    return {
+        'Authorization': token ? `Bearer ${token}` : '',
+        'Content-Type': 'application/json',
+    };
+};
+
+// دالة مساعدة لتنسيق التواريخ للـ API
+const formatDateForAPI = (date) => {
+    if (!date) return '';
+
+    try {
+        // إذا كان تاريخ بالفعل
+        if (date instanceof Date) {
+            return encodeURIComponent(date.toISOString());
+        }
+
+        // إذا كان نص، نحوله لتاريخ أولاً
+        if (typeof date === 'string') {
+            return encodeURIComponent(new Date(date).toISOString());
+        }
+
+        // احتياطي
+        return encodeURIComponent(String(date));
+    } catch (error) {
+        console.error("خطأ في تنسيق التاريخ:", error, date);
+        return '';
+    }
+};
+
+// جلب تفاصيل الإدارة
 export const fetchDepartmentDetails = createAsyncThunk(
     'departmentDetails/fetchDepartmentDetails',
-    async (id) => {
+    async (id, { rejectWithValue }) => {
         try {
-            const response = await axios.get(`/api/departments/${id}`);
+            const response = await axios.get(`${API_URL}/departments/${id}`, { headers: getHeaders() });
             return response.data;
         } catch (error) {
-            throw error;
+            console.error(" خطأ في جلب بيانات الإدارة:", error);
+            return rejectWithValue(error.response?.data || "حدث خطأ في جلب بيانات الإدارة");
         }
     }
 );
@@ -17,14 +53,22 @@ export const fetchDepartmentDetails = createAsyncThunk(
 // جلب إحصائيات الإدارة
 export const fetchDepartmentStats = createAsyncThunk(
     'departmentDetails/fetchDepartmentStats',
-    async ({ departmentId, startDate, endDate }) => {
+    async ({ departmentId, startDate, endDate }, { rejectWithValue }) => {
         try {
-            const response = await axios.get(`/api/departments/${departmentId}/stats`, {
-                params: { startDate, endDate }
-            });
+            let url = `${API_URL}/departments/${departmentId}/stats`;
+
+            // إضافة معاملات التاريخ إذا كانت متوفرة
+            if (startDate && endDate) {
+                const formattedStartDate = formatDateForAPI(startDate);
+                const formattedEndDate = formatDateForAPI(endDate);
+                url += `?startDate=${formattedStartDate}&endDate=${formattedEndDate}`;
+            }
+
+            const response = await axios.get(url, { headers: getHeaders() });
             return response.data;
         } catch (error) {
-            throw error;
+            console.error(" خطأ في جلب إحصائيات الإدارة:", error);
+            return rejectWithValue(error.response?.data || "حدث خطأ في جلب إحصائيات الإدارة");
         }
     }
 );
@@ -32,14 +76,22 @@ export const fetchDepartmentStats = createAsyncThunk(
 // جلب متوسط وقت المعالجة لكل نوع طلب
 export const fetchProcessingTimeStats = createAsyncThunk(
     'departmentDetails/fetchProcessingTimeStats',
-    async ({ departmentId, startDate, endDate }) => {
+    async ({ departmentId, startDate, endDate }, { rejectWithValue }) => {
         try {
-            const response = await axios.get(`/api/departments/${departmentId}/processing-time`, {
-                params: { startDate, endDate }
-            });
+            let url = `${API_URL}/departments/${departmentId}/processing-time`;
+
+            // إضافة معاملات التاريخ إذا كانت متوفرة
+            if (startDate && endDate) {
+                const formattedStartDate = formatDateForAPI(startDate);
+                const formattedEndDate = formatDateForAPI(endDate);
+                url += `?startDate=${formattedStartDate}&endDate=${formattedEndDate}`;
+            }
+
+            const response = await axios.get(url, { headers: getHeaders() });
             return response.data;
         } catch (error) {
-            throw error;
+            console.error("خطأ في جلب إحصائيات وقت المعالجة:", error);
+            return rejectWithValue(error.response?.data || "حدث خطأ في جلب إحصائيات وقت المعالجة");
         }
     }
 );
@@ -47,28 +99,45 @@ export const fetchProcessingTimeStats = createAsyncThunk(
 // جلب عدد الطلبات لكل نوع
 export const fetchRequestsCountByType = createAsyncThunk(
     'departmentDetails/fetchRequestsCountByType',
-    async ({ departmentId, startDate, endDate }) => {
+    async ({ departmentId, startDate, endDate }, { rejectWithValue }) => {
         try {
-            const response = await axios.get(`/api/departments/${departmentId}/requests-count`, {
-                params: { startDate, endDate }
-            });
+            let url = `${API_URL}/departments/${departmentId}/requests-count`;
+
+            // إضافة معاملات التاريخ إذا كانت متوفرة
+            if (startDate && endDate) {
+                const formattedStartDate = formatDateForAPI(startDate);
+                const formattedEndDate = formatDateForAPI(endDate);
+                url += `?startDate=${formattedStartDate}&endDate=${formattedEndDate}`;
+            }
+
+            const response = await axios.get(url, { headers: getHeaders() });
             return response.data;
         } catch (error) {
-            throw error;
+            console.error(" خطأ في جلب عدد الطلبات لكل نوع:", error);
+            return rejectWithValue(error.response?.data || "حدث خطأ في جلب عدد الطلبات لكل نوع");
         }
     }
 );
+
 // اسباب الرفض
 export const fetchRejectionReasons = createAsyncThunk(
     'departmentDetails/fetchRejectionReasons',
-    async ({ departmentId, startDate, endDate }) => {
+    async ({ departmentId, startDate, endDate }, { rejectWithValue }) => {
         try {
-            const response = await axios.get(`/api/departments/${departmentId}/rejection-reasons`, {
-                params: { startDate, endDate }
-            });
+            let url = `${API_URL}/departments/${departmentId}/rejection-reasons`;
+
+            // إضافة معاملات التاريخ إذا كانت متوفرة
+            if (startDate && endDate) {
+                const formattedStartDate = formatDateForAPI(startDate);
+                const formattedEndDate = formatDateForAPI(endDate);
+                url += `?startDate=${formattedStartDate}&endDate=${formattedEndDate}`;
+            }
+
+            const response = await axios.get(url, { headers: getHeaders() });
             return response.data;
         } catch (error) {
-            throw error;
+            console.error(" خطأ في جلب أسباب الرفض:", error);
+            return rejectWithValue(error.response?.data || "حدث خطأ في جلب أسباب الرفض");
         }
     }
 );
@@ -76,14 +145,22 @@ export const fetchRejectionReasons = createAsyncThunk(
 // جلب التحليل الزمني للطلبات
 export const fetchTimeAnalysis = createAsyncThunk(
     'departmentDetails/fetchTimeAnalysis',
-    async ({ departmentId, startDate, endDate }) => {
+    async ({ departmentId, startDate, endDate }, { rejectWithValue }) => {
         try {
-            const response = await axios.get(`/api/departments/${departmentId}/time-analysis`, {
-                params: { startDate, endDate }
-            });
+            let url = `${API_URL}/departments/${departmentId}/time-analysis`;
+
+            // إضافة معاملات التاريخ إذا كانت متوفرة
+            if (startDate && endDate) {
+                const formattedStartDate = formatDateForAPI(startDate);
+                const formattedEndDate = formatDateForAPI(endDate);
+                url += `?startDate=${formattedStartDate}&endDate=${formattedEndDate}`;
+            }
+
+            const response = await axios.get(url, { headers: getHeaders() });
             return response.data;
         } catch (error) {
-            throw error;
+            console.error(" خطأ في جلب التحليل الزمني:", error);
+            return rejectWithValue(error.response?.data || "حدث خطأ في جلب التحليل الزمني");
         }
     }
 );
@@ -91,14 +168,33 @@ export const fetchTimeAnalysis = createAsyncThunk(
 // جلب بيانات حالات الطلبات للمخطط الدائري
 export const fetchRequestStatusPieChart = createAsyncThunk(
     'departmentDetails/fetchRequestStatusPieChart',
-    async ({ departmentId, startDate, endDate }) => {
+    async ({ departmentId, startDate, endDate }, { rejectWithValue }) => {
         try {
-            const response = await axios.get(`/api/departments/${departmentId}/status-distribution`, {
-                params: { startDate, endDate }
-            });
-            return response.data;
+            let url = `${API_URL}/departments/${departmentId}/requests/status`;
+
+            // إضافة معاملات التاريخ إذا كانت متوفرة
+            if (startDate && endDate) {
+                const formattedStartDate = formatDateForAPI(startDate);
+                const formattedEndDate = formatDateForAPI(endDate);
+                url += `?startDate=${formattedStartDate}&endDate=${formattedEndDate}`;
+            }
+
+            const response = await axios.get(url, { headers: getHeaders() });
+
+            // تحويل البيانات إلى التنسيق المطلوب للمخطط الدائري
+            const statusData = response.data;
+            return {
+                labels: ['قيد التنفيذ', 'متأخر', 'مقبول', 'مرفوض'],
+                data: [
+                    statusData.pending || 0,
+                    statusData.delayed || 0,
+                    statusData.approved || 0,
+                    statusData.rejected || 0
+                ]
+            };
         } catch (error) {
-            throw error;
+            console.error(" خطأ في جلب بيانات المخطط الدائري:", error);
+            return rejectWithValue(error.response?.data || "حدث خطأ في جلب بيانات المخطط الدائري");
         }
     }
 );
@@ -110,30 +206,39 @@ const initialState = {
         pendingRequests: 0,
         delayedRequests: 0,
         approvedRequests: 0,
-        rejectedRequests: 0,
-        createdRequests: 0,
-        receivedRequests: 0
+        rejectedRequests: 0
     },
-    processingTimeStats: [],
-    requestsCountByType: [],
+    processingTimeStats: {
+        labels: [],
+        data: []
+    },
+    requestsCountByType: {
+        labels: [],
+        data: []
+    },
+    rejectionReasons: {
+        labels: [],
+        data: []
+    },
     timeAnalysis: {
+        labels: [],
         receivedData: [],
-        processedData: [],
-        timeLabels: []
+        processedData: []
     },
     statusPieChart: {
         labels: ['قيد التنفيذ', 'متأخر', 'مقبول', 'مرفوض'],
         data: [0, 0, 0, 0]
     },
     dateRange: {
-        startDate: new Date(new Date().setMonth(new Date().getMonth() - 1)),
-        endDate: new Date()
+        startDate: new Date(new Date().setMonth(new Date().getMonth() - 1)).toISOString(),
+        endDate: new Date().toISOString()
     },
     loading: {
         department: false,
         stats: false,
         processingTime: false,
         requestsCount: false,
+        rejectionReasons: false,
         timeAnalysis: false,
         statusPieChart: false
     },
@@ -142,6 +247,7 @@ const initialState = {
         stats: null,
         processingTime: null,
         requestsCount: null,
+        rejectionReasons: null,
         timeAnalysis: null,
         statusPieChart: null
     }
@@ -152,7 +258,19 @@ const departmentDetailsSlice = createSlice({
     initialState,
     reducers: {
         setDateRange: (state, action) => {
-            state.dateRange = action.payload;
+            // تحويل أي كائنات Date إلى سلاسل نصية
+            const startDate = action.payload.startDate instanceof Date
+                ? action.payload.startDate.toISOString()
+                : action.payload.startDate;
+
+            const endDate = action.payload.endDate instanceof Date
+                ? action.payload.endDate.toISOString()
+                : action.payload.endDate;
+
+            state.dateRange = {
+                startDate,
+                endDate
+            };
         }
     },
     extraReducers: (builder) => {
@@ -168,7 +286,7 @@ const departmentDetailsSlice = createSlice({
             })
             .addCase(fetchDepartmentDetails.rejected, (state, action) => {
                 state.loading.department = false;
-                state.error.department = action.error.message;
+                state.error.department = action.payload;
             })
 
             // Department Stats
@@ -182,7 +300,7 @@ const departmentDetailsSlice = createSlice({
             })
             .addCase(fetchDepartmentStats.rejected, (state, action) => {
                 state.loading.stats = false;
-                state.error.stats = action.error.message;
+                state.error.stats = action.payload;
             })
 
             // Processing Time Stats
@@ -196,7 +314,7 @@ const departmentDetailsSlice = createSlice({
             })
             .addCase(fetchProcessingTimeStats.rejected, (state, action) => {
                 state.loading.processingTime = false;
-                state.error.processingTime = action.error.message;
+                state.error.processingTime = action.payload;
             })
 
             // Requests Count By Type
@@ -210,8 +328,9 @@ const departmentDetailsSlice = createSlice({
             })
             .addCase(fetchRequestsCountByType.rejected, (state, action) => {
                 state.loading.requestsCount = false;
-                state.error.requestsCount = action.error.message;
+                state.error.requestsCount = action.payload;
             })
+
             // اسباب الرفض
             .addCase(fetchRejectionReasons.pending, (state) => {
                 state.loading.rejectionReasons = true;
@@ -223,8 +342,9 @@ const departmentDetailsSlice = createSlice({
             })
             .addCase(fetchRejectionReasons.rejected, (state, action) => {
                 state.loading.rejectionReasons = false;
-                state.error.rejectionReasons = action.error.message;
+                state.error.rejectionReasons = action.payload;
             })
+
             // Time Analysis
             .addCase(fetchTimeAnalysis.pending, (state) => {
                 state.loading.timeAnalysis = true;
@@ -236,7 +356,7 @@ const departmentDetailsSlice = createSlice({
             })
             .addCase(fetchTimeAnalysis.rejected, (state, action) => {
                 state.loading.timeAnalysis = false;
-                state.error.timeAnalysis = action.error.message;
+                state.error.timeAnalysis = action.payload;
             })
 
             // Status Pie Chart
@@ -250,22 +370,32 @@ const departmentDetailsSlice = createSlice({
             })
             .addCase(fetchRequestStatusPieChart.rejected, (state, action) => {
                 state.loading.statusPieChart = false;
-                state.error.statusPieChart = action.error.message;
+                state.error.statusPieChart = action.payload;
             });
     }
 });
 
 export const { setDateRange } = departmentDetailsSlice.actions;
 
-// Selectors
-export const selectDepartment = (state) => state.departmentDetails.department;
-export const selectStats = (state) => state.departmentDetails.stats;
-export const selectProcessingTimeStats = (state) => state.departmentDetails.processingTimeStats;
-export const selectRequestsCountByType = (state) => state.departmentDetails.requestsCountByType;
-export const selectTimeAnalysis = (state) => state.departmentDetails.timeAnalysis;
-export const selectStatusPieChart = (state) => state.departmentDetails.statusPieChart;
-export const selectDateRange = (state) => state.departmentDetails.dateRange;
-export const selectLoading = (state) => state.departmentDetails.loading;
-export const selectError = (state) => state.departmentDetails.error;
+// Selectors with safe access to prevent undefined errors
+export const selectDepartment = (state) => state.departmentDetails?.department;
+export const selectStats = (state) => state.departmentDetails?.stats || {
+    totalRequests: 0,
+    pendingRequests: 0,
+    delayedRequests: 0,
+    approvedRequests: 0,
+    rejectedRequests: 0
+};
+export const selectProcessingTimeStats = (state) => state.departmentDetails?.processingTimeStats || { labels: [], data: [] };
+export const selectRequestsCountByType = (state) => state.departmentDetails?.requestsCountByType || { labels: [], data: [] };
+export const selectRejectionReasons = (state) => state.departmentDetails?.rejectionReasons || { labels: [], data: [] };
+export const selectTimeAnalysis = (state) => state.departmentDetails?.timeAnalysis || { labels: [], receivedData: [], processedData: [] };
+export const selectStatusPieChart = (state) => state.departmentDetails?.statusPieChart || { labels: ['قيد التنفيذ', 'متأخر', 'مقبول', 'مرفوض'], data: [0, 0, 0, 0] };
+export const selectDateRange = (state) => state.departmentDetails?.dateRange || {
+    startDate: new Date(new Date().setMonth(new Date().getMonth() - 1)).toISOString(),
+    endDate: new Date().toISOString()
+};
+export const selectLoading = (state) => state.departmentDetails?.loading || {};
+export const selectError = (state) => state.departmentDetails?.error || {};
 
 export default departmentDetailsSlice.reducer; 

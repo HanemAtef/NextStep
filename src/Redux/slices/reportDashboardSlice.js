@@ -1,102 +1,384 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
 
-// Async Thunks
+const API_URL = "https://nextstep.runasp.net/api";
+
+// Helper function to properly format dates for API
+const formatDateForAPI = (date) => {
+    if (!date) return '';
+
+    try {
+        // If it's already a Date object
+        if (date instanceof Date) {
+            return encodeURIComponent(date.toISOString());
+        }
+
+        // If it's a string, parse it to Date first to ensure proper ISO format
+        if (typeof date === 'string') {
+            return encodeURIComponent(new Date(date).toISOString());
+        }
+
+        // Fallback
+        return encodeURIComponent(String(date));
+    } catch (error) {
+        console.error("Error formatting date:", error, date);
+        return '';
+    }
+};
+
+// Get token from sessionStorage (اختياري إذا كانت التقارير تتطلب توثيق)
+const getAuthToken = () => {
+    const token = sessionStorage.getItem("token");
+    if (!token) {
+        throw new Error("No token found");
+    }
+    return token;
+};
+
+// إحصائيات عامة للطلبات
+export const fetchStats = createAsyncThunk(
+    'reportDashboard/fetchStats',
+    async ({ startDate, endDate } = {}, { rejectWithValue }) => {
+        try {
+            let url = `${API_URL}/Reports/stats`;
+
+            // إضافة معاملات URL إذا كانت متوفرة
+            if (startDate && endDate) {
+                // Format dates properly
+                const formattedStartDate = formatDateForAPI(startDate);
+                const formattedEndDate = formatDateForAPI(endDate);
+                url += `?startDate=${formattedStartDate}&endDate=${formattedEndDate}`;
+            }
+
+            // إضافة رأس التوثيق
+            const headers = {};
+            try {
+                const token = sessionStorage.getItem('token');
+                if (token) {
+                    headers.Authorization = `Bearer ${token}`;
+                }
+            } catch (authError) {
+                console.warn('No auth token available:', authError);
+            }
+
+            const response = await axios.get(url, { headers });
+            return response.data;
+        } catch (error) {
+            console.error("Error fetching stats:", error);
+            return rejectWithValue("حدث خطأ أثناء جلب الإحصائيات");
+        }
+    }
+);
+
+// قائمة الإدارات
 export const fetchDepartments = createAsyncThunk(
     'reportDashboard/fetchDepartments',
-    async () => {
+    async ({ startDate, endDate } = {}, { rejectWithValue }) => {
         try {
-            const response = await axios.get('https://nextstep.runasp.net/api/Departments');
+            let url = `${API_URL}/Departments`;
+
+            // إضافة معاملات URL إذا كانت متوفرة
+            if (startDate && endDate) {
+                // Format dates properly
+                const formattedStartDate = formatDateForAPI(startDate);
+                const formattedEndDate = formatDateForAPI(endDate);
+                url += `?startDate=${formattedStartDate}&endDate=${formattedEndDate}`;
+            } else {
+            }
+
+            // إضافة رأس التوثيق
+            const headers = {};
+            try {
+                const token = sessionStorage.getItem('token');
+                if (token) {
+                    headers.Authorization = `Bearer ${token}`;
+                }
+            } catch (authError) {
+                console.warn('No auth token available:', authError);
+            }
+
+            const response = await axios.get(url, { headers });
+            console.log(" Department data structure:",
+                {
+                    isArray: Array.isArray(response.data),
+                    length: response.data.length,
+                    firstItem: response.data.length > 0 ? response.data[0] : null,
+                    keys: response.data.length > 0 ? Object.keys(response.data[0]) : []
+                });
+
+            // تنسيق البيانات للتأكد من وجود اسم للإدارة بغض النظر عن تسمية الخاصية في API
+            if (Array.isArray(response.data)) {
+                return response.data.map(dept => ({
+                    ...dept,
+                    // ضمان وجود اسم للإدارة عبر تحديد الأولويات للخصائص
+                    name: dept.departmentName || dept.name || dept.arabic_name || `قسم ${dept.id}`
+                }));
+            }
+
             return response.data;
         } catch (error) {
-            throw error;
-        }
-    }
-);
+            console.error("Error fetching departments:", error);
+            console.error("Error details:", error.response?.data || error.message);
+            console.error("This might be a network or authentication issue. Check the API URL and make sure you have valid credentials.");
 
-// متوسط المعالجة للأقسام
-export const fetchProcessingAverage = createAsyncThunk(
-    'reportDashboard/fetchProcessingAverage',
-    async ({ startDate, endDate }) => {
-        try {
-            const response = await axios.get(`/api/reports/processing-average`, {
-                params: { startDate, endDate }
+            // Return a formatted error message
+            return rejectWithValue({
+                message: "حدث خطأ أثناء جلب الإدارات",
+                details: error.response?.data || error.message,
+                statusCode: error.response?.status
             });
-            return response.data;
-        } catch (error) {
-            throw error;
         }
     }
 );
 
-// عدد الطلبات في حالة معينة لكل إدارة
-export const fetchRequestsByStatus = createAsyncThunk(
-    'reportDashboard/fetchRequestsByStatus',
-    async ({ startDate, endDate, status }) => {
+// التحليل الزمني للطلبات
+export const fetchTimeAnalysis = createAsyncThunk(
+    'reportDashboard/fetchTimeAnalysis',
+    async ({ startDate, endDate } = {}, { rejectWithValue }) => {
         try {
-            const response = await axios.get(`/api/reports/requests-by-status`, {
-                params: { startDate, endDate, status }
-            });
+            let url = `${API_URL}/Reports/requests/time-analysis`;
+
+            // إضافة معاملات URL إذا كانت متوفرة
+            if (startDate && endDate) {
+                // Format dates properly
+                const formattedStartDate = formatDateForAPI(startDate);
+                const formattedEndDate = formatDateForAPI(endDate);
+                url += `?startDate=${formattedStartDate}&endDate=${formattedEndDate}`;
+            } else {
+            }
+
+            // إضافة رأس التوثيق
+            const headers = {};
+            try {
+                const token = sessionStorage.getItem('token');
+                if (token) {
+                    headers.Authorization = `Bearer ${token}`;
+                }
+            } catch (authError) {
+                console.warn('No auth token available:', authError);
+            }
+
+            const response = await axios.get(url, { headers });
+
             return response.data;
         } catch (error) {
-            throw error;
+            console.error("Error fetching time analysis:", error);
+            if (error.response) {
+                console.error("Error status:", error.response.status);
+                console.error("Error data:", error.response.data);
+            }
+            return rejectWithValue("حدث خطأ أثناء جلب التحليل الزمني");
         }
     }
 );
 
-// عدد الطلبات المنشأة في الفترة المحددة
+// عدد الطلبات لكل إدارة
+export const fetchRequestsCount = createAsyncThunk(
+    'reportDashboard/fetchRequestsCount',
+    async ({ startDate, endDate } = {}, { rejectWithValue }) => {
+        try {
+            let url = `${API_URL}/Reports/departments/requests-count`;
+
+            // إضافة معاملات URL إذا كانت متوفرة
+            if (startDate && endDate) {
+                // Format dates properly
+                const formattedStartDate = formatDateForAPI(startDate);
+                const formattedEndDate = formatDateForAPI(endDate);
+                url += `?startDate=${formattedStartDate}&endDate=${formattedEndDate}`;
+            } else {
+            }
+
+            // إضافة رأس التوثيق
+            const headers = {};
+            try {
+                const token = sessionStorage.getItem('token');
+                if (token) {
+                    headers.Authorization = `Bearer ${token}`;
+                }
+            } catch (authError) {
+                console.warn('No auth token available:', authError);
+            }
+
+            const response = await axios.get(url, { headers });
+            return response.data;
+        } catch (error) {
+            console.error("Error fetching requests count:", error);
+            return rejectWithValue("حدث خطأ أثناء جلب عدد الطلبات");
+        }
+    }
+);
+
+// الطلبات المنشأة حسب الشهر
 export const fetchCreatedRequests = createAsyncThunk(
     'reportDashboard/fetchCreatedRequests',
-    async ({ startDate, endDate }) => {
+    async ({ startDate, endDate } = {}, { rejectWithValue }) => {
         try {
-            const response = await axios.get(`/api/reports/created-requests`, {
-                params: { startDate, endDate }
-            });
+            let url = `${API_URL}/Reports/requests/created`;
+
+            // إضافة معاملات URL إذا كانت متوفرة
+            if (startDate && endDate) {
+                // Format dates properly
+                const formattedStartDate = formatDateForAPI(startDate);
+                const formattedEndDate = formatDateForAPI(endDate);
+                url += `?startDate=${formattedStartDate}&endDate=${formattedEndDate}`;
+            } else {
+            }
+
+            // إضافة رأس التوثيق
+            const headers = {};
+            try {
+                const token = sessionStorage.getItem('token');
+                if (token) {
+                    headers.Authorization = `Bearer ${token}`;
+                }
+            } catch (authError) {
+                console.warn('No auth token available:', authError);
+            }
+
+            const response = await axios.get(url, { headers });
             return response.data;
         } catch (error) {
-            throw error;
+            console.error("Error fetching created requests:", error);
+            return rejectWithValue("حدث خطأ أثناء جلب الطلبات المنشأة");
         }
     }
 );
 
-// العدد الإجمالي للطلبات في كل إدارة
-export const fetchTotalRequestsByDepartment = createAsyncThunk(
-    'reportDashboard/fetchTotalRequestsByDepartment',
-    async ({ startDate, endDate }) => {
+// حالات الطلبات حسب الإدارات
+export const fetchDepartmentStatus = createAsyncThunk(
+    'reportDashboard/fetchDepartmentStatus',
+    async ({ status, startDate, endDate } = {}, { rejectWithValue }) => {
         try {
-            const response = await axios.get(`/api/reports/total-by-department`, {
-                params: { startDate, endDate }
-            });
+            let url = `${API_URL}/Reports/departments/status`;
+
+            // إضافة معاملات URL إذا كانت متوفرة
+            const params = [];
+
+            // التأكد من أن معلمة الحالة موجودة وصحيحة
+            if (status) {
+                // تحويل حالات باللغة الإنجليزية إلى مقابلها بالعربية للـ API
+                let arabicStatus = status;
+                if (status === 'delayed') arabicStatus = 'متاخر';
+                else if (status === 'rejected') arabicStatus = 'مرفوض';
+                else if (status === 'approved') arabicStatus = 'مقبول';
+                else if (status === 'pending') arabicStatus = 'قيد التنفيذ';
+
+                params.push(`status=${encodeURIComponent(arabicStatus)}`);
+            } else {
+                console.warn('Missing status parameter. Using default status: متاخر');
+                params.push('status=متاخر');
+            }
+
+            // إضافة نطاق التاريخ إذا كان متاحًا
+            if (startDate && endDate) {
+                try {
+                    // Format dates properly
+                    const formattedStartDate = formatDateForAPI(startDate);
+                    const formattedEndDate = formatDateForAPI(endDate);
+                    params.push(`startDate=${formattedStartDate}`);
+                    params.push(`endDate=${formattedEndDate}`);
+                } catch (dateError) {
+                    console.error('Error formatting date parameters:', dateError);
+                }
+            } else {
+            }
+
+            if (params.length > 0) {
+                url += `?${params.join('&')}`;
+            }
+
+
+            // تنسيق تواريخ العرض للسجلات
+            const displayStartDate = startDate instanceof Date ?
+                startDate.toLocaleDateString() :
+                startDate ? new Date(startDate).toLocaleDateString() : 'غير محدد';
+
+            const displayEndDate = endDate instanceof Date ?
+                endDate.toLocaleDateString() :
+                endDate ? new Date(endDate).toLocaleDateString() : 'غير محدد';
+
+
+            // إضافة رأس التوثيق
+            const headers = {};
+            try {
+                const token = sessionStorage.getItem('token');
+                if (token) {
+                    headers.Authorization = `Bearer ${token}`;
+                } else {
+                    console.warn(' No auth token found in sessionStorage');
+                }
+            } catch (authError) {
+                console.warn('No auth token available:', authError);
+            }
+
+            const response = await axios.get(url, { headers });
+            // console.log("✅ Response data structure:", {
+            //     labels: Array.isArray(response.data.labels) ?
+            //         `Array with ${response.data.labels.length} items: ${JSON.stringify(response.data.labels)}` :
+            //         `Not an array: ${typeof response.data.labels}`,
+            //     data: Array.isArray(response.data.data) ?
+            //         `Array with ${response.data.data.length} items: ${JSON.stringify(response.data.data)}` :
+            //         `Not an array: ${typeof response.data.data}`
+            // });
+
             return response.data;
         } catch (error) {
-            throw error;
+            console.error(" Error fetching department status:", error);
+            console.error("Error details:", error.response?.data || error.message);
+            if (error.response) {
+                console.error("Error status:", error.response.status);
+                console.error("Error headers:", error.response.headers);
+            }
+            return rejectWithValue("حدث خطأ أثناء جلب حالات الطلبات حسب الإدارات");
         }
     }
 );
 
 const initialState = {
-    departments: [],
-    processingAverage: [],
-    requestsByStatus: [],
-    createdRequests: [],
-    totalByDepartment: [],
-    dateRange: {
-        startDate: new Date(new Date().setMonth(new Date().getMonth() - 1)),
-        endDate: new Date()
+    stats: {
+        totalRequests: 0,
+        pendingRequests: 0,
+        delayedRequests: 0,
+        approvedRequests: 0,
+        rejectedRequests: 0
     },
+    departments: [],
+    timeAnalysis: {
+        labels: [],
+        data: []
+    },
+    requestsCount: {
+        labels: [],
+        data: []
+    },
+    createdRequests: {
+        labels: [],
+        data: []
+    },
+    departmentStatus: {
+        labels: [],
+        data: []
+    },
+    dateRange: {
+        startDate: new Date(new Date().setMonth(new Date().getMonth() - 1)).toISOString(),
+        endDate: new Date().toISOString()
+    },
+    pieStatus: 'delayed', // حالة افتراضية لمخطط الدائرة
     loading: {
+        stats: false,
         departments: false,
-        processingAverage: false,
-        requestsByStatus: false,
+        timeAnalysis: false,
+        requestsCount: false,
         createdRequests: false,
-        totalByDepartment: false
+        departmentStatus: false
     },
     error: {
+        stats: null,
         departments: null,
-        processingAverage: null,
-        requestsByStatus: null,
+        timeAnalysis: null,
+        requestsCount: null,
         createdRequests: null,
-        totalByDepartment: null
+        departmentStatus: null
     }
 };
 
@@ -105,11 +387,40 @@ const reportDashboardSlice = createSlice({
     initialState,
     reducers: {
         setDateRange: (state, action) => {
-            state.dateRange = action.payload;
+            // تحويل أي كائنات Date إلى سلاسل نصية
+            const startDate = action.payload.startDate instanceof Date
+                ? action.payload.startDate.toISOString()
+                : action.payload.startDate;
+
+            const endDate = action.payload.endDate instanceof Date
+                ? action.payload.endDate.toISOString()
+                : action.payload.endDate;
+
+            state.dateRange = {
+                startDate,
+                endDate
+            };
+        },
+        setPieStatus: (state, action) => {
+            state.pieStatus = action.payload;
         }
     },
     extraReducers: (builder) => {
         builder
+            // Stats
+            .addCase(fetchStats.pending, (state) => {
+                state.loading.stats = true;
+                state.error.stats = null;
+            })
+            .addCase(fetchStats.fulfilled, (state, action) => {
+                state.loading.stats = false;
+                state.stats = action.payload;
+            })
+            .addCase(fetchStats.rejected, (state, action) => {
+                state.loading.stats = false;
+                state.error.stats = action.payload;
+            })
+
             // Departments
             .addCase(fetchDepartments.pending, (state) => {
                 state.loading.departments = true;
@@ -121,35 +432,35 @@ const reportDashboardSlice = createSlice({
             })
             .addCase(fetchDepartments.rejected, (state, action) => {
                 state.loading.departments = false;
-                state.error.departments = action.error.message;
+                state.error.departments = action.payload;
             })
 
-            // Processing Average
-            .addCase(fetchProcessingAverage.pending, (state) => {
-                state.loading.processingAverage = true;
-                state.error.processingAverage = null;
+            // Time Analysis
+            .addCase(fetchTimeAnalysis.pending, (state) => {
+                state.loading.timeAnalysis = true;
+                state.error.timeAnalysis = null;
             })
-            .addCase(fetchProcessingAverage.fulfilled, (state, action) => {
-                state.loading.processingAverage = false;
-                state.processingAverage = action.payload;
+            .addCase(fetchTimeAnalysis.fulfilled, (state, action) => {
+                state.loading.timeAnalysis = false;
+                state.timeAnalysis = action.payload;
             })
-            .addCase(fetchProcessingAverage.rejected, (state, action) => {
-                state.loading.processingAverage = false;
-                state.error.processingAverage = action.error.message;
+            .addCase(fetchTimeAnalysis.rejected, (state, action) => {
+                state.loading.timeAnalysis = false;
+                state.error.timeAnalysis = action.payload;
             })
 
-            // Requests By Status
-            .addCase(fetchRequestsByStatus.pending, (state) => {
-                state.loading.requestsByStatus = true;
-                state.error.requestsByStatus = null;
+            // Requests Count
+            .addCase(fetchRequestsCount.pending, (state) => {
+                state.loading.requestsCount = true;
+                state.error.requestsCount = null;
             })
-            .addCase(fetchRequestsByStatus.fulfilled, (state, action) => {
-                state.loading.requestsByStatus = false;
-                state.requestsByStatus = action.payload;
+            .addCase(fetchRequestsCount.fulfilled, (state, action) => {
+                state.loading.requestsCount = false;
+                state.requestsCount = action.payload;
             })
-            .addCase(fetchRequestsByStatus.rejected, (state, action) => {
-                state.loading.requestsByStatus = false;
-                state.error.requestsByStatus = action.error.message;
+            .addCase(fetchRequestsCount.rejected, (state, action) => {
+                state.loading.requestsCount = false;
+                state.error.requestsCount = action.payload;
             })
 
             // Created Requests
@@ -163,34 +474,36 @@ const reportDashboardSlice = createSlice({
             })
             .addCase(fetchCreatedRequests.rejected, (state, action) => {
                 state.loading.createdRequests = false;
-                state.error.createdRequests = action.error.message;
+                state.error.createdRequests = action.payload;
             })
 
-            // Total By Department
-            .addCase(fetchTotalRequestsByDepartment.pending, (state) => {
-                state.loading.totalByDepartment = true;
-                state.error.totalByDepartment = null;
+            // Department Status
+            .addCase(fetchDepartmentStatus.pending, (state) => {
+                state.loading.departmentStatus = true;
+                state.error.departmentStatus = null;
             })
-            .addCase(fetchTotalRequestsByDepartment.fulfilled, (state, action) => {
-                state.loading.totalByDepartment = false;
-                state.totalByDepartment = action.payload;
+            .addCase(fetchDepartmentStatus.fulfilled, (state, action) => {
+                state.loading.departmentStatus = false;
+                state.departmentStatus = action.payload;
             })
-            .addCase(fetchTotalRequestsByDepartment.rejected, (state, action) => {
-                state.loading.totalByDepartment = false;
-                state.error.totalByDepartment = action.error.message;
+            .addCase(fetchDepartmentStatus.rejected, (state, action) => {
+                state.loading.departmentStatus = false;
+                state.error.departmentStatus = action.payload || "حدث خطأ أثناء جلب حالات الطلبات حسب الإدارات";
             });
     }
 });
 
-export const { setDateRange } = reportDashboardSlice.actions;
+export const { setDateRange, setPieStatus } = reportDashboardSlice.actions;
 
 // Selectors
+export const selectStats = (state) => state.reportDashboard.stats;
 export const selectDepartments = (state) => state.reportDashboard.departments;
-export const selectProcessingAverage = (state) => state.reportDashboard.processingAverage;
-export const selectRequestsByStatus = (state) => state.reportDashboard.requestsByStatus;
+export const selectTimeAnalysis = (state) => state.reportDashboard.timeAnalysis;
+export const selectRequestsCount = (state) => state.reportDashboard.requestsCount;
 export const selectCreatedRequests = (state) => state.reportDashboard.createdRequests;
-export const selectTotalByDepartment = (state) => state.reportDashboard.totalByDepartment;
+export const selectDepartmentStatus = (state) => state.reportDashboard.departmentStatus;
 export const selectDateRange = (state) => state.reportDashboard.dateRange;
+export const selectPieStatus = (state) => state.reportDashboard.pieStatus;
 export const selectLoading = (state) => state.reportDashboard.loading;
 export const selectError = (state) => state.reportDashboard.error;
 

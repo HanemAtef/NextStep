@@ -92,6 +92,100 @@
     box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.15);
 }
 
+.actionsGroup {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.refreshButton {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #f8f9fa;
+    border: 1px solid #e6e9ef;
+    border-radius: 6px;
+    color: #4361ee;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.refreshButton:hover:not(:disabled) {
+    background-color: #e9ecef;
+    border-color: #4361ee;
+}
+
+.refreshButton:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.spinning {
+    animation: spin 1s linear infinite;
+}
+
+.resetButton {
+    padding: 10px 14px;
+    background-color: #f8f9fa;
+    border: 1px solid #e6e9ef;
+    border-radius: 6px;
+    color: #4a4a4a;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-right: 10px;
+}
+
+.resetButton:hover {
+    background-color: #e9ecef;
+    border-color: #ccc;
+}
+
+.errorAlert {
+    background-color: #fee2e2;
+    border: 1px solid #fecaca;
+    border-radius: 8px;
+    padding: 14px 18px;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: #b91c1c;
+}
+
+.errorAlert svg {
+    font-size: 20px;
+    flex-shrink: 0;
+}
+
+.errorContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 70vh;
+    text-align: center;
+    padding: 0 20px;
+}
+
+.errorIcon {
+    font-size: 48px;
+    color: #f4511e;
+    margin-bottom: 20px;
+}
+
+.chartLoading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    width: 100%;
+}
+
 .generateReportButton {
     display: flex;
     align-items: center;
@@ -107,12 +201,17 @@
     transition: background-color 0.3s ease;
 }
 
-.generateReportButton:hover {
+.generateReportButton:hover:not(:disabled) {
     background-color: #4aa8e8;
 }
 
-.generateReportButton:active {
+.generateReportButton:active:not(:disabled) {
     transform: translateY(1px);
+}
+
+.generateReportButton:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
 }
 
 .generateReportButton svg {
@@ -216,6 +315,15 @@
     position: relative;
 }
 
+.sectionTitle {
+    font-size: 24px;
+    font-weight: 600;
+    color: #4a4a4a;
+    margin: 30px 0 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #f0f0f0;
+}
+
 /* Loading Container */
 .loadingContainer {
     display: flex;
@@ -258,7 +366,7 @@
 
 @media (max-width: 768px) {
     .statsCards {
-        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
     }
 
     .filtersSection {
@@ -267,28 +375,31 @@
     }
 
     .filterGroup {
-        margin-bottom: 12px;
+        margin-bottom: 16px;
         width: 100%;
     }
 
-    .generateReportButton {
+    .actionsGroup {
         width: 100%;
-        justify-content: center;
+        justify-content: space-between;
     }
 }
 
 @media (max-width: 576px) {
     .statsCards {
-        grid-template-columns: 1fr 1fr;
+        grid-template-columns: 1fr;
     }
 
     .pageHeader {
         flex-direction: column;
         align-items: flex-start;
-        gap: 16px;
+    }
+
+    .backButton {
+        margin-top: 16px;
     }
 
     .container {
-        padding: 0;
+        padding: 0 10px;
     }
 }

@@ -54,31 +54,209 @@
 .filterGroup {
     display: flex;
     align-items: center;
-    margin-bottom: 8px;
+    gap: 10px;
 }
 
 .filterLabel {
-    margin-left: 12px;
     font-weight: 600;
-    color: #4a4a4a;
-    font-size: 16px;
+    font-size: 15px;
+    color: #333;
+    white-space: nowrap;
+}
+
+.dateRangeContainer {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    padding: 8px 12px;
+    border: 1px solid #e6e9ef;
+}
+
+.dateInputGroup {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.dateLabel {
+    font-weight: 600;
+    font-size: 13px;
+    color: #5bbefa;
+    white-space: nowrap;
 }
 
 .datePicker {
-    padding: 10px 14px;
+    padding: 6px 10px;
     border: 1px solid #e6e9ef;
     border-radius: 6px;
-    min-width: 220px;
+    font-size: 13px;
+    color: #333;
+    background-color: white;
+    width: 120px;
     text-align: center;
-    font-family: 'Cairo', sans-serif;
-    transition: border-color 0.2s ease;
-    font-size: 14px;
+    direction: ltr;
+    /* Keep date picker LTR for proper calendar display */
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    transition: all 0.2s ease;
 }
 
 .datePicker:focus {
     outline: none;
-    border-color: #4361ee;
-    box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.15);
+    border-color: #5bbefa;
+    box-shadow: 0 0 0 3px rgba(91, 190, 250, 0.2);
+}
+
+.activeFilter {
+    border-color: #5bbefa;
+    background-color: rgba(91, 190, 250, 0.05);
+    font-weight: bold;
+}
+
+.activeDateFilter {
+    display: inline-block;
+    background-color: rgba(91, 190, 250, 0.1);
+    color: #333;
+    border-radius: 4px;
+    padding: 4px 8px;
+    font-size: 12px;
+    margin-right: 10px;
+    border: 1px solid rgba(91, 190, 250, 0.3);
+}
+
+.activeDateFilter span {
+    font-weight: bold;
+    color: #5bbefa;
+}
+
+.resetFilterButton {
+    background-color: #f1f1f1;
+    border: 1px solid #ddd;
+    color: #666;
+    border-radius: 4px;
+    padding: 5px 10px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-weight: bold;
+}
+
+.resetFilterButton:hover {
+    color: #f44336;
+    background-color: #fff;
+    border-color: #f44336;
+}
+
+.resetFilterButton:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    background-color: #e9e9e9;
+    color: #999;
+    border-color: #ddd;
+}
+
+.resetting {
+    background-color: #f8f9fa;
+    color: #6c757d;
+    border-color: #dee2e6;
+    position: relative;
+}
+
+.resetMessage {
+    margin-top: 8px;
+    padding: 5px 12px;
+    border-radius: 4px;
+    font-size: 12px;
+    transition: all 0.3s ease;
+    text-align: center;
+    max-width: 100%;
+}
+
+.loading {
+    background-color: rgba(91, 190, 250, 0.1);
+    border: 1px solid rgba(91, 190, 250, 0.3);
+    color: #5bbefa;
+}
+
+.success {
+    background-color: rgba(0, 184, 148, 0.1);
+    border: 1px solid rgba(0, 184, 148, 0.3);
+    color: #00b894;
+}
+
+/* أنيميشن دوّار للتحميل */
+@keyframes spinArrow {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.resetting::after {
+    content: "";
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border: 2px solid #6c757d;
+    border-radius: 50%;
+    border-top-color: transparent;
+    margin-right: 5px;
+    animation: spinArrow 1s linear infinite;
+    vertical-align: middle;
+}
+
+/* Override react-datepicker styles for RTL support */
+:global(.react-datepicker-wrapper) {
+    width: auto;
+    display: inline-block;
+}
+
+:global(.react-datepicker__input-container) {
+    display: block;
+}
+
+:global(.react-datepicker-popper) {
+    z-index: 3 !important;
+}
+
+:global(.react-datepicker) {
+    font-family: 'Cairo', sans-serif !important;
+    direction: rtl;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+    border: 1px solid #e6e9ef;
+}
+
+:global(.react-datepicker__header) {
+    background-color: #f8fafc;
+    border-bottom: 1px solid #e6e9ef;
+}
+
+:global(.react-datepicker__day--selected) {
+    background-color: #5bbefa !important;
+    color: white !important;
+}
+
+:global(.react-datepicker__day--in-range) {
+    background-color: rgba(91, 190, 250, 0.2) !important;
+    color: #333 !important;
+}
+
+:global(.react-datepicker__day--in-selecting-range) {
+    background-color: rgba(91, 190, 250, 0.3) !important;
+    color: #333 !important;
+}
+
+:global(.react-datepicker__day--keyboard-selected) {
+    background-color: rgba(91, 190, 250, 0.5) !important;
+    color: #333 !important;
+}
+
+:global(.react-datepicker__day:hover) {
+    background-color: rgba(91, 190, 250, 0.1) !important;
 }
 
 /* إضافة تبويبات */
@@ -155,6 +333,8 @@
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
     border: 1px solid #e6e9ef;
     transition: transform 0.2s, box-shadow 0.2s;
+    display: flex;
+    align-items: center;
 }
 
 .statBox:hover {
@@ -162,16 +342,7 @@
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
-.statBox:hover {
-    /* Removing hover effects */
-}
-
-.statContent {
-    display: flex;
-    align-items: center;
-}
-
-.statIcon {
+.iconContainer {
     width: 48px;
     height: 48px;
     border-radius: 8px;
@@ -183,18 +354,18 @@
     font-size: 20px;
 }
 
-.statText {
+.statDetails {
     display: flex;
     flex-direction: column;
 }
 
-.statValue {
+.value {
     font-size: 24px;
     font-weight: 700;
     color: #4a4a4a;
 }
 
-.statTitle {
+.title {
     font-size: 14px;
     color: #666;
     margin-top: 4px;
@@ -261,6 +432,7 @@
     margin-bottom: 12px;
     position: relative;
     overflow: hidden;
+    text-align: center;
 }
 
 .departmentCard:hover {
@@ -274,12 +446,13 @@
     margin: 0;
     font-size: 20px;
     font-weight: 700;
-    color: inherit;
+    color: #333;
     display: flex;
     align-items: center;
     gap: 8px;
     justify-content: space-between;
     width: 100%;
+    text-align: right;
 }
 
 .arrowIcon {
@@ -431,13 +604,13 @@
 }
 
 .loader {
-    border: 4px solid #f3f3f3;
-    border-top: 4px solid #4361ee;
+    width: 30px;
+    height: 30px;
+    border: 3px solid #f3f3f3;
     border-radius: 50%;
-    width: 40px;
-    height: 40px;
+    border-top: 3px solid #5bbefa;
     animation: spin 1s linear infinite;
-    margin-bottom: 16px;
+    margin: 0 auto;
 }
 
 @keyframes spin {
