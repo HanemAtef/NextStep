@@ -524,7 +524,7 @@ const ReportsDashboard = () => {
                 left: 20,
                 right: 20,
                 top: 20,
-                bottom: 120 // زيادة المساحة للـ legend
+                bottom: 120
             }
         }
     };
@@ -544,7 +544,8 @@ const ReportsDashboard = () => {
             y: {
                 beginAtZero: true,
                 grid: {
-                    color: `${colors.text}20`,
+                    color: '#e0e0e0',
+                    drawBorder: false,
                 },
                 ticks: {
                     font: {
@@ -557,7 +558,8 @@ const ReportsDashboard = () => {
             },
             x: {
                 grid: {
-                    color: `${colors.text}10`,
+                    color: '#e0e0e0',
+                    drawBorder: false,
                 },
                 ticks: {
                     font: {
@@ -599,21 +601,10 @@ const ReportsDashboard = () => {
                 callbacks: {
                     label: function (context) {
                         const label = context.label || '';
-
-                        // التحقق مما إذا كانت جميع البيانات صفرية
-                        const isAllZeros = departmentStatus.data && departmentStatus.data.every(value => value === 0);
-
-                        // إذا كانت كل القيم صفراً، أظهر "لا توجد طلبات" بدلاً من الصفر
-                        const value = isAllZeros ?
-                            "لا توجد طلبات" :
-                            (departmentStatus.data && departmentStatus.data[context.dataIndex] || 0) + " طلب";
-
-                        return `${label}: ${value}`;
+                        const value = context.parsed || 0;
+                        return `${label}: ${value} طلب`;
                     }
                 }
-            },
-            datalabels: {
-                display: false // إخفاء تسميات البيانات داخل المخطط
             }
         },
         layout: {
@@ -628,8 +619,43 @@ const ReportsDashboard = () => {
             animateScale: true,
             animateRotate: true
         },
-        cutout: '30%', // جعل المخطط أكثر سمكاً
-        radius: '85%'  // تقليل حجم المخطط قليلاً للحصول على مظهر أفضل
+        cutout: '30%',
+        radius: '85%'
+    };
+
+    // تحديث خيارات مخطط الخط
+    const lineChartOptions = {
+        ...chartOptions,
+        scales: {
+            x: {
+                grid: {
+                    color: '#e0e0e0',
+                    drawBorder: false,
+                },
+                ticks: {
+                    font: {
+                        family: 'Cairo, sans-serif',
+                        size: 13,
+                        weight: 'bold'
+                    },
+                    color: '#000000'
+                }
+            },
+            y: {
+                grid: {
+                    color: '#e0e0e0',
+                    drawBorder: false,
+                },
+                ticks: {
+                    font: {
+                        family: 'Cairo, sans-serif',
+                        size: 13,
+                        weight: 'bold'
+                    },
+                    color: '#000000'
+                }
+            }
+        }
     };
 
     // مراجع للمخططات البيانية (للتقرير)
@@ -663,8 +689,14 @@ const ReportsDashboard = () => {
                 timeAnalysis: timeAnalysis,
                 requestsCount: requestsCount,
                 createdRequests: createdRequests,
-                dateRange: [localDateRange.startDate, localDateRange.endDate],
-                pieStatus: pieStatus
+                departmentStatus: departmentStatus
+            };
+
+            // إنشاء دالة لتغيير الحالة
+            const handleStatusChange = async (status) => {
+                dispatch(setPieStatus(status));
+                // انتظار لتحديث البيانات
+                await dispatch(fetchDepartmentStatus({ dateRange: localDateRange, status }));
             };
 
             await generateDashboardReport(
@@ -672,7 +704,8 @@ const ReportsDashboard = () => {
                 departments,
                 chartRefs,
                 pieStatus,
-                reportData
+                reportData,
+                handleStatusChange
             );
         } catch (error) {
             console.error('خطأ في توليد التقرير:', error);

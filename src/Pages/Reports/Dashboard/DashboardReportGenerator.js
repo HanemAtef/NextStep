@@ -5,23 +5,22 @@ import html2canvas from 'html2canvas';
 /**
  * وظيفة مساعدة لتحويل عنصر HTML إلى صورة بدقة عالية
  */
-const elementToImage = async (element, scale = 3) => {
+const elementToImage = async (element, scale = 4) => {
   try {
-    // إنشاء حاوية مؤقتة
     const container = document.createElement('div');
     container.style.cssText = `
       position: fixed;
       left: -9999px;
       top: 0;
       background-color: #ffffff;
+      direction: rtl;
+      font-family: 'Cairo', sans-serif;
     `;
 
-    // إضافة العنصر إلى الحاوية
     container.appendChild(element);
     document.body.appendChild(container);
 
     try {
-      // تحويل العنصر إلى صورة
       const canvas = await html2canvas(container, {
         scale: scale,
         logging: false,
@@ -32,9 +31,8 @@ const elementToImage = async (element, scale = 3) => {
         backgroundColor: '#ffffff'
       });
 
-      return canvas.toDataURL('image/jpeg', 6.0);
+      return canvas.toDataURL('image/jpeg', 0.9);
     } finally {
-      // تنظيف - إزالة الحاوية المؤقتة
       if (document.body.contains(container)) {
         document.body.removeChild(container);
       }
@@ -81,7 +79,7 @@ const addTableToPDF = async (pdf, table, yPos, isNewPage = false) => {
       const xPos = (pdfWidth - finalWidth) / 2;
 
       // إضافة الصورة إلى PDF
-      pdf.addImage(image, 'jpeg', xPos, yPos, finalWidth, finalHeight);
+      pdf.addImage(image, 'PNG', xPos, yPos, finalWidth, finalHeight);
       return true;
     }
     return false;
@@ -94,32 +92,31 @@ const addTableToPDF = async (pdf, table, yPos, isNewPage = false) => {
 /**
  * وظيفة لإنشاء جدول بيانات بتنسيق موحد
  */
-const createSingleTable = (headers, rows, title = '', pageNum = 1, totalPages = 1, fontSize = 20) => {
+const createSingleTable = (headers, rows, title = '', pageNum = 1, totalPages = 1, fontSize = 16) => {
   const wrapper = document.createElement('div');
   wrapper.style.cssText = `
     direction: rtl;
-    font-family: Arial, sans-serif;
+    font-family: 'Cairo', sans-serif;
     width: 700px;
     background-color: #ffffff;
     padding: 10px;
     box-sizing: border-box;
   `;
 
-  // إضافة العنوان
   if (title) {
     const titleDiv = document.createElement('div');
     titleDiv.style.cssText = `
-      margin-bottom: 10px;
+      margin-bottom: 15px;
       font-weight: bold;
       font-size: ${fontSize + 2}px;
       color: #2c3e50;
       text-align: center;
+      font-family: 'Cairo', sans-serif;
     `;
     titleDiv.textContent = title + (totalPages > 1 ? ` (${pageNum}/${totalPages})` : '');
     wrapper.appendChild(titleDiv);
   }
 
-  // إنشاء الجدول
   const table = document.createElement('table');
   table.style.cssText = `
     width: 100%;
@@ -129,9 +126,9 @@ const createSingleTable = (headers, rows, title = '', pageNum = 1, totalPages = 
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     border-radius: 8px;
     overflow: hidden;
+    margin-bottom: 7px;
   `;
 
-  // إضافة رؤوس الأعمدة
   const thead = document.createElement('thead');
   const headerRow = document.createElement('tr');
 
@@ -145,7 +142,7 @@ const createSingleTable = (headers, rows, title = '', pageNum = 1, totalPages = 
       text-align: center;
       font-size: ${fontSize}px;
       background-color: #5bbefa;
-      position: relative;
+      font-family: 'Cairo', sans-serif;
     `;
     th.textContent = String(header || '');
     headerRow.appendChild(th);
@@ -154,12 +151,10 @@ const createSingleTable = (headers, rows, title = '', pageNum = 1, totalPages = 
   thead.appendChild(headerRow);
   table.appendChild(thead);
 
-  // إضافة البيانات
   const tbody = document.createElement('tbody');
   rows.forEach((row, index) => {
     const tr = document.createElement('tr');
     tr.style.backgroundColor = index % 2 === 0 ? '#f8fcff' : '#ffffff';
-    tr.style.transition = 'background-color 0.3s';
 
     row.forEach(cell => {
       const td = document.createElement('td');
@@ -169,6 +164,7 @@ const createSingleTable = (headers, rows, title = '', pageNum = 1, totalPages = 
         text-align: center;
         color: #2c3e50;
         font-size: ${fontSize - 2}px;
+        font-family: 'Cairo', sans-serif;
       `;
       td.textContent = String(cell || '');
       tr.appendChild(td);
@@ -265,7 +261,7 @@ const createTextElement = (text, fontSize = 24, isBold = true, align = 'center')
 };
 
 /**
- * وظيفة مساعدة لتحويل مخطط Chart.js إلى صورة
+ * وظيفة مساعدة لتحويل مخطط Chart.js إلى صورة مع خلفية بيضاء
  */
 const chartToImage = async (chartRef) => {
   try {
@@ -281,7 +277,22 @@ const chartToImage = async (chartRef) => {
       return null;
     }
 
-    return canvas.toDataURL('image/png', 6.0);
+    // إنشاء canvas جديد مع خلفية بيضاء
+    const newCanvas = document.createElement('canvas');
+    const ctx = newCanvas.getContext('2d');
+
+    // تعيين نفس الأبعاد
+    newCanvas.width = canvas.width;
+    newCanvas.height = canvas.height;
+
+    // رسم خلفية بيضاء
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, newCanvas.width, newCanvas.height);
+
+    // رسم المخطط الأصلي فوق الخلفية البيضاء
+    ctx.drawImage(canvas, 0, 0);
+
+    return newCanvas.toDataURL('image/jpeg', 0.9);
   } catch (error) {
     console.error('خطأ في تحويل المخطط:', error);
     return null;
@@ -301,9 +312,9 @@ const loadImage = (src) => {
 };
 
 /**
- * وظيفة مساعدة للتحقق من وجود العنصر في المستند وتحويله إلى صورة
+ * وظيفة مساعدة للتحقق من وجود العنصر في المستند وتحويله إلى صورة مع خلفية بيضاء
  */
-export const convertChartToImage = async (chartRef, scale = 3) => {
+export const convertChartToImage = async (chartRef, scale = 4) => {
   if (!chartRef?.current) {
     console.warn('المخطط البياني غير متاح');
     return null;
@@ -317,8 +328,22 @@ export const convertChartToImage = async (chartRef, scale = 3) => {
       return null;
     }
 
-    // نسخ بيانات الصورة مباشرة من canvas
-    return canvas.toDataURL('image/jpeg', 6.0);
+    // إنشاء canvas جديد مع خلفية بيضاء
+    const newCanvas = document.createElement('canvas');
+    const ctx = newCanvas.getContext('2d');
+
+    // تعيين نفس الأبعاد مع مضاعف الدقة
+    newCanvas.width = canvas.width;
+    newCanvas.height = canvas.height;
+
+    // رسم خلفية بيضاء
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, newCanvas.width, newCanvas.height);
+
+    // رسم المخطط الأصلي فوق الخلفية البيضاء
+    ctx.drawImage(canvas, 0, 0);
+
+    return newCanvas.toDataURL('image/jpeg', 0.9);
   } catch (error) {
     console.error('خطأ في تحويل المخطط البياني:', error);
     return null;
@@ -351,428 +376,272 @@ export const generateDashboardReport = async (
   departments,
   chartRefs,
   pieStatus,
-  chartsData
+  chartsData,
+  onStatusChange
 ) => {
   try {
-    console.log('بيانات التقرير:', {
-      dateRange,
-      departments,
-      chartRefs,
-      pieStatus,
-      chartsData
-    });
-
     // التحقق من وجود البيانات المطلوبة
-    if (!chartRefs) {
-      throw new Error('مراجع المخططات غير متوفرة');
+    if (!chartRefs || !chartsData) {
+      console.error('البيانات المطلوبة غير متوفرة');
+      return false;
     }
 
-    if (!chartsData) {
-      throw new Error('بيانات المخططات غير متوفرة');
-    }
-
-    // إنشاء وثيقة PDF جديدة بحجم A4 واتجاه عمودي
+    // إنشاء مستند PDF جديد
     const pdf = new jsPDF({
       orientation: 'portrait',
       unit: 'mm',
       format: 'a4',
+      putOnlyUsedFonts: true,
     });
 
-    // تعيين اتجاه النص من اليمين إلى اليسار
+    // إضافة الخط العربي
+    pdf.addFont('assets/fonts/Cairo-Regular.ttf', 'Cairo', 'normal');
+    pdf.addFont('assets/fonts/Cairo-Bold.ttf', 'Cairo', 'bold');
+    pdf.setFont('Cairo');
     pdf.setR2L(true);
-
-    let yPos = 20;
 
     // إضافة الشعارات
     try {
       const logoCollage = await loadImage('/logoCollage.jpg');
-      console.log('تم تحميل شعار الكلية');
-      pdf.addImage(logoCollage, 'JPEG', 20, 5, 30, 30);
+      pdf.addImage(logoCollage, 'JPEG', 20, 10, 30, 30);
 
       const logoUniversity = await loadImage('/logoUnivercity.png');
-      console.log('تم تحميل شعار الجامعة');
-      pdf.addImage(logoUniversity, 'PNG', 160, 5, 30, 30);
-
-      yPos = 40;
+      pdf.addImage(logoUniversity, 'PNG', 160, 10, 30, 30);
     } catch (logoError) {
       console.warn('تعذر تحميل الشعارات:', logoError);
-      // المتابعة حتى لو فشل تحميل الشعارات
     }
-    // إضافة خط فاصل
-    pdf.setDrawColor(0);
-    pdf.setLineWidth(0.5);
-    pdf.line(10, 95, 200, 95);
 
-
-    // إنشاء عنوان التقرير
-    const titleElement = createTextElement('تقرير لوحة المعلومات', 36, true);
-    const titleImage = await elementToImage(titleElement);
+    // إضافة عنوان التقرير
+    const title = createTextElement('تقرير لوحة المعلومات', 28, true);
+    const titleImage = await elementToImage(title);
     if (titleImage) {
-      console.log('تم إنشاء عنوان التقرير');
-      pdf.addImage(titleImage, 'PNG', 10, yPos, 190, 20);
-      yPos += 25;
+      pdf.addImage(titleImage, 'JPEG', 20, 45, 170, 20);
     }
 
-    // إضافة نطاق التاريخ والإحصائيات العامة في الصفحة الأولى
-    if (dateRange?.[0] && dateRange?.[1]) {
-      const startDateStr = new Date(dateRange[0]).toLocaleDateString('ar-EG');
-      const endDateStr = new Date(dateRange[1]).toLocaleDateString('ar-EG');
-      const rangeElement = createTextElement(`الفترة: من ${startDateStr} إلى ${endDateStr}`, 20, false);
-      const rangeImage = await elementToImage(rangeElement);
-      if (rangeImage) {
-        console.log('تم إضافة نطاق التاريخ');
-        pdf.addImage(rangeImage, 'PNG', 10, yPos, 190, 10);
-        yPos += 15;
-      }
-
-      // إضافة تاريخ إنشاء التقرير
-      const reportDateElement = createTextElement(`تاريخ إنشاء التقرير: ${new Date().toLocaleDateString('ar-EG')}`, 16, false);
-      const reportDateImage = await elementToImage(reportDateElement);
-      if (reportDateImage) {
-        console.log('تم إضافة تاريخ إنشاء التقرير');
-        pdf.addImage(reportDateImage, 'PNG', 10, yPos, 190, 10);
-        yPos += 20;
-      }
+    // إضافة معلومات التاريخ بالتقويم الميلادي
+    let dateText = 'جميع الفترات';
+    if (dateRange.startDate && dateRange.endDate) {
+      const formatDate = (date) => {
+        const d = new Date(date);
+        return d.toLocaleDateString('en-GB', { // استخدام التنسيق الميلادي
+          year: 'numeric',
+          month: '2-digit',
+          day: '2-digit'
+        });
+      };
+      const startDate = formatDate(dateRange.startDate);
+      const endDate = formatDate(dateRange.endDate);
+      dateText = `الفترة من ${startDate} إلى ${endDate}`;
+    }
+    const dateElement = createTextElement(dateText, 16, false);
+    const dateImage = await elementToImage(dateElement);
+    if (dateImage) {
+      pdf.addImage(dateImage, 'PNG', 20, 70, 170, 10);
     }
 
-    // إضافة الإحصائيات العامة في الصفحة الأولى
-    const generalStatsElement = createTextElement('الإحصائيات العامة', 26, true);
-    const generalStatsImage = await elementToImage(generalStatsElement);
-    if (generalStatsImage) {
-      pdf.addImage(generalStatsImage, 'PNG', 10, yPos, 190, 15);
-      yPos += 25;
+    // إضافة تاريخ إنشاء التقرير بالتقويم الميلادي
+    const reportDate = createTextElement(
+      `تاريخ إنشاء التقرير: ${new Date().toLocaleDateString('en-GB')}`,
+      14,
+      false
+    );
+    const reportDateImage = await elementToImage(reportDate);
+    if (reportDateImage) {
+      pdf.addImage(reportDateImage, 'JPEG', 20, 85, 170, 10);
     }
 
-    // إنشاء جدول الإحصائيات العامة
-    try {
-      const statsHeaders = ['البيان', 'العدد'];
-      const statsRows = [
-        ['إجمالي الطلبات', chartsData.stats?.totalRequests || 0],
-        ['الطلبات قيد التنفيذ', chartsData.stats?.pendingRequests || 0],
-        ['الطلبات متاخر', chartsData.stats?.delayedRequests || 0],
-        ['الطلبات مقبول', chartsData.stats?.approvedRequests || 0],
-        ['الطلبات مرفوض', chartsData.stats?.rejectedRequests || 0]
-      ];
+    // إضافة الإحصائيات العامة
+    const statsHeaders = ['المؤشر', 'القيمة'];
+    const statsRows = [
+      ['إجمالي عدد الطلبات', chartsData.stats.totalRequests || 0],
+      ['الطلبات قيد التنفيذ', chartsData.stats.pendingRequests || 0],
+      ['الطلبات المتأخرة', chartsData.stats.delayedRequests || 0],
+      ['الطلبات المقبولة', chartsData.stats.approvedRequests || 0],
+      ['الطلبات المرفوضة', chartsData.stats.rejectedRequests || 0],
+    ];
+    const statsTable = createSingleTable(statsHeaders, statsRows, 'الإحصائيات العامة');
+    await addTableToPDF(pdf, statsTable, 100);
 
-      console.log('إحصائيات عامة:', statsRows);
+    // إضافة مخططات توزيع الطلبات لكل حالة
+    const statuses = ['pending', 'delayed', 'approved', 'rejected'];
+    const statusTitles = {
+      pending: 'قيد التنفيذ',
+      delayed: 'متأخره',
+      approved: 'مقبول',
+      rejected: 'مرفوض'
+    };
 
-      const statsTableElement = createSingleTable(
-        statsHeaders,
-        statsRows,
-        'ملخص الإحصائيات',
-        1,
-        1,
-        16
-      );
-
-      const statsTableImage = await elementToImage(statsTableElement);
-      if (statsTableImage) {
-        console.log('تم إضافة جدول الإحصائيات العامة');
-        pdf.addImage(statsTableImage, 'jpeg', 15, yPos, 180, 60);
-      }
-    } catch (statsError) {
-      console.error('خطأ في إنشاء الإحصائيات العامة:', statsError);
-    }
-
-    // إضافة مخططات حالة الطلبات لكل حالة
-    const statuses = ['delayed', 'rejected', 'approved', 'pending'];
+    // إضافة المخططات للتقرير
     for (const status of statuses) {
-      try {
-        pdf.addPage();
-        yPos = 20;
+      if (chartRefs.pieChartRef?.current) {
+        try {
+          // تحديث الحالة
+          if (onStatusChange) {
+            await onStatusChange(status);
+            // انتظار لتحديث البيانات
+            await new Promise(resolve => setTimeout(resolve, 1500));
+          }
 
-        const chartTitleElement = createTextElement(`توزيع الطلبات ${getStatusTitle(status)} حسب الإدارة`, 26, true);
-        const chartTitleImage = await elementToImage(chartTitleElement);
-        if (chartTitleImage) {
-          pdf.addImage(chartTitleImage, 'jpeg', 10, yPos, 180, 15);
-          yPos += 25;
-        }
+          // التحقق من وجود البيانات
+          if (!chartsData.departmentStatus?.labels || !chartsData.departmentStatus?.data) {
+            console.warn(`لا توجد بيانات متاحة للحالة: ${status}`);
+            continue;
+          }
 
-        console.log(`جاري تحويل مخطط حالة الطلبات ${status}...`);
-        const chartImage = await chartToImage(chartRefs.pieChartRef);
-        if (chartImage) {
-          console.log(`تم تحويل مخطط حالة الطلبات ${status} بنجاح`);
-          const imgWidth = 140;
-          const imgHeight = 100;
-          pdf.addImage(chartImage, 'jpeg', 25, yPos, imgWidth, imgHeight);
-          yPos += imgHeight + 20;
+          // تنقية البيانات من إدارة التقارير
+          const filteredData = {
+            labels: [],
+            data: []
+          };
 
-          // إضافة جدول تفاصيل توزيع الحالة المحددة
-          const pieHeaders = ['الإدارة', `عدد الطلبات ${getStatusTitle(status)}`];
-          const pieRows = departments.map(dept => {
-            const stats = dept.stats || {};
-            const count = status === 'pending' ? stats.pendingCount :
-              status === 'delayed' ? stats.delayedCount :
-                status === 'approved' ? stats.approvedCount :
-                  status === 'rejected' ? stats.rejectedCount : 0;
-            return [dept.name, count || 0];
+          // نسخ البيانات بأمان
+          const labels = [...chartsData.departmentStatus.labels];
+          const data = [...chartsData.departmentStatus.data];
+
+          labels.forEach((label, index) => {
+            if (!label.includes('إدارة التقارير') && !label.includes('اداره التقارير')) {
+              filteredData.labels.push(label);
+              filteredData.data.push(data[index] || 0);
+            }
           });
 
-          const pieTable = createSingleTable(
-            pieHeaders,
-            pieRows,
-            `تفاصيل توزيع الطلبات ${getStatusTitle(status)} حسب الإدارة`,
-            1,
-            1,
-            16
-          );
-
-          // إضافة الجدول تحت المخطط الدائري
-          const pieTableImage = await elementToImage(pieTable);
-          if (pieTableImage) {
-            pdf.addImage(pieTableImage, 'jpeg', 15, yPos, 180, 60);
-            yPos += 70;
+          // التحقق من وجود بيانات بعد التصفية
+          if (filteredData.labels.length === 0) {
+            console.warn(`لا توجد بيانات بعد التصفية للحالة: ${status}`);
+            continue;
           }
-        }
-      } catch (pieError) {
-        console.error(`خطأ في إضافة مخطط حالة الطلبات ${status}:`, pieError);
-      }
-    }
 
-    // إضافة الجدول الكامل في نهاية التقرير
-    try {
-      pdf.addPage();
-      yPos = 20;
+          // تحديث المخطط بالبيانات الجديدة
+          const chartInstance = chartRefs.pieChartRef.current.chartInstance;
+          if (chartInstance) {
+            chartInstance.data.labels = filteredData.labels;
+            chartInstance.data.datasets[0].data = filteredData.data;
+            chartInstance.update();
 
-      const distributionTitleElement = createTextElement('توزيع الطلبات حسب الإدارات', 26, true);
-      const distributionTitleImage = await elementToImage(distributionTitleElement);
-      if (distributionTitleImage) {
-        pdf.addImage(distributionTitleImage, 'jpeg', 10, yPos, 190, 15);
-        yPos += 25;
-      }
+            // انتظار لتحديث الرسم
+            await new Promise(resolve => setTimeout(resolve, 500));
+          }
 
-      const distributionHeaders = ['الإدارة', 'إجمالي الطلبات', 'قيد التنفيذ', 'متأخرة', 'مقبولة', 'مرفوضة', 'متوسط وقت المعالجة'];
-      const distributionRows = departments.map(dept => {
-        const stats = dept.stats || {};
-        return [
-          dept.name,
-          stats.totalCount || 0,
-          stats.pendingCount || 0,
-          stats.delayedCount || 0,
-          stats.approvedCount || 0,
-          stats.rejectedCount || 0,
-          `${stats.processingTime || 0} يوم`
-        ];
-      });
+          const pieChartImage = await convertChartToImage(chartRefs.pieChartRef);
+          if (pieChartImage) {
+            pdf.addPage();
+            const pieTitle = createTextElement(`توزيع الطلبات ${statusTitles[status]} حسب الإدارة`, 24);
+            const pieTitleImage = await elementToImage(pieTitle);
+            if (pieTitleImage) {
+              pdf.addImage(pieTitleImage, 'PNG', 20, 10, 170, 15);
+            }
+            pdf.addImage(pieChartImage, 'PNG', 20, 30, 170, 100);
 
-      const distributionTable = createSingleTable(
-        distributionHeaders,
-        distributionRows,
-        'تفاصيل توزيع الطلبات حسب الإدارات',
-        1,
-        1,
-        16
-      );
+            // إضافة جدول تفصيلي للبيانات
+            if (filteredData.labels.length > 0 && filteredData.data.length > 0) {
+              const pieDataHeaders = ['الإدارة', 'عدد الطلبات', 'النسبة المئوية'];
 
-      const distributionTableImage = await elementToImage(distributionTable);
-      if (distributionTableImage) {
-        pdf.addImage(distributionTableImage, 'jpeg', 15, yPos, 180, 60);
-      }
-    } catch (distributionError) {
-      console.error('خطأ في إضافة جدول توزيع الطلبات:', distributionError);
-    }
+              const total = filteredData.data.reduce((sum, val) => sum + (val || 0), 0);
+              const pieDataRows = filteredData.labels.map((label, index) => {
+                const value = filteredData.data[index] || 0;
+                const percentage = total > 0 ? ((value / total) * 100).toFixed(1) + '%' : '0%';
+                return [label, value, percentage];
+              });
 
-    // إضافة مخطط عدد الطلبات المنشأة في صفحة منفصلة
-    if (chartRefs.lineChartRef?.current) {
-      try {
-        pdf.addPage();
-        yPos = 20;
-
-        const chartTitleElement = createTextElement('تفاصيل الطلبات المنشأه حسب الفترة الزمنية', 26, true);
-        const chartTitleImage = await elementToImage(chartTitleElement);
-        if (chartTitleImage) {
-          pdf.addImage(chartTitleImage, 'jpeg', 10, yPos, 190, 15);
-          yPos += 25;
-        }
-
-        const chartImage = await chartToImage(chartRefs.lineChartRef);
-        if (chartImage) {
-          const imgWidth = 160;
-          const imgHeight = 90; // تقليل ارتفاع المخطط أكثر
-          pdf.addImage(chartImage, 'jpeg', 25, yPos, imgWidth, imgHeight);
-          yPos += imgHeight + 10;
-
-          // إضافة جدول تفاصيل الطلبات حسب الفترة
-          if (chartsData.periods && chartsData.barCreated) {
-            const lineHeaders = ['التاريخ', 'عدد الطلبات'];
-            const allRows = chartsData.periods.map((period, index) => [
-              new Date(period.start).toLocaleDateString('ar-EG', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric'
-              }),
-              chartsData.barCreated[index] || 0
-            ]);
-
-            // تقسيم البيانات إلى صفحات - بالضبط 20 صف في كل صفحة
-            const rowsPerPage = 20;
-            const totalPages = Math.ceil(allRows.length / rowsPerPage);
-
-            // إضافة الجداول في صفحات منفصلة
-            for (let pageNum = 0; pageNum < totalPages; pageNum++) {
-              if (pageNum === 0) {
-                // في الصفحة الأولى، نضع الجدول تحت المخطط مباشرة
-                // التحقق من المساحة المتبقية في الصفحة
-                const remainingSpace = 297 - yPos; // 297 هو ارتفاع A4 بالملم
-
-                if (remainingSpace < 140) { // إذا كانت المساحة المتبقية غير كافية
-                  pdf.addPage();
-                  yPos = 20;
-                }
-
-                const startIdx = 0;
-                const endIdx = Math.min(rowsPerPage, allRows.length);
-                const pageRows = allRows.slice(startIdx, endIdx);
-
-                const lineTable = createSingleTable(
-                  lineHeaders,
-                  pageRows,
-                  'تفاصيل عدد الطلبات حسب الفترة الزمنية',
-                  pageNum + 1,
-                  totalPages,
-                  16
+              if (pieDataRows.length > 0) {
+                const pieDataTable = createSingleTable(
+                  pieDataHeaders,
+                  pieDataRows,
+                  `تفاصيل توزيع الطلبات ${statusTitles[status]} حسب الإدارة`
                 );
-
-                const lineTableImage = await elementToImage(lineTable);
-                if (lineTableImage) {
-                  // تعديل ارتفاع الجدول ليناسب المساحة المتبقية
-                  const tableHeight = Math.min(140, remainingSpace - 20); // نترك هامش 20 ملم
-                  pdf.addImage(lineTableImage, 'jpeg', 15, yPos, 180, tableHeight);
-                }
-              } else {
-                // للصفحات التالية، نبدأ من أعلى الصفحة
-                pdf.addPage();
-                yPos = 20;
-
-                const startIdx = pageNum * rowsPerPage;
-                const endIdx = Math.min(startIdx + rowsPerPage, allRows.length);
-                const pageRows = allRows.slice(startIdx, endIdx);
-
-                const lineTable = createSingleTable(
-                  lineHeaders,
-                  pageRows,
-                  'تفاصيل عدد الطلبات حسب الفترة الزمنية',
-                  pageNum + 1,
-                  totalPages,
-                  16
-                );
-
-                const lineTableImage = await elementToImage(lineTable);
-                if (lineTableImage) {
-                  pdf.addImage(lineTableImage, 'jpeg', 15, yPos, 180, 140); // ارتفاع ثابت للصفحات التالية
-                }
+                await addTableToPDF(pdf, pieDataTable, 140);
               }
             }
           }
+        } catch (error) {
+          console.error(`خطأ في معالجة الحالة ${status}:`, error);
+          continue;
         }
-      } catch (error) {
-        console.error('خطأ في إضافة مخطط الخط وجدول التفاصيل:', error);
       }
     }
 
-    // إضافة مخطط متوسط وقت المعالجة في صفحة منفصلة
-    if (chartRefs.barChartRef?.current) {
-      try {
+    // إضافة مخطط متوسط وقت المعالجة
+    if (chartRefs.barChartRef && chartRefs.barChartRef.current) {
+      const barChartImage = await convertChartToImage(chartRefs.barChartRef);
+      if (barChartImage) {
         pdf.addPage();
-        yPos = 20;
-
-        const chartTitleElement = createTextElement('متوسط وقت المعالجة حسب الإدارة', 26, true);
-        const chartTitleImage = await elementToImage(chartTitleElement);
-        if (chartTitleImage) {
-          pdf.addImage(chartTitleImage, 'jpeg', 10, yPos, 190, 15);
-          yPos += 25;
+        const barTitle = createTextElement('متوسط وقت المعالجة حسب الإدارة', 24);
+        const barTitleImage = await elementToImage(barTitle);
+        if (barTitleImage) {
+          pdf.addImage(barTitleImage, 'JPEG', 20, 10, 170, 15);
         }
+        pdf.addImage(barChartImage, 'JPEG', 20, 30, 170, 100);
 
-        console.log('جاري تحويل مخطط متوسط وقت المعالجة...');
-        const chartImage = await chartToImage(chartRefs.barChartRef);
-        if (chartImage) {
-          console.log('تم تحويل مخطط متوسط وقت المعالجة بنجاح');
-          const imgWidth = 160;
-          const imgHeight = 120;
-          pdf.addImage(chartImage, 'jpeg', 25, yPos, imgWidth, imgHeight);
-          yPos += imgHeight + 20;
+        // إضافة جدول تفصيلي للبيانات
+        if (chartsData.timeAnalysis && chartsData.timeAnalysis.labels) {
+          const timeHeaders = ['الإدارة', 'متوسط وقت المعالجة (ساعة)', 'عدد الطلبات المعالجة'];
+          const timeRows = chartsData.timeAnalysis.labels
+            .filter(label => !label.includes('إدارة التقارير') && !label.includes('اداره التقارير'))
+            .map((label, index) => [
+              label,
+              (chartsData.timeAnalysis.data[index] || 0).toFixed(1),
+              chartsData.timeAnalysis.requestCounts ? chartsData.timeAnalysis.requestCounts[index] || 0 : 0
+            ]);
+          const timeTable = createSingleTable(timeHeaders, timeRows, 'تفاصيل متوسط وقت المعالجة');
+          await addTableToPDF(pdf, timeTable, 140);
+        }
+      }
+    }
 
-          console.log('بيانات متوسط وقت المعالجة:', chartsData);
-          console.log('بيانات الإدارات:', departments);
+    // إضافة مخطط عدد الطلبات المنشأة
+    if (chartRefs.lineChartRef && chartRefs.lineChartRef.current) {
+      const lineChartImage = await convertChartToImage(chartRefs.lineChartRef);
+      if (lineChartImage) {
+        pdf.addPage();
+        const lineTitle = createTextElement('تحليل الطلبات المنشأة خلال الفترة', 24);
+        const lineTitleImage = await elementToImage(lineTitle);
+        if (lineTitleImage) {
+          pdf.addImage(lineTitleImage, 'JPEG', 20, 10, 170, 15);
+        }
+        pdf.addImage(lineChartImage, 'JPEG', 20, 30, 170, 100);
 
-          // جدول متوسط وقت المعالجة
-          if (departments?.length) {
-            const timeHeaders = ['الإدارة', 'متوسط وقت المعالجة (يوم)'];
-            const timeRows = departments.map(dept => {
-              const stats = chartsData.departmentStats?.[dept.id] || {};
-              const avgTime = stats.averageProcessingTime || chartsData.barProcessing?.datasets?.[0]?.data?.[departments.indexOf(dept)] || 0;
-              return [
-                dept.name,
-                avgTime.toFixed(1)
-              ];
+        // إضافة جدول تفصيلي للبيانات
+        if (chartsData.createdRequests && chartsData.createdRequests.labels) {
+          const createdHeaders = ['التاريخ', 'عدد الطلبات', 'نسبة التغيير'];
+          const createdRows = chartsData.createdRequests.labels.map((label, index) => {
+            const currentValue = chartsData.createdRequests.data[index] || 0;
+            const prevValue = index > 0 ? chartsData.createdRequests.data[index - 1] || 0 : 0;
+            const change = prevValue === 0 ? '-' :
+              ((currentValue - prevValue) / prevValue * 100).toFixed(1) + '%';
+            return [label, currentValue, change];
+          });
+          const createdTable = createSingleTable(createdHeaders, createdRows, 'تفاصيل الطلبات المنشأة');
+          await addTableToPDF(pdf, createdTable, 140);
+        }
+      }
+    }
+
+    // إضافة مخطط عدد الطلبات لكل إدارة
+    if (chartRefs.timeLineChartRef && chartRefs.timeLineChartRef.current) {
+      const timeLineChartImage = await convertChartToImage(chartRefs.timeLineChartRef);
+      if (timeLineChartImage) {
+        pdf.addPage();
+        const deptTitle = createTextElement('توزيع الطلبات على الإدارات', 24);
+        const deptTitleImage = await elementToImage(deptTitle);
+        if (deptTitleImage) {
+          pdf.addImage(deptTitleImage, 'JPEG', 20, 10, 170, 15);
+        }
+        pdf.addImage(timeLineChartImage, 'JPEG', 20, 30, 170, 100);
+
+        // إضافة جدول تفصيلي للبيانات
+        if (chartsData.requestsCount && chartsData.requestsCount.labels) {
+          const deptHeaders = ['الإدارة', 'عدد الطلبات', 'النسبة المئوية'];
+          const total = chartsData.requestsCount.data.reduce((sum, val) => sum + (val || 0), 0);
+          const deptRows = chartsData.requestsCount.labels
+            .filter(label => !label.includes('إدارة التقارير') && !label.includes('اداره التقارير'))
+            .map((label, index) => {
+              const value = chartsData.requestsCount.data[index] || 0;
+              const percentage = total > 0 ? ((value / total) * 100).toFixed(1) + '%' : '0%';
+              return [label, value, percentage];
             });
-
-            const timeTableElement = createSingleTable(
-              timeHeaders,
-              timeRows,
-              'تفاصيل متوسط وقت المعالجة حسب الإدارة',
-              1,
-              1,
-              16
-            );
-
-            const timeTableImage = await elementToImage(timeTableElement);
-            if (timeTableImage) {
-              pdf.addImage(timeTableImage, 'jpeg', 15, yPos, 180, 60);
-              yPos += 70;
-            }
-          }
+          const deptTable = createSingleTable(deptHeaders, deptRows, 'تفاصيل توزيع الطلبات على الإدارات');
+          await addTableToPDF(pdf, deptTable, 140);
         }
-      } catch (timeError) {
-        console.error('خطأ في إضافة مخطط متوسط وقت المعالجة:', timeError);
-      }
-    }
-
-    // إضافة مخطط عدد الطلبات حسب الإدارة في صفحة منفصلة
-    if (chartRefs.timeLineChartRef?.current) {
-      try {
-        pdf.addPage();
-        yPos = 20;
-
-        const chartTitleElement = createTextElement('عدد الطلبات حسب الإدارة', 26, true);
-        const chartTitleImage = await elementToImage(chartTitleElement);
-        if (chartTitleImage) {
-          pdf.addImage(chartTitleImage, 'jpeg', 10, yPos, 190, 15);
-          yPos += 25;
-        }
-
-        console.log('جاري تحويل مخطط عدد الطلبات حسب الإدارة...');
-        const chartImage = await chartToImage(chartRefs.timeLineChartRef);
-        if (chartImage) {
-          console.log('تم تحويل مخطط عدد الطلبات حسب الإدارة بنجاح');
-          const imgWidth = 160;
-          const imgHeight = 120;
-          pdf.addImage(chartImage, 'jpeg', 25, yPos, imgWidth, imgHeight);
-          yPos += imgHeight + 20;
-
-          // إضافة جدول عدد الطلبات لكل إدارة
-          const countHeaders = ['الإدارة', 'عدد الطلبات'];
-          const countRows = departments.map(dept => [
-            dept.name,
-            dept.requests || 0
-          ]);
-
-          const countTable = createSingleTable(
-            countHeaders,
-            countRows,
-            'تفاصيل عدد الطلبات حسب الإدارة',
-            1,
-            1,
-            16
-          );
-
-          const countTableImage = await elementToImage(countTable);
-          if (countTableImage) {
-            pdf.addImage(countTableImage, 'jpeg', 15, yPos, 180, 60);
-          }
-        }
-      } catch (countError) {
-        console.error('خطأ في إضافة مخطط عدد الطلبات حسب الإدارة:', countError);
       }
     }
 
@@ -780,20 +649,20 @@ export const generateDashboardReport = async (
     const pageCount = pdf.internal.getNumberOfPages();
     for (let i = 1; i <= pageCount; i++) {
       pdf.setPage(i);
-      const pageNumberElement = createTextElement(`الصفحة ${i} من ${pageCount}`, 14, false, 'center');
+      const pageNumberElement = createTextElement(`الصفحة ${i} من ${pageCount}`, 14, false);
       const pageNumberImage = await elementToImage(pageNumberElement);
       if (pageNumberImage) {
-        // تعديل موضع رقم الصفحة ليكون في أسفل الصفحة بمسافة كافية
-        pdf.addImage(pageNumberImage, 'jpeg', 70, 285, 70, 8);
+        pdf.addImage(pageNumberImage, 'JPEG', 70, 280, 70, 10);
       }
     }
 
     // حفظ الملف
-    pdf.save(`تقرير_لوحة_المعلومات_${new Date().toLocaleDateString('ar-EG')}.pdf`);
-    console.log('تم إنشاء التقرير بنجاح');
+    const fileName = `تقرير_لوحة_المعلومات_${new Date().toISOString().split('T')[0]}.pdf`;
+    pdf.save(fileName);
+
     return true;
   } catch (error) {
-    console.error('حدث خطأ أثناء إنشاء التقرير:', error);
+    console.error('خطأ في إنشاء التقرير:', error);
     return false;
   }
 };
