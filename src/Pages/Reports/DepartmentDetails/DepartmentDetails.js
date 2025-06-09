@@ -669,7 +669,7 @@ const DepartmentDetails = () => {
 
                     <button
                         className={styles.generateReportButton}
-                        onClick={handleGenerateReport}
+                        // onClick={handleGenerateReport}
                         disabled={!department || isGeneratingReport || loading?.department || loading?.stats}
                     >
                         <FaFileExport className={styles.buttonIcon} /> إنشاء تقرير
