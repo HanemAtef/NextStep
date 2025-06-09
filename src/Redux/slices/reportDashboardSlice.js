@@ -9,17 +9,11 @@ const formatDateForAPI = (date) => {
 
     try {
         // If it's already a Date object
-        if (date instanceof Date) {
-            return encodeURIComponent(date.toISOString());
-        }
-
-        // If it's a string, parse it to Date first to ensure proper ISO format
-        if (typeof date === 'string') {
-            return encodeURIComponent(new Date(date).toISOString());
-        }
-
-        // Fallback
-        return encodeURIComponent(String(date));
+        const d = date instanceof Date ? date : new Date(date);
+        const year = d.getFullYear();
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        return `${year}%2F${month}%2F${day}`;
     } catch (error) {
         console.error("Error formatting date:", error, date);
         return '';
@@ -98,21 +92,19 @@ export const fetchDepartments = createAsyncThunk(
             }
 
             const response = await axios.get(url, { headers });
-            // console.log(" Department data structure:",
-            //     {
-            //         isArray: Array.isArray(response.data),
-            //         length: response.data.length,
-            //         firstItem: response.data.length > 0 ? response.data[0] : null,
-            //         keys: response.data.length > 0 ? Object.keys(response.data[0]) : []
-            //     });
 
             // تنسيق البيانات للتأكد من وجود اسم للإدارة بغض النظر عن تسمية الخاصية في API
             if (Array.isArray(response.data)) {
-                return response.data.map(dept => ({
-                    ...dept,
-                    // ضمان وجود اسم للإدارة عبر تحديد الأولويات للخصائص
-                    name: dept.departmentName || dept.name || dept.arabic_name || `قسم ${dept.id}`
-                }));
+                return response.data
+                    .filter(dept => {
+                        const deptName = dept.departmentName || dept.name || dept.arabic_name || '';
+                        return !deptName.includes('إدارة التقارير') && !deptName.includes('اداره التقارير');
+                    })
+                    .map(dept => ({
+                        ...dept,
+                        // ضمان وجود اسم للإدارة عبر تحديد الأولويات للخصائص
+                        name: dept.departmentName || dept.name || dept.arabic_name || `قسم ${dept.id}`
+                    }));
             }
 
             return response.data;
@@ -250,116 +242,51 @@ export const fetchDepartmentStatus = createAsyncThunk(
     async ({ status, startDate, endDate } = {}, { rejectWithValue }) => {
         try {
             let url = `${API_URL}/Reports/departments/status`;
-
-            // إضافة معاملات URL إذا كانت متوفرة
             const params = [];
 
-            // التأكد من أن معلمة الحالة موجودة وصحيحة
             if (status) {
-                // تحويل حالات باللغة الإنجليزية إلى مقابلها بالعربية للـ API
                 let arabicStatus = status;
-                if (status === 'delayed') arabicStatus = 'متأخره';
+                if (status === 'pending') arabicStatus = 'قيد التنفيذ';
+                else if (status === 'delayed') arabicStatus = 'متأخره';
                 else if (status === 'rejected') arabicStatus = 'مرفوض';
                 else if (status === 'approved') arabicStatus = 'مقبول';
-                else if (status === 'pending') arabicStatus = 'قيد التنفيذ';
 
+                console.log('Status before encoding:', arabicStatus);
                 params.push(`status=${encodeURIComponent(arabicStatus)}`);
-            } else {
-                console.warn('Missing status parameter. Using default status: متاخر');
-                params.push('status=متاخر');
+                console.log('Final status parameter:', params[params.length - 1]);
             }
 
-            // إضافة نطاق التاريخ إذا كان متاحًا
             if (startDate && endDate) {
-                try {
-                    // Format dates properly
-                    const formattedStartDate = formatDateForAPI(startDate);
-                    const formattedEndDate = formatDateForAPI(endDate);
-                    params.push(`startDate=${formattedStartDate}`);
-                    params.push(`endDate=${formattedEndDate}`);
-                } catch (dateError) {
-                    console.error('Error formatting date parameters:', dateError);
-                }
-            } else {
+                const formattedStartDate = formatDateForAPI(startDate);
+                const formattedEndDate = formatDateForAPI(endDate);
+                params.push(`startDate=${formattedStartDate}`);
+                params.push(`endDate=${formattedEndDate}`);
             }
 
             if (params.length > 0) {
                 url += `?${params.join('&')}`;
             }
 
+            console.log('Final API URL:', url);
 
-            // تنسيق تواريخ العرض للسجلات
-            const displayStartDate = startDate instanceof Date ?
-                startDate.toLocaleDateString() :
-                startDate ? new Date(startDate).toLocaleDateString() : 'غير محدد';
-
-            const displayEndDate = endDate instanceof Date ?
-                endDate.toLocaleDateString() :
-                endDate ? new Date(endDate).toLocaleDateString() : 'غير محدد';
-
-
-            // إضافة رأس التوثيق
             const headers = {};
             try {
                 const token = sessionStorage.getItem('token');
                 if (token) {
                     headers.Authorization = `Bearer ${token}`;
-                } else {
-                    console.warn(' No auth token found in sessionStorage');
                 }
             } catch (authError) {
                 console.warn('No auth token available:', authError);
             }
 
             const response = await axios.get(url, { headers });
-
-            // إذا كانت الحالة هي "قيد التنفيذ"، نحتاج إلى استدعاء API آخر للحصول على الطلبات المتأخرة
-            if (status === 'pending') {
-                // استدعاء API للحصول على الطلبات المتأخرة
-                const delayedUrl = `${API_URL}/Reports/departments/status`;
-                const delayedParams = [];
-                delayedParams.push(`status=متأخره`);
-
-                if (startDate && endDate) {
-                    try {
-                        const formattedStartDate = formatDateForAPI(startDate);
-                        const formattedEndDate = formatDateForAPI(endDate);
-                        delayedParams.push(`startDate=${formattedStartDate}`);
-                        delayedParams.push(`endDate=${formattedEndDate}`);
-                    } catch (dateError) {
-                        console.error('Error formatting date parameters for delayed requests:', dateError);
-                    }
-                }
-
-                const delayedRequestsUrl = `${delayedUrl}?${delayedParams.join('&')}`;
-                const delayedResponse = await axios.get(delayedRequestsUrl, { headers });
-
-                // تعديل البيانات: طرح عدد الطلبات المتأخرة من عدد الطلبات قيد التنفيذ
-                if (response.data && response.data.data && delayedResponse.data && delayedResponse.data.data) {
-                    const pendingData = [...response.data.data];
-                    const delayedData = delayedResponse.data.data;
-
-                    // تأكد من أن المصفوفتين لهما نفس الطول
-                    const minLength = Math.min(pendingData.length, delayedData.length);
-
-                    for (let i = 0; i < minLength; i++) {
-                        // طرح عدد الطلبات المتأخرة من عدد الطلبات قيد التنفيذ
-                        pendingData[i] = Math.max(0, pendingData[i] - delayedData[i]);
-                    }
-
-                    // تحديث البيانات
-                    response.data.data = pendingData;
-                }
-            }
+            console.log('API Response:', response.data);
 
             return response.data;
         } catch (error) {
-            console.error(" Error fetching department status:", error);
-            console.error("Error details:", error.response?.data || error.message);
-            if (error.response) {
-                console.error("Error status:", error.response.status);
-                console.error("Error headers:", error.response.headers);
-            }
+            console.error("Error fetching department status:", error);
+            console.error("Error URL:", error.config?.url);
+            console.error("Error Response:", error.response?.data);
             return rejectWithValue("حدث خطأ أثناء جلب حالات الطلبات حسب الإدارات");
         }
     }

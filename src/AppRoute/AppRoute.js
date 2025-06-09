@@ -88,6 +88,9 @@ export default function AppRoutes() {
                 </Route>
             </Route>
 
+            {/* مسار مباشر لصفحة المستخدم */}
+            <Route path="/user-direct" element={<UserInfo />} />
+
             {/* مسارات إدارة التقارير - مستقلة مثل الأدمن */}
             <Route element={<ProtectedRoute allowedRole="مدير التقارير" />}>
                 <Route path="/reports" element={<ReportsDash title=" إدارة التقارير " />}>
@@ -100,9 +103,6 @@ export default function AppRoutes() {
 
             {/* مسار مباشر لصفحة تقارير الإدارة للتأكد من أنها تعمل */}
             <Route path="/reports-direct" element={<ReportsDashboard />} />
-
-            {/* مسار مباشر لصفحة المستخدم */}
-            <Route path="/user-direct" element={<UserInfo />} />
 
             <Route element={<ProtectedRoute allowedRole="Employee" />}>
                 <Route element={<DashLayout title={userRole} />}>

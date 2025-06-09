@@ -67,9 +67,9 @@ export const fetchDepartmentDetails = createAsyncThunk(
 // جلب إحصائيات الإدارة
 export const fetchDepartmentStats = createAsyncThunk(
     'departmentDetails/fetchDepartmentStats',
-    async ({ departmentId, startDate, endDate }, { rejectWithValue }) => {
+    async ({ id, startDate, endDate }, { rejectWithValue }) => {
         try {
-            let url = `${API_URL}/departments/${departmentId}/stats`;
+            let url = `${API_URL}/departments/${id}/stats`;
 
             // إضافة معاملات التاريخ إذا كانت متوفرة
             if (startDate && endDate) {
@@ -90,9 +90,9 @@ export const fetchDepartmentStats = createAsyncThunk(
 // جلب متوسط وقت المعالجة لكل نوع طلب
 export const fetchProcessingTimeStats = createAsyncThunk(
     'departmentDetails/fetchProcessingTimeStats',
-    async ({ departmentId, startDate, endDate }, { rejectWithValue }) => {
+    async ({ id, startDate, endDate }, { rejectWithValue }) => {
         try {
-            let url = `${API_URL}/departments/${departmentId}/processing-time`;
+            let url = `${API_URL}/departments/${id}/processing-time`;
 
             // إضافة معاملات التاريخ إذا كانت متوفرة
             if (startDate && endDate) {
@@ -113,9 +113,9 @@ export const fetchProcessingTimeStats = createAsyncThunk(
 // جلب عدد الطلبات لكل نوع
 export const fetchRequestsCountByType = createAsyncThunk(
     'departmentDetails/fetchRequestsCountByType',
-    async ({ departmentId, startDate, endDate }, { rejectWithValue }) => {
+    async ({ id, startDate, endDate }, { rejectWithValue }) => {
         try {
-            let url = `${API_URL}/departments/${departmentId}/requests-count`;
+            let url = `${API_URL}/departments/${id}/requests-count`;
 
             // إضافة معاملات التاريخ إذا كانت متوفرة
             if (startDate && endDate) {
@@ -136,9 +136,9 @@ export const fetchRequestsCountByType = createAsyncThunk(
 // اسباب الرفض
 export const fetchRejectionReasons = createAsyncThunk(
     'departmentDetails/fetchRejectionReasons',
-    async ({ departmentId, startDate, endDate }, { rejectWithValue }) => {
+    async ({ id, startDate, endDate }, { rejectWithValue }) => {
         try {
-            let url = `${API_URL}/departments/${departmentId}/rejection-reasons`;
+            let url = `${API_URL}/departments/${id}/rejection-reasons`;
 
             // إضافة معاملات التاريخ إذا كانت متوفرة
             if (startDate && endDate) {
@@ -159,9 +159,9 @@ export const fetchRejectionReasons = createAsyncThunk(
 // جلب التحليل الزمني للطلبات
 export const fetchTimeAnalysis = createAsyncThunk(
     'departmentDetails/fetchTimeAnalysis',
-    async ({ departmentId, startDate, endDate }, { rejectWithValue }) => {
+    async ({ id, startDate, endDate }, { rejectWithValue }) => {
         try {
-            let url = `${API_URL}/departments/${departmentId}/time-analysis`;
+            let url = `${API_URL}/departments/${id}/time-analysis`;
 
             // إضافة معاملات التاريخ إذا كانت متوفرة
             if (startDate && endDate) {
@@ -182,14 +182,14 @@ export const fetchTimeAnalysis = createAsyncThunk(
 // جلب بيانات حالات الطلبات للمخطط الدائري
 export const fetchStatusPieChart = createAsyncThunk(
     'departmentDetails/fetchStatusPieChart',
-    async ({ departmentId, dateRange }, { rejectWithValue }) => {
+    async ({ id, startDate, endDate }, { rejectWithValue }) => {
         try {
-            let url = `${API_URL}/departments/${departmentId}/requests/status`;
+            let url = `${API_URL}/departments/${id}/requests/status`;
 
             // إضافة معاملات التاريخ إذا كانت متوفرة
-            if (dateRange && dateRange.startDate && dateRange.endDate) {
-                const formattedStartDate = formatDateForAPI(dateRange.startDate);
-                const formattedEndDate = formatDateForAPI(dateRange.endDate);
+            if (startDate && endDate) {
+                const formattedStartDate = formatDateForAPI(startDate);
+                const formattedEndDate = formatDateForAPI(endDate);
                 url += `?startDate=${formattedStartDate}&endDate=${formattedEndDate}`;
             }
 
@@ -220,7 +220,7 @@ export const fetchStatusPieChart = createAsyncThunk(
 const initialState = {
     department: null,
     stats: {
-        totalRequests: 0,   
+        totalRequests: 0,
         pendingRequests: 0,
         delayedRequests: 0,
         approvedRequests: 0,

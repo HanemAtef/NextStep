@@ -87,13 +87,6 @@ const ReportsDashboard = () => {
         // لا نحتاج إلى تحديث Redux إذا لم يتغير التاريخ
         if (!update || !update[0]) return;
 
-        // console.log("📅 Date picker update:", update);
-        // console.log("📅 Original format:", {
-        //     startDate: update[0],
-        //     endDate: update[1] || update[0]
-        // });
-
-        // إذا كان تاريخ الانتهاء غير محدد، استخدم تاريخ البدء
         const newDateRange = {
             startDate: update[0],
             endDate: update[1] || update[0]
@@ -326,16 +319,16 @@ const ReportsDashboard = () => {
 
     // إعداد بيانات مخطط الدائرة بناءً على البيانات من API فقط
     const getPieChartData = () => {
-        // console.log(" Department Status original data:", departmentStatus);
-        // console.log(" Pie Status:", pieStatus);
-        // console.log(" Departments list:", departments);
-
         // قائمة الإدارات (استخدم الإدارات الفعلية إذا كانت متوفرة)
-        const departmentNames = departments.length ? departments.map(d => d.name) : [];
+        const departmentNames = departments.length ? departments
+            .filter(d => {
+                const deptName = d.name || '';
+                return !deptName.includes('إدارة التقارير') && !deptName.includes('اداره التقارير');
+            })
+            .map(d => d.name) : [];
 
         // تحقق مما إذا كانت البيانات متوفرة
         if (!departmentStatus || !departmentStatus.data) {
-            // إرجاع بيانات فارغة إذا لم تكن البيانات متوفرة
             return {
                 labels: [],
                 datasets: [{
@@ -351,41 +344,24 @@ const ReportsDashboard = () => {
         let displayLabels = departmentStatus.labels || departmentNames;
         let displayValues = [...(departmentStatus.data || [])];
 
-        // إذا كانت الحالة هي "قيد التنفيذ"، نحتاج إلى الحصول على عدد الطلبات المتأخرة لكل إدارة
-        if (pieStatus === 'pending') {
-            // هنا نفترض أن البيانات الواردة من API تشمل بالفعل الطلبات المتأخرة
-            // لذلك لا نحتاج إلى تعديل البيانات، لأن الخدمة الخلفية يجب أن تكون قد قامت بالفعل بالحساب الصحيح
-            // إذا كنت تريد تعديل البيانات هنا، فأنت بحاجة إلى بيانات إضافية عن الطلبات المتأخرة لكل إدارة
-        }
+        // فلترة البيانات لإزالة إدارة التقارير
+        const filteredData = displayLabels.reduce((acc, label, index) => {
+            if (!label.includes('إدارة التقارير') && !label.includes('اداره التقارير')) {
+                acc.labels.push(label);
+                acc.values.push(displayValues[index]);
+            }
+            return acc;
+        }, { labels: [], values: [] });
 
-        // تحقق مما إذا كانت جميع البيانات صفرية
-        const isAllZeros = displayValues && displayValues.every(value => value === 0);
-
-        // إذا كانت كل القيم صفراً، استخدم قيمة 1 لكل عنصر لإظهار المخطط بشكل متساوٍ مع نمط شفاف
-        if (isAllZeros) {
-            displayValues = displayValues.map(() => 1);
-        }
-
-        // تخصيص ألوان للإدارات - إذا كانت جميع القيم صفرية استخدم ألوان باهتة
-        const departmentColors = displayLabels.map((_, index) => {
-            const color = palette[index % palette.length];
-            return isAllZeros ? `${color}50` : color; // إضافة شفافية للألوان إذا كانت جميع القيم صفرية
-        });
-
-        // إنشاء بيانات المخطط
-        const chartData = {
-            labels: displayLabels,
+        return {
+            labels: filteredData.labels,
             datasets: [{
-                data: displayValues,
-                backgroundColor: departmentColors,
-                borderWidth: isAllZeros ? 0.5 : 1,
-                borderColor: isAllZeros ? '#e0e0e0' : 'white',
-                hoverBorderColor: isAllZeros ? '#ccc' : 'white',
-                hoverBorderWidth: isAllZeros ? 1 : 2,
+                data: filteredData.values,
+                backgroundColor: filteredData.labels.map((_, index) => palette[index % palette.length]),
+                borderWidth: 1,
+                borderColor: 'white'
             }]
         };
-
-        return chartData;
     };
 
     // إعداد بيانات مخطط الأعمدة لمتوسط وقت المعالجة
@@ -402,14 +378,23 @@ const ReportsDashboard = () => {
             };
         }
 
+        // فلترة البيانات لإزالة إدارة التقارير
+        const filteredData = timeAnalysis.labels.reduce((acc, label, index) => {
+            if (!label.includes('إدارة التقارير') && !label.includes('اداره التقارير')) {
+                acc.labels.push(label);
+                acc.values.push(timeAnalysis.data[index]);
+            }
+            return acc;
+        }, { labels: [], values: [] });
+
         // تخصيص ألوان للإدارات
-        const departmentColors = departments.map((_, index) => palette[index % palette.length]);
+        const departmentColors = filteredData.labels.map((_, index) => palette[index % palette.length]);
 
         return {
-            labels: timeAnalysis.labels,
+            labels: filteredData.labels,
             datasets: [{
                 label: 'متوسط وقت المعالجة',
-                data: timeAnalysis.data,
+                data: filteredData.values,
                 backgroundColor: departmentColors,
                 borderWidth: 1,
             }]
@@ -471,14 +456,23 @@ const ReportsDashboard = () => {
             };
         }
 
+        // فلترة البيانات لإزالة إدارة التقارير
+        const filteredData = requestsCount.labels.reduce((acc, label, index) => {
+            if (!label.includes('إدارة التقارير') && !label.includes('اداره التقارير')) {
+                acc.labels.push(label);
+                acc.values.push(requestsCount.data[index]);
+            }
+            return acc;
+        }, { labels: [], values: [] });
+
         // تخصيص ألوان للإدارات
-        const departmentColors = departments.map((_, index) => palette[index % palette.length]);
+        const departmentColors = filteredData.labels.map((_, index) => palette[index % palette.length]);
 
         return {
-            labels: requestsCount.labels,
+            labels: filteredData.labels,
             datasets: [{
                 label: 'عدد الطلبات',
-                data: requestsCount.data,
+                data: filteredData.values,
                 backgroundColor: departmentColors,
                 borderColor: departmentColors.map(color => color + '80'), // إضافة حدود شفافة
                 borderWidth: 1,
@@ -797,7 +791,7 @@ const ReportsDashboard = () => {
                                     handleDateChange([newRange.startDate, newRange.endDate]);
                                 }}
                                 className={styles.datePicker}
-                                dateFormat="dd/MM/yyyy"
+                                dateFormat="yyyy/MM/dd"
                                 placeholderText="تاريخ البداية"
                                 isClearable={false}
                                 showMonthDropdown
@@ -818,7 +812,7 @@ const ReportsDashboard = () => {
                                     handleDateChange([newRange.startDate, newRange.endDate]);
                                 }}
                                 className={styles.datePicker}
-                                dateFormat="dd/MM/yyyy"
+                                dateFormat="yyyy/MM/dd"
                                 placeholderText="تاريخ النهاية"
                                 isClearable={false}
                                 showMonthDropdown

@@ -56,19 +56,29 @@ function DepartmentDetails() {
     };
 
     useEffect(() => {
-        if (id) {
-            dispatch(fetchDepartment(id));
-            fetchDepartmentData();
+        if (!id) {
+            console.log('No id available, skipping data fetch');
+            return;
         }
+        dispatch(fetchDepartment(id));
+        fetchDepartmentData();
     }, [dispatch, id, dateRangeFromStore]);
 
     const fetchDepartmentData = () => {
-        dispatch(fetchDepartmentStats({ departmentId: id, dateRange: dateRangeFromStore }));
-        dispatch(fetchProcessingTimeStats({ departmentId: id, dateRange: dateRangeFromStore }));
-        dispatch(fetchRequestsCountByType({ departmentId: id, dateRange: dateRangeFromStore }));
-        dispatch(fetchRejectionReasons({ departmentId: id, dateRange: dateRangeFromStore }));
-        dispatch(fetchTimeAnalysis({ departmentId: id, dateRange: dateRangeFromStore }));
-        dispatch(fetchStatusPieChart({ departmentId: id, dateRange: dateRangeFromStore }));
+        if (!id) {
+            console.log('No id available, skipping data fetch');
+            return;
+        }
+        dispatch(fetchDepartmentStats({ id: id, dateRange: dateRangeFromStore }));
+        dispatch(fetchProcessingTimeStats({ id: id, dateRange: dateRangeFromStore }));
+        dispatch(fetchRequestsCountByType({ id: id, dateRange: dateRangeFromStore }));
+        dispatch(fetchRejectionReasons({ id: id, dateRange: dateRangeFromStore }));
+        dispatch(fetchTimeAnalysis({ id: id, dateRange: dateRangeFromStore }));
+        dispatch(fetchStatusPieChart({
+            id: id,
+            startDate: dateRangeFromStore.startDate,
+            endDate: dateRangeFromStore.endDate
+        }));
     };
 
     // التعامل مع تغيير نطاق التاريخ

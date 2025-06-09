@@ -74,12 +74,91 @@ const DepartmentDetails = () => {
     // حالة تحميل محلية
     const [isGeneratingReport, setIsGeneratingReport] = useState(false);
 
-    // التحقق من وجود شريحة departmentDetails في المخزن
+    // جلب البيانات الأولية عند تحميل المكون
     useEffect(() => {
-        if (reduxState && reduxState.departmentDetails) {
-            setIsInitialLoading(false);
+        const fetchInitialData = async () => {
+            if (!id || !dispatch) {
+                console.log('No id or dispatch available, skipping data fetch');
+                return;
+            }
+
+            console.log('Fetching initial data for department:', id);
+
+            try {
+                // جلب تفاصيل الإدارة أولاً
+                await dispatch(fetchDepartmentDetails(id)).unwrap();
+
+                // تنسيق التاريخ بشكل صحيح
+                const formatDate = (date) => {
+                    if (!date) return null;
+                    const d = new Date(date);
+                    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+                };
+
+                // جلب باقي البيانات
+                const params = {
+                    id: id,
+                    startDate: startDate ? formatDate(startDate) : null,
+                    endDate: endDate ? formatDate(endDate) : null
+                };
+
+                console.log('Fetching department data with params:', params);
+
+                await Promise.all([
+                    dispatch(fetchDepartmentStats(params)),
+                    dispatch(fetchProcessingTimeStats(params)),
+                    dispatch(fetchRequestsCountByType(params)),
+                    dispatch(fetchRejectionReasons(params)),
+                    dispatch(fetchTimeAnalysis(params)),
+                    dispatch(fetchStatusPieChart({
+                        id: id,
+                        startDate: params.startDate,
+                        endDate: params.endDate
+                    }))
+                ]);
+            } catch (error) {
+                console.error('Error fetching department data:', error);
+            }
+        };
+
+        fetchInitialData();
+    }, [id, dispatch]);
+
+    // تحديث البيانات عند تغيير نطاق التاريخ
+    useEffect(() => {
+        if (!department || !id) {
+            console.log('No department or id available, skipping data update');
+            return;
         }
-    }, [reduxState]);
+
+        if (dispatch && id && (startDate || endDate)) {
+            const formatDate = (date) => {
+                if (!date) return null;
+                const d = new Date(date);
+                return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+            };
+
+            const params = {
+                id: id,
+                startDate: startDate ? formatDate(startDate) : null,
+                endDate: endDate ? formatDate(endDate) : null
+            };
+
+            console.log('Updating data for department:', id, 'with params:', params);
+
+            // تحديث البيانات
+            dispatch(fetchDepartmentStats(params));
+            dispatch(fetchProcessingTimeStats(params));
+            dispatch(fetchRequestsCountByType(params));
+            dispatch(fetchRejectionReasons(params));
+            dispatch(fetchTimeAnalysis(params));
+            dispatch(fetchStatusPieChart({
+                id: id,
+                startDate: params.startDate,
+                endDate: params.endDate
+            }));
+        }
+    }, [dispatch, id, startDate, endDate, department]);
 
     // تحديث حالة التاريخ في Redux عند تغييرها محلياً
     useEffect(() => {
@@ -93,45 +172,34 @@ const DepartmentDetails = () => {
         }
     }, [dispatch, startDate, endDate]);
 
-    // جلب البيانات من API عند تحميل الصفحة أو تغيير التاريخ
-    useEffect(() => {
-        const fetchAllData = async () => {
-            if (!id || !dispatch) return;
+    // تحديث بيانات مخطط الدائرة
+    const statusData = useMemo(() => ({
+        labels: ['قيد التنفيذ', 'متأخر', 'مقبول', 'مرفوض'],
+        datasets: [
+            {
+                data: [
+                    stats?.pendingRequests || 0,
+                    stats?.delayedRequests || 0,
+                    stats?.approvedRequests || 0,
+                    stats?.rejectedRequests || 0
+                ],
+                backgroundColor: ['#ffe066', '#b6b6f7', '#00b894', '#f4511e'],
+                borderWidth: 1,
+            },
+        ],
+    }), [stats]);
 
-            try {
-                // جلب تفاصيل الإدارة
-                dispatch(fetchDepartmentDetails(id));
+    // إعادة تعيين نطاق التاريخ
+    const handleResetDateRange = () => {
+        console.log('Resetting date range');
+        setLocalDateRange([null, null]);
 
-                // جلب باقي البيانات مع نطاق التاريخ
-                const params = {
-                    departmentId: id,
-                    startDate: startDate instanceof Date ? startDate.toISOString() : startDate,
-                    endDate: endDate instanceof Date ? endDate.toISOString() : endDate
-                };
-
-                dispatch(fetchDepartmentStats(params));
-                dispatch(fetchProcessingTimeStats(params));
-                dispatch(fetchRequestsCountByType(params));
-                dispatch(fetchRejectionReasons(params));
-                dispatch(fetchTimeAnalysis(params));
-                dispatch(fetchStatusPieChart(params));
-            } catch (error) {
-                console.error("خطأ في جلب البيانات:", error);
-            }
-        };
-
-        fetchAllData();
-    }, [dispatch, id, startDate, endDate]);
-
-    // إعادة تحميل البيانات
-    const handleRefreshData = () => {
-        if (!id || !dispatch) return;
-
-        try {
+        // إعادة تحميل البيانات بدون تاريخ
+        if (dispatch && id) {
             const params = {
-                departmentId: id,
-                startDate: startDate instanceof Date ? startDate.toISOString() : startDate,
-                endDate: endDate instanceof Date ? endDate.toISOString() : endDate
+                id: id,
+                startDate: null,
+                endDate: null
             };
 
             dispatch(fetchDepartmentStats(params));
@@ -139,15 +207,46 @@ const DepartmentDetails = () => {
             dispatch(fetchRequestsCountByType(params));
             dispatch(fetchRejectionReasons(params));
             dispatch(fetchTimeAnalysis(params));
-            dispatch(fetchStatusPieChart(params));
-        } catch (error) {
-            console.error("خطأ في تحديث البيانات:", error);
+            dispatch(fetchStatusPieChart({
+                id: id,
+                startDate: null,
+                endDate: null
+            }));
         }
     };
 
-    // إعادة تعيين نطاق التاريخ
-    const handleResetDateRange = () => {
-        setLocalDateRange([null, null]);
+    // إعادة تحميل البيانات
+    const handleRefreshData = () => {
+        console.log('Refreshing data with current date range:', { startDate, endDate });
+        if (!id || !dispatch) return;
+
+        // تنسيق التاريخ بشكل صحيح
+        const formatDate = (date) => {
+            if (!date) return null;
+            const d = new Date(date);
+            // تنسيق التاريخ بصيغة YYYY-MM-DD
+            return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+        };
+
+        const params = {
+            id: id,
+            startDate: startDate ? formatDate(startDate) : null,
+            endDate: endDate ? formatDate(endDate) : null
+        };
+
+        console.log('Refreshing with formatted params:', params);
+
+        // تحديث جميع البيانات
+        dispatch(fetchDepartmentStats(params));
+        dispatch(fetchProcessingTimeStats(params));
+        dispatch(fetchRequestsCountByType(params));
+        dispatch(fetchRejectionReasons(params));
+        dispatch(fetchTimeAnalysis(params));
+        dispatch(fetchStatusPieChart({
+            id: id,
+            startDate: params.startDate,
+            endDate: params.endDate
+        }));
     };
 
     // باليت الألوان
@@ -170,18 +269,6 @@ const DepartmentDetails = () => {
         info: palette[5],
         dark: palette[6],
         background: '#f8fafc',
-    };
-
-    // تحديث بيانات مخطط الدائرة
-    const statusData = {
-        labels: statusPieChart?.labels || ['قيد التنفيذ', 'متاخر', 'مقبول', 'مرفوض'],
-        datasets: [
-            {
-                data: statusPieChart?.data || [0, 0, 0, 0],
-                backgroundColor: ['#ffe066', '#b6b6f7', '#00b894', '#f4511e'],
-                borderWidth: 1,
-            },
-        ],
     };
 
     // بيانات مخطط أوقات المعالجة
@@ -482,7 +569,7 @@ const DepartmentDetails = () => {
         return (
             <div className={styles.loadingContainer}>
                 <div className={styles.loader}></div>
-                <p>جاري تحميل البيانات...</p>
+                <p>جاري تحميل بيانات الإدارة...</p>
             </div>
         );
     }
@@ -492,7 +579,7 @@ const DepartmentDetails = () => {
             <div className={styles.errorContainer}>
                 <FaExclamationTriangle className={styles.errorIcon} />
                 <h2>الإدارة غير موجودة</h2>
-                <p>لم يتم العثور على بيانات لهذه الإدارة</p>
+                <p>لم يتم العثور على بيانات لهذه الإدارة (ID: {id})</p>
                 <button
                     className={styles.backButton}
                     onClick={() => navigate('/reports')}
@@ -529,14 +616,41 @@ const DepartmentDetails = () => {
                         endDate={endDate}
                         onChange={(update) => {
                             setLocalDateRange(update);
+                            // تحديث البيانات مباشرة
+                            if (dispatch && id) {
+                                const [newStartDate, newEndDate] = update;
+                                const formatDate = (date) => {
+                                    if (!date) return null;
+                                    const d = new Date(date);
+                                    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+                                };
+
+                                const params = {
+                                    id: id,
+                                    startDate: newStartDate ? formatDate(newStartDate) : null,
+                                    endDate: newEndDate ? formatDate(newEndDate) : null
+                                };
+
+                                dispatch(fetchDepartmentStats(params));
+                                dispatch(fetchProcessingTimeStats(params));
+                                dispatch(fetchRequestsCountByType(params));
+                                dispatch(fetchRejectionReasons(params));
+                                dispatch(fetchTimeAnalysis(params));
+                                dispatch(fetchStatusPieChart({
+                                    id: id,
+                                    startDate: params.startDate,
+                                    endDate: params.endDate
+                                }));
+                            }
                         }}
                         className={styles.datePicker}
-                        dateFormat="dd/MM/yyyy"
+                        dateFormat="yyyy/MM/dd"
                         placeholderText="اختر فترة زمنية"
                     />
                     <button
                         className={styles.resetButton}
                         onClick={handleResetDateRange}
+                        disabled={!startDate && !endDate} // تعطيل الزر فقط إذا لم يكن هناك تواريخ محددة
                         title="إعادة تعيين الفترة الزمنية"
                     >
                         إعادة تعيين
@@ -547,16 +661,16 @@ const DepartmentDetails = () => {
                     <button
                         className={styles.refreshButton}
                         onClick={handleRefreshData}
-                        disabled={isPageLoading}
+                        disabled={loading?.department || loading?.stats}
                         title="تحديث البيانات"
                     >
-                        <FaSync className={isPageLoading ? styles.spinning : ''} />
+                        <FaSync className={loading?.department || loading?.stats ? styles.spinning : ''} />
                     </button>
 
                     <button
                         className={styles.generateReportButton}
                         onClick={handleGenerateReport}
-                        disabled={isGeneratingReport || isPageLoading || !department}
+                        disabled={!department || isGeneratingReport || loading?.department || loading?.stats}
                     >
                         <FaFileExport className={styles.buttonIcon} /> إنشاء تقرير
                     </button>
@@ -599,7 +713,11 @@ const DepartmentDetails = () => {
                                 <p>جاري تحميل البيانات...</p>
                             </div>
                         ) : (
-                            <Pie data={statusData} options={pieChartOptions} />
+                            <Pie
+                                data={statusData}
+                                options={pieChartOptions}
+                                key={`pie-${startDate}-${endDate}`}
+                            />
                         )}
                     </div>
                 </div>
