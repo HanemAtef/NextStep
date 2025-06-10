@@ -95,6 +95,9 @@ const ApplicationPreview = () => {
       .then(() => {
         setShowMessage(true);
         setSuccessMessage("تمت الموافقة على الطلب بنجاح!");
+        setTimeout(() => {
+          navigate("/outbox");
+        }, 1000);
       })
       .catch((error) => {
         setFormError(error.message || "حدث خطأ أثناء الموافقة على الطلب");
@@ -118,6 +121,9 @@ const ApplicationPreview = () => {
       .then(() => {
         setShowMessage(true);
         setSuccessMessage("تم رفض الطلب بنجاح!");
+        setTimeout(() => {
+          navigate("/outbox");
+        }, 1000);
       })
       .catch((error) => {
         setFormError(error.message || "حدث خطأ أثناء رفض الطلب");
@@ -185,7 +191,7 @@ const ApplicationPreview = () => {
       <div className={styles.actions}>
         <div className={styles.upload}>
           <label htmlFor="file-upload">
-            <span className={styles.upIcon}>📤</span>ارفاق ملف 
+            <span className={styles.upIcon}>📤</span>ارفاق ملف
           </label>
           <input
             type="file"
@@ -223,7 +229,7 @@ const ApplicationPreview = () => {
           </button>
         </div>
       </div>
-      <button className={styles.backButton} onClick={handleBack}>🔙 العودة إلى الطلبات</button>
+      {/* <button className={styles.backButton} onClick={handleBack}>🔙 العودة إلى الطلبات</button> */}
 
       {showMessage && (
         <div className={styles.messagePopup}>
