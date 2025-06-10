@@ -224,7 +224,8 @@ const initialState = {
         pendingRequests: 0,
         delayedRequests: 0,
         approvedRequests: 0,
-        rejectedRequests: 0
+        rejectedRequests: 0,
+        createdRequests: 0
     },
     processingTimeStats: {
         labels: [],

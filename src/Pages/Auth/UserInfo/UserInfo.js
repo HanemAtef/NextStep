@@ -4,7 +4,7 @@ import styles from './UserInfo.module.css';
 import { useDispatch, useSelector } from "react-redux";
 import { updateField, resetForm } from "../../../Redux/slices/applicationSlice";
 import { useNavigate } from "react-router-dom";
-import { FaUser, FaEnvelope, FaBuilding, FaSignOutAlt, FaCamera } from "react-icons/fa";
+import { FaUser, FaEnvelope, FaBuilding, FaSignOutAlt, FaCamera, FaChartBar, FaArrowRight } from "react-icons/fa";
 
 const decodeToken = (token) => {
   try {
@@ -122,6 +122,17 @@ function UserInfo() {
     }
   };
 
+  const handleGoToDashboard = () => {
+    navigate('/reports');
+  };
+
+  // Check if user belongs to reports department
+  const isReportsDepartment = userData.department &&
+    (userData.department.includes('تقارير') ||
+      userData.department.includes('احصائيات') ||
+      userData.department.toLowerCase().includes('report') ||
+      userData.department.toLowerCase().includes('statistics'));
+
   if (loading) {
     return (
       <div className={styles.loadingContainer}>
@@ -137,6 +148,12 @@ function UserInfo() {
 
   return (
     <div className={styles.userCardd}>
+      {isReportsDepartment && (
+        <button className={styles.cardCornerBtn} onClick={handleGoToDashboard}>
+          <FaArrowRight className={styles.backIcon} /> العودة لصفحة التقارير
+        </button>
+      )}
+
       <div className={styles.rightSection}>
         <div className={styles.avatarWrapper}>
           <img
@@ -169,6 +186,7 @@ function UserInfo() {
           <p><FaUser className={styles.infoIcon} /> <strong>الاسم:</strong> {userData.name || "..."}</p>
           <p><FaEnvelope className={styles.infoIcon} /> <strong>الإيميل:</strong> {userData.email || "..."}</p>
           <p><FaBuilding className={styles.infoIcon} /> <strong>القسم/الإدارة:</strong> {userData.department || "..."}</p>
+
           <button className={styles.logoutBtn} onClick={handleLogout}>
             <FaSignOutAlt className={styles.logoutIcon} /> تسجيل الخروج
           </button>

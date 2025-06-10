@@ -503,7 +503,14 @@ const DepartmentDetails = () => {
             value: stats?.rejectedRequests || 0,
             icon: <FaTimesCircle />,
             color: colors.danger
-        }
+        },
+        {
+            id: 6,
+            title: 'ما تم انشاؤه',
+            value: stats?.createdRequests || 0,
+            icon: <FaTimesCircle />,
+            color: colors.success
+        },
     ];
 
     // إنشاء تقرير بناءً على البيانات الحالية

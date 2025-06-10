@@ -509,3 +509,351 @@
         border-right-width: 3px;
     }
 }
+
+.dashboardBtn {
+    width: 100%;
+    margin-top: 10px;
+    margin-bottom: 15px;
+    padding: 12px 28px;
+    background: linear-gradient(to right, #2980b9, #3498db);
+    color: white;
+    font-weight: 600;
+    font-size: 15px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(52, 152, 219, 0.2);
+    transition: all 0.3s ease;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.dashboardBtn:hover {
+    background: linear-gradient(to right, #1c638e, #2980b9);
+    box-shadow: 0 6px 15px rgba(52, 152, 219, 0.3);
+    transform: translateY(-2px);
+}
+
+.dashboardBtn::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: rgba(255, 255, 255, 0.1);
+    transform: rotate(30deg);
+    transition: transform 0.5s ease;
+}
+
+.dashboardBtn:hover::after {
+    transform: rotate(30deg) translate(10%, 10%);
+}
+
+.dashboardIcon {
+    margin-left: 8px;
+    font-size: 18px;
+    transition: transform 0.3s ease;
+}
+
+.dashboardBtn:hover .dashboardIcon {
+    transform: scale(1.2);
+}
+
+/* Responsive styles for dashboard button */
+@media (max-width: 768px) {
+    .dashboardBtn {
+        padding: 10px 20px;
+        font-size: 14px;
+    }
+
+    .dashboardIcon {
+        font-size: 16px;
+    }
+}
+
+@media (max-width: 480px) {
+    .dashboardBtn {
+        padding: 8px 16px;
+        font-size: 13px;
+        margin-bottom: 10px;
+    }
+
+    .dashboardIcon {
+        font-size: 14px;
+    }
+}
+
+.topDashboardBtn {
+    position: absolute;
+    bottom: 10px;
+    left: 35%;
+    background-color: #2980b9;
+    color: white;
+    border-radius: 50%;
+    width: 35px;
+    height: 35px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
+    font-size: 16px;
+    border: none;
+}
+
+.topDashboardBtn:hover {
+    transform: scale(1.1);
+    background-color: #3498db;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.25);
+}
+
+[dir="rtl"] .topDashboardBtn {
+    left: 35%;
+    right: auto;
+}
+
+@media (max-width: 992px) {
+    .topDashboardBtn {
+        width: 32px;
+        height: 32px;
+        font-size: 15px;
+    }
+}
+
+@media (max-width: 768px) {
+    .topDashboardBtn {
+        width: 30px;
+        height: 30px;
+        font-size: 14px;
+        left: 32%;
+    }
+
+    [dir="rtl"] .topDashboardBtn {
+        left: 32%;
+        right: auto;
+    }
+}
+
+@media (max-width: 576px) {
+    .topDashboardBtn {
+        width: 28px;
+        height: 28px;
+        font-size: 13px;
+        left: 31%;
+    }
+
+    [dir="rtl"] .topDashboardBtn {
+        left: 31%;
+    }
+}
+
+@media (max-width: 480px) {
+    .topDashboardBtn {
+        width: 28px;
+        height: 28px;
+        font-size: 12px;
+        left: 30%;
+    }
+
+    [dir="rtl"] .topDashboardBtn {
+        left: 30%;
+        right: auto;
+    }
+}
+
+@media (max-width: 360px) {
+    .topDashboardBtn {
+        width: 25px;
+        height: 25px;
+        font-size: 11px;
+        left: 28%;
+    }
+
+    [dir="rtl"] .topDashboardBtn {
+        left: 28%;
+    }
+}
+
+.topCornerBtn {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    padding: 10px 20px;
+    background: linear-gradient(to right, #2980b9, #3498db);
+    color: white;
+    font-weight: 600;
+    font-size: 15px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(52, 152, 219, 0.2);
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.topCornerBtn:hover {
+    background: linear-gradient(to right, #1c638e, #2980b9);
+    box-shadow: 0 6px 15px rgba(52, 152, 219, 0.3);
+    transform: translateY(-2px);
+}
+
+.backIcon {
+    margin-left: 8px;
+    font-size: 16px;
+    transition: transform 0.3s ease;
+}
+
+.topCornerBtn:hover .backIcon {
+    transform: translateX(-5px);
+}
+
+[dir="rtl"] .topCornerBtn {
+    left: auto;
+    right: 20px;
+}
+
+[dir="rtl"] .backIcon {
+    margin-left: 0;
+    margin-right: 8px;
+    transform: rotate(180deg);
+}
+
+[dir="rtl"] .topCornerBtn:hover .backIcon {
+    transform: rotate(180deg) translateX(5px);
+}
+
+@media (max-width: 768px) {
+    .topCornerBtn {
+        padding: 8px 16px;
+        font-size: 14px;
+        top: 15px;
+        left: 15px;
+    }
+
+    [dir="rtl"] .topCornerBtn {
+        left: auto;
+        right: 15px;
+    }
+
+    .backIcon {
+        font-size: 14px;
+    }
+}
+
+@media (max-width: 480px) {
+    .topCornerBtn {
+        padding: 6px 12px;
+        font-size: 13px;
+        top: 10px;
+        left: 10px;
+    }
+
+    [dir="rtl"] .topCornerBtn {
+        left: auto;
+        right: 10px;
+    }
+
+    .backIcon {
+        font-size: 12px;
+    }
+}
+
+.cardCornerBtn {
+    position: absolute;
+    top: 15px;
+    left: 15px;
+    padding: 8px 16px;
+    background: linear-gradient(to right, #2980b9, #3498db);
+    color: white;
+    font-weight: 600;
+    font-size: 14px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(52, 152, 219, 0.2);
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+}
+
+.cardCornerBtn:hover {
+    background: linear-gradient(to right, #1c638e, #2980b9);
+    box-shadow: 0 6px 15px rgba(52, 152, 219, 0.3);
+    transform: translateY(-2px);
+}
+
+.backIcon {
+    margin-left: 8px;
+    font-size: 16px;
+    transition: transform 0.3s ease;
+}
+
+.cardCornerBtn:hover .backIcon {
+    transform: translateX(-5px);
+}
+
+[dir="rtl"] .cardCornerBtn {
+    left: auto;
+    right: 15px;
+}
+
+[dir="rtl"] .backIcon {
+    margin-left: 0;
+    margin-right: 8px;
+    transform: rotate(180deg);
+}
+
+[dir="rtl"] .cardCornerBtn:hover .backIcon {
+    transform: rotate(180deg) translateX(5px);
+}
+
+@media (max-width: 768px) {
+    .cardCornerBtn {
+        padding: 6px 12px;
+        font-size: 13px;
+    }
+
+    .backIcon {
+        font-size: 14px;
+    }
+}
+
+@media (max-width: 576px) {
+    .cardCornerBtn {
+        padding: 5px 10px;
+        font-size: 12px;
+        top: 10px;
+        left: 10px;
+    }
+
+    [dir="rtl"] .cardCornerBtn {
+        left: auto;
+        right: 10px;
+    }
+
+    .backIcon {
+        font-size: 12px;
+    }
+}
+
+@media (max-width: 480px) {
+    .cardCornerBtn {
+        padding: 4px 8px;
+        font-size: 11px;
+    }
+
+    .backIcon {
+        font-size: 11px;
+    }
+}
