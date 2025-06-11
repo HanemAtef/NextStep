@@ -60,7 +60,7 @@ const addTableToPDF = async (pdf, table, yPos, isNewPage = false) => {
       const margin = 20;     // الهامش
 
       const maxWidth = pdfWidth - (2 * margin);
-      const maxHeight = 120; // ارتفاع أقصى للجدول
+      const maxHeight = 100; // ارتفاع أقصى للجدول
 
       // حساب النسبة بين العرض والارتفاع
       const aspectRatio = table.offsetWidth / table.offsetHeight || 1;
@@ -182,7 +182,7 @@ const createSingleTable = (headers, rows, title = '', pageNum = 1, totalPages = 
 /**
  * وظيفة مساعدة لتقسيم الجدول إلى صفحات
  */
-const splitTableIntoPages = (rows, itemsPerPage = 20) => {
+const splitTableIntoPages = (rows, itemsPerPage = 12) => {
   const pages = [];
   for (let i = 0; i < rows.length; i += itemsPerPage) {
     pages.push(rows.slice(i, i + itemsPerPage));
@@ -201,8 +201,8 @@ const createDataTable = async (pdf, headers, rows, title = '', startY = 40, font
       return false;
     }
 
-    // تقسيم البيانات إلى صفحات - 20 صف في كل صفحة
-    const itemsPerPage = Math.min(20, rows.length);
+    // تقسيم البيانات إلى صفحات - 12 صف في كل صفحة
+    const itemsPerPage = 12;
     const pages = splitTableIntoPages(rows, itemsPerPage);
 
     // إضافة كل صفحة على حدة
@@ -300,13 +300,16 @@ const chartToImage = async (chartRef) => {
 };
 
 /**
- * وظيفة مساعدة لتحميل صورة
+ * وظيفة مساعدة لتحميل صورة مع معالجة الأخطاء
  */
 const loadImage = (src) => {
   return new Promise((resolve, reject) => {
     const img = new Image();
     img.onload = () => resolve(img);
-    img.onerror = reject;
+    img.onerror = () => {
+      console.warn(`فشل في تحميل الصورة: ${src}`);
+      resolve(null); // إرجاع null بدلاً من رفض الوعد
+    };
     img.src = src;
   });
 };
@@ -332,7 +335,7 @@ export const convertChartToImage = async (chartRef, scale = 4) => {
     const newCanvas = document.createElement('canvas');
     const ctx = newCanvas.getContext('2d');
 
-    // تعيين نفس الأبعاد مع مضاعف الدقة
+    // تعيين نفس الأبعاد مع مضaعف الدقة
     newCanvas.width = canvas.width;
     newCanvas.height = canvas.height;
 
@@ -386,27 +389,24 @@ export const generateDashboardReport = async (
       return false;
     }
 
-    // إنشاء مستند PDF جديد
+    // إنشاء مستند PDF جديد - إزالة إعدادات الخطوط المشكلة
     const pdf = new jsPDF({
       orientation: 'portrait',
       unit: 'mm',
-      format: 'a4',
-      putOnlyUsedFonts: true,
+      format: 'a4'
     });
 
-    // إضافة الخط العربي
-    pdf.addFont('assets/fonts/Cairo-Regular.ttf', 'Cairo', 'normal');
-    pdf.addFont('assets/fonts/Cairo-Bold.ttf', 'Cairo', 'bold');
-    pdf.setFont('Cairo');
-    pdf.setR2L(true);
-
-    // إضافة الشعارات
+    // إضافة الشعارات مع معالجة الأخطاء
     try {
       const logoCollage = await loadImage('/logoCollage.jpg');
-      pdf.addImage(logoCollage, 'JPEG', 20, 10, 30, 30);
+      if (logoCollage) {
+        pdf.addImage(logoCollage, 'JPEG', 20, 10, 30, 30);
+      }
 
       const logoUniversity = await loadImage('/logoUnivercity.png');
-      pdf.addImage(logoUniversity, 'PNG', 160, 10, 30, 30);
+      if (logoUniversity) {
+        pdf.addImage(logoUniversity, 'PNG', 160, 10, 30, 30);
+      }
     } catch (logoError) {
       console.warn('تعذر تحميل الشعارات:', logoError);
     }
@@ -418,7 +418,7 @@ export const generateDashboardReport = async (
       pdf.addImage(titleImage, 'JPEG', 20, 45, 170, 20);
     }
 
-    // إضافة معلومات التاريخ بالتقويم الميلادي
+    // إضافة معلومات التاريخ بالتقليم الميلادي
     let dateText = 'جميع الفترات';
     if (dateRange.startDate && dateRange.endDate) {
       const formatDate = (date) => {
@@ -450,6 +450,10 @@ export const generateDashboardReport = async (
       pdf.addImage(reportDateImage, 'JPEG', 20, 85, 170, 10);
     }
 
+    pdf.setDrawColor(52, 58, 64);
+    pdf.setLineWidth(0.5);
+    pdf.line(15, 95, 195, 95);
+
     // إضافة الإحصائيات العامة
     const statsHeaders = ['المؤشر', 'القيمة'];
     const statsRows = [
@@ -475,16 +479,34 @@ export const generateDashboardReport = async (
     for (const status of statuses) {
       if (chartRefs.pieChartRef?.current) {
         try {
+          console.log(`معالجة الحالة: ${status}`);
+
           // تحديث الحالة
           if (onStatusChange) {
             await onStatusChange(status);
-            // انتظار لتحديث البيانات
-            await new Promise(resolve => setTimeout(resolve, 1500));
+            // انتظار أطول لضمان تحديث البيانات
+            await new Promise(resolve => setTimeout(resolve, 2000));
           }
 
-          // التحقق من وجود البيانات
-          if (!chartsData.departmentStatus?.labels || !chartsData.departmentStatus?.data) {
-            console.warn(`لا توجد بيانات متاحة للحالة: ${status}`);
+          // الحصول على البيانات المحدثة مباشرة من المخطط
+          const chartInstance = chartRefs.pieChartRef.current.chartInstance || chartRefs.pieChartRef.current;
+
+          if (!chartInstance || !chartInstance.data) {
+            console.warn(`المخطط غير متاح للحالة: ${status}`);
+            continue;
+          }
+
+          // استخراج البيانات الحالية من المخطط
+          const currentLabels = chartInstance.data.labels || [];
+          const currentData = chartInstance.data.datasets?.[0]?.data || [];
+
+          console.log(`البيانات للحالة ${status}:`, { currentLabels, currentData });
+
+          // التحقق من أن البيانات غير فارغة وتحتوي على قيم فعلية
+          const hasValidData = currentData.some(value => value > 0);
+
+          if (!hasValidData || currentLabels.length === 0) {
+            console.warn(`لا توجد بيانات صالحة للحالة: ${status}`);
             continue;
           }
 
@@ -494,35 +516,26 @@ export const generateDashboardReport = async (
             data: []
           };
 
-          // نسخ البيانات بأمان
-          const labels = [...chartsData.departmentStatus.labels];
-          const data = [...chartsData.departmentStatus.data];
-
-          labels.forEach((label, index) => {
-            if (!label.includes('إدارة التقارير') && !label.includes('اداره التقارير')) {
+          currentLabels.forEach((label, index) => {
+            const value = currentData[index] || 0;
+            // فقط إضافة البيانات التي تحتوي على قيم أكبر من صفر وليست إدارة التقارير
+            if (value > 0 &&
+              !label.includes('إدارة التقارير') &&
+              !label.includes('اداره التقارير')) {
               filteredData.labels.push(label);
-              filteredData.data.push(data[index] || 0);
+              filteredData.data.push(value);
             }
           });
 
-          // التحقق من وجود بيانات بعد التصفية
-          if (filteredData.labels.length === 0) {
-            console.warn(`لا توجد بيانات بعد التصفية للحالة: ${status}`);
+          // التحقق من وجود بيانات صالحة بعد التصفية
+          if (filteredData.labels.length === 0 || filteredData.data.every(val => val === 0)) {
+            console.warn(`لا توجد بيانات صالحة بعد التصفية للحالة: ${status}`);
             continue;
           }
 
-          // تحديث المخطط بالبيانات الجديدة
-          const chartInstance = chartRefs.pieChartRef.current.chartInstance;
-          if (chartInstance) {
-            chartInstance.data.labels = filteredData.labels;
-            chartInstance.data.datasets[0].data = filteredData.data;
-            chartInstance.update();
-
-            // انتظار لتحديث الرسم
-            await new Promise(resolve => setTimeout(resolve, 500));
-          }
-
+          // تحويل المخطط الحالي إلى صورة مباشرة
           const pieChartImage = await convertChartToImage(chartRefs.pieChartRef);
+
           if (pieChartImage) {
             pdf.addPage();
             const pieTitle = createTextElement(`توزيع الطلبات ${statusTitles[status]} حسب الإدارة`, 24);
@@ -533,24 +546,21 @@ export const generateDashboardReport = async (
             pdf.addImage(pieChartImage, 'PNG', 20, 30, 170, 100);
 
             // إضافة جدول تفصيلي للبيانات
-            if (filteredData.labels.length > 0 && filteredData.data.length > 0) {
-              const pieDataHeaders = ['الإدارة', 'عدد الطلبات', 'النسبة المئوية'];
+            const pieDataHeaders = ['الإدارة', 'عدد الطلبات', 'النسبة المئوية'];
+            const total = filteredData.data.reduce((sum, val) => sum + (val || 0), 0);
+            const pieDataRows = filteredData.labels.map((label, index) => {
+              const value = filteredData.data[index] || 0;
+              const percentage = total > 0 ? ((value / total) * 100).toFixed(1) + '%' : '0%';
+              return [label, value, percentage];
+            });
 
-              const total = filteredData.data.reduce((sum, val) => sum + (val || 0), 0);
-              const pieDataRows = filteredData.labels.map((label, index) => {
-                const value = filteredData.data[index] || 0;
-                const percentage = total > 0 ? ((value / total) * 100).toFixed(1) + '%' : '0%';
-                return [label, value, percentage];
-              });
-
-              if (pieDataRows.length > 0) {
-                const pieDataTable = createSingleTable(
-                  pieDataHeaders,
-                  pieDataRows,
-                  `تفاصيل توزيع الطلبات ${statusTitles[status]} حسب الإدارة`
-                );
-                await addTableToPDF(pdf, pieDataTable, 140);
-              }
+            if (pieDataRows.length > 0) {
+              const pieDataTable = createSingleTable(
+                pieDataHeaders,
+                pieDataRows,
+                `تفاصيل توزيع الطلبات ${statusTitles[status]} حسب الإدارة`
+              );
+              await addTableToPDF(pdf, pieDataTable, 140);
             }
           }
         } catch (error) {
