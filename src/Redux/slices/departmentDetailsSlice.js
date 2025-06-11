@@ -198,16 +198,27 @@ export const fetchStatusPieChart = createAsyncThunk(
             // تحويل البيانات إلى التنسيق المطلوب للمخطط الدائري
             const statusData = response.data;
 
-            // حساب عدد الطلبات قيد التنفيذ بطرح عدد الطلبات المتأخرة من إجمالي عدد الطلبات قيد التنفيذ
-            const pendingCount = Math.max(0, (statusData.pending || 0) - (statusData.delayed || 0));
-
+            // تحويل البيانات للتنسيق الجديد
             return {
-                labels: ['قيد التنفيذ', 'متأخر', 'مقبول', 'مرفوض'],
+                labels: [
+                    'منشأة قيد التنفيذ',
+                    'منشأة متأخرة',
+                    'منشأة مقبولة',
+                    'منشأة مرفوضة',
+                    'مستلمة قيد التنفيذ',
+                    'مستلمة متأخرة',
+                    'مستلمة مقبولة',
+                    'مستلمة مرفوضة'
+                ],
                 data: [
-                    pendingCount,
-                    statusData.delayed || 0,
-                    statusData.approved || 0,
-                    statusData.rejected || 0
+                    statusData.createdByDepartment?.inProgress || 0,
+                    statusData.createdByDepartment?.delayed || 0,
+                    statusData.createdByDepartment?.acceptedByOthers || 0,
+                    statusData.createdByDepartment?.rejectedByOthers || 0,
+                    statusData.receivedFromOthers?.inProgress || 0,
+                    statusData.receivedFromOthers?.delayed || 0,
+                    statusData.receivedFromOthers?.acceptedByDepartment || 0,
+                    statusData.receivedFromOthers?.rejectedByDepartment || 0
                 ]
             };
         } catch (error) {
@@ -221,11 +232,19 @@ const initialState = {
     department: null,
     stats: {
         totalRequests: 0,
-        pendingRequests: 0,
-        delayedRequests: 0,
-        approvedRequests: 0,
-        rejectedRequests: 0,
-        createdRequests: 0
+        createdByDepartment: {
+            total: 0,
+            inProgress: 0,
+            delayed: 0,
+            acceptedByOthers: 0,
+            rejectedByOthers: 0
+        },
+        receivedFromOthers: {
+            inProgress: 0,
+            delayed: 0,
+            acceptedByDepartment: 0,
+            rejectedByDepartment: 0
+        }
     },
     processingTimeStats: {
         labels: [],
@@ -245,8 +264,17 @@ const initialState = {
         processedData: []
     },
     statusPieChart: {
-        labels: ['قيد التنفيذ', 'متأخر', 'مقبول', 'مرفوض'],
-        data: [0, 0, 0, 0]
+        labels: [
+            'منشأة قيد التنفيذ',
+            'منشأة متأخرة',
+            'منشأة مقبولة',
+            'منشأة مرفوضة',
+            'مستلمة قيد التنفيذ',
+            'مستلمة متأخرة',
+            'مستلمة مقبولة',
+            'مستلمة مرفوضة'
+        ],
+        data: [0, 0, 0, 0, 0, 0, 0, 0]
     },
     dateRange: {
         startDate: new Date(new Date().setDate(new Date().getDate() - 7)).toISOString(),
@@ -414,16 +442,37 @@ export const { setDateRange } = departmentDetailsSlice.actions;
 export const selectDepartment = (state) => state.departmentDetails?.department;
 export const selectStats = (state) => state.departmentDetails?.stats || {
     totalRequests: 0,
-    pendingRequests: 0,
-    delayedRequests: 0,
-    approvedRequests: 0,
-    rejectedRequests: 0
+    createdByDepartment: {
+        total: 0,
+        inProgress: 0,
+        delayed: 0,
+        acceptedByOthers: 0,
+        rejectedByOthers: 0
+    },
+    receivedFromOthers: {
+        inProgress: 0,
+        delayed: 0,
+        acceptedByDepartment: 0,
+        rejectedByDepartment: 0
+    }
 };
 export const selectProcessingTimeStats = (state) => state.departmentDetails?.processingTimeStats || { labels: [], data: [] };
 export const selectRequestsCountByType = (state) => state.departmentDetails?.requestsCountByType || { labels: [], data: [] };
 export const selectRejectionReasons = (state) => state.departmentDetails?.rejectionReasons || { labels: [], data: [] };
 export const selectTimeAnalysis = (state) => state.departmentDetails?.timeAnalysis || { labels: [], receivedData: [], processedData: [] };
-export const selectStatusPieChart = (state) => state.departmentDetails?.statusPieChart || { labels: ['قيد التنفيذ', 'متأخر', 'مقبول', 'مرفوض'], data: [0, 0, 0, 0] };
+export const selectStatusPieChart = (state) => state.departmentDetails?.statusPieChart || {
+    labels: [
+        'منشأة قيد التنفيذ',
+        'منشأة متأخرة',
+        'منشأة مقبولة',
+        'منشأة مرفوضة',
+        'مستلمة قيد التنفيذ',
+        'مستلمة متأخرة',
+        'مستلمة مقبولة',
+        'مستلمة مرفوضة'
+    ],
+    data: [0, 0, 0, 0, 0, 0, 0, 0]
+};
 export const selectDateRange = (state) => state.departmentDetails?.dateRange || {
     startDate: new Date(new Date().setDate(new Date().getDate() - 7)).toISOString(),
     endDate: new Date().toISOString()

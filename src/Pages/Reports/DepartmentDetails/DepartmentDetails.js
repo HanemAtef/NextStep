@@ -174,16 +174,29 @@ const DepartmentDetails = () => {
 
     // تحديث بيانات مخطط الدائرة
     const statusData = useMemo(() => ({
-        labels: ['قيد التنفيذ', 'متأخر', 'مقبول', 'مرفوض'],
+        labels: [
+            'منشأة قيد التنفيذ',
+            'منشأة متأخرة',
+            'منشأة مقبولة',
+            'منشأة مرفوضة',
+            'مستلمة قيد التنفيذ',
+            'مستلمة متأخرة',
+            'مستلمة مقبولة',
+            'مستلمة مرفوضة'
+        ],
         datasets: [
             {
                 data: [
-                    stats?.pendingRequests || 0,
-                    stats?.delayedRequests || 0,
-                    stats?.approvedRequests || 0,
-                    stats?.rejectedRequests || 0
+                    stats?.createdByDepartment?.inProgress || 0,
+                    stats?.createdByDepartment?.delayed || 0,
+                    stats?.createdByDepartment?.acceptedByOthers || 0,
+                    stats?.createdByDepartment?.rejectedByOthers || 0,
+                    stats?.receivedFromOthers?.inProgress || 0,
+                    stats?.receivedFromOthers?.delayed || 0,
+                    stats?.receivedFromOthers?.acceptedByDepartment || 0,
+                    stats?.receivedFromOthers?.rejectedByDepartment || 0
                 ],
-                backgroundColor: ['#ffe066', '#b6b6f7', '#00b894', '#f4511e'],
+                backgroundColor: ['#ffe066', '#b6b6f7', '#00b894', '#f4511e', '#3498db', '#9b59b6', '#2ecc71', '#e74c3c'],
                 borderWidth: 1,
             },
         ],
@@ -478,38 +491,66 @@ const DepartmentDetails = () => {
         },
         {
             id: 2,
-            title: 'قيد التنفيذ',
-            value: stats?.pendingRequests || 0,
+            title: 'إجمالي الطلبات المنشأة',
+            value: stats?.createdByDepartment?.total || 0,
+            icon: <FaShare />,
+            color: colors.info
+        },
+        {
+            id: 3,
+            title: 'منشأة قيد التنفيذ',
+            value: stats?.createdByDepartment?.inProgress || 0,
             icon: <FaRegClock />,
             color: colors.warning
         },
         {
-            id: 3,
-            title: 'متأخرة',
-            value: stats?.delayedRequests || 0,
+            id: 4,
+            title: 'منشأة متأخرة',
+            value: stats?.createdByDepartment?.delayed || 0,
             icon: <FaExclamationTriangle />,
             color: colors.secondary
         },
         {
-            id: 4,
-            title: 'تمت الموافقة',
-            value: stats?.approvedRequests || 0,
+            id: 5,
+            title: 'منشأة مقبولة',
+            value: stats?.createdByDepartment?.acceptedByOthers || 0,
             icon: <FaCheckCircle />,
             color: colors.success
         },
         {
-            id: 5,
-            title: 'مرفوضة',
-            value: stats?.rejectedRequests || 0,
+            id: 6,
+            title: 'منشأة مرفوضة',
+            value: stats?.createdByDepartment?.rejectedByOthers || 0,
             icon: <FaTimesCircle />,
             color: colors.danger
         },
         {
-            id: 6,
-            title: 'ما تم انشاؤه',
-            value: stats?.createdRequests || 0,
-            icon: <FaTimesCircle />,
+            id: 7,
+            title: 'مستلمة قيد التنفيذ',
+            value: stats?.receivedFromOthers?.inProgress || 0,
+            icon: <FaInbox />,
+            color: colors.warning
+        },
+        {
+            id: 8,
+            title: 'مستلمة متأخرة',
+            value: stats?.receivedFromOthers?.delayed || 0,
+            icon: <FaExclamationTriangle />,
+            color: colors.secondary
+        },
+        {
+            id: 9,
+            title: 'مستلمة مقبولة',
+            value: stats?.receivedFromOthers?.acceptedByDepartment || 0,
+            icon: <FaCheckCircle />,
             color: colors.success
+        },
+        {
+            id: 10,
+            title: 'مستلمة مرفوضة',
+            value: stats?.receivedFromOthers?.rejectedByDepartment || 0,
+            icon: <FaTimesCircle />,
+            color: colors.danger
         },
     ];
 
@@ -694,18 +735,118 @@ const DepartmentDetails = () => {
                 </div>
             )}
 
-            <div className={styles.statsCards}>
-                {quickStats.map(stat => (
-                    <div key={stat.id} className={styles.statCard}>
-                        <div className={styles.statIcon} style={{ backgroundColor: stat.color }}>
-                            {stat.icon}
+            {/* إجمالي الطلبات */}
+            <div className={styles.statsSection}>
+                <div className={styles.statsCards}>
+                    <div className={styles.statCard}>
+                        <div className={styles.statIcon} style={{ backgroundColor: colors.primary }}>
+                            <FaList />
                         </div>
                         <div className={styles.statInfo}>
-                            <span className={styles.statValue}>{stat.value}</span>
-                            <span className={styles.statLabel}>{stat.title}</span>
+                            <span className={styles.statValue}>{stats?.totalRequests || 0}</span>
+                            <span className={styles.statLabel}>إجمالي الطلبات</span>
                         </div>
                     </div>
-                ))}
+                </div>
+            </div>
+
+            {/* الطلبات المنشأة من الإدارة */}
+            <div className={styles.statsSection}>
+                <h3 className={styles.sectionSubTitle}>
+                    <FaShare className={styles.sectionIcon} /> الطلبات المنشأة من الإدارة
+                </h3>
+                <div className={styles.statsCards}>
+                    <div className={styles.statCard}>
+                        <div className={styles.statIcon} style={{ backgroundColor: colors.info }}>
+                            <FaShare />
+                        </div>
+                        <div className={styles.statInfo}>
+                            <span className={styles.statValue}>{stats?.createdByDepartment?.total || 0}</span>
+                            <span className={styles.statLabel}>إجمالي الطلبات المنشأة</span>
+                        </div>
+                    </div>
+                    <div className={styles.statCard}>
+                        <div className={styles.statIcon} style={{ backgroundColor: colors.warning }}>
+                            <FaRegClock />
+                        </div>
+                        <div className={styles.statInfo}>
+                            <span className={styles.statValue}>{stats?.createdByDepartment?.inProgress || 0}</span>
+                            <span className={styles.statLabel}>قيد التنفيذ</span>
+                        </div>
+                    </div>
+                    <div className={styles.statCard}>
+                        <div className={styles.statIcon} style={{ backgroundColor: colors.secondary }}>
+                            <FaExclamationTriangle />
+                        </div>
+                        <div className={styles.statInfo}>
+                            <span className={styles.statValue}>{stats?.createdByDepartment?.delayed || 0}</span>
+                            <span className={styles.statLabel}>متأخرة</span>
+                        </div>
+                    </div>
+                    <div className={styles.statCard}>
+                        <div className={styles.statIcon} style={{ backgroundColor: colors.success }}>
+                            <FaCheckCircle />
+                        </div>
+                        <div className={styles.statInfo}>
+                            <span className={styles.statValue}>{stats?.createdByDepartment?.acceptedByOthers || 0}</span>
+                            <span className={styles.statLabel}>مقبولة</span>
+                        </div>
+                    </div>
+                    <div className={styles.statCard}>
+                        <div className={styles.statIcon} style={{ backgroundColor: colors.danger }}>
+                            <FaTimesCircle />
+                        </div>
+                        <div className={styles.statInfo}>
+                            <span className={styles.statValue}>{stats?.createdByDepartment?.rejectedByOthers || 0}</span>
+                            <span className={styles.statLabel}>مرفوضة</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* الطلبات المستلمة من الإدارات الأخرى */}
+            <div className={styles.statsSection}>
+                <h3 className={styles.sectionSubTitle}>
+                    <FaInbox className={styles.sectionIcon} /> الطلبات المستلمة من الإدارات الأخرى
+                </h3>
+                <div className={styles.statsCards}>
+                    <div className={styles.statCard}>
+                        <div className={styles.statIcon} style={{ backgroundColor: colors.warning }}>
+                            <FaRegClock />
+                        </div>
+                        <div className={styles.statInfo}>
+                            <span className={styles.statValue}>{stats?.receivedFromOthers?.inProgress || 0}</span>
+                            <span className={styles.statLabel}>قيد التنفيذ</span>
+                        </div>
+                    </div>
+                    <div className={styles.statCard}>
+                        <div className={styles.statIcon} style={{ backgroundColor: colors.secondary }}>
+                            <FaExclamationTriangle />
+                        </div>
+                        <div className={styles.statInfo}>
+                            <span className={styles.statValue}>{stats?.receivedFromOthers?.delayed || 0}</span>
+                            <span className={styles.statLabel}>متأخرة</span>
+                        </div>
+                    </div>
+                    <div className={styles.statCard}>
+                        <div className={styles.statIcon} style={{ backgroundColor: colors.success }}>
+                            <FaCheckCircle />
+                        </div>
+                        <div className={styles.statInfo}>
+                            <span className={styles.statValue}>{stats?.receivedFromOthers?.acceptedByDepartment || 0}</span>
+                            <span className={styles.statLabel}>مقبولة</span>
+                        </div>
+                    </div>
+                    <div className={styles.statCard}>
+                        <div className={styles.statIcon} style={{ backgroundColor: colors.danger }}>
+                            <FaTimesCircle />
+                        </div>
+                        <div className={styles.statInfo}>
+                            <span className={styles.statValue}>{stats?.receivedFromOthers?.rejectedByDepartment || 0}</span>
+                            <span className={styles.statLabel}>مرفوضة</span>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <div className={styles.chartsContainer}>

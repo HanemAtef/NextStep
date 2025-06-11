@@ -57,10 +57,10 @@ const addTableToPDF = async (pdf, table, yPos, isNewPage = false) => {
       // تحويل أبعاد الجدول من البكسل إلى المليمتر (A4 = 210mm × 297mm)
       const pdfWidth = 210;  // عرض A4
       const pdfHeight = 297; // ارتفاع A4
-      const margin = 20;     // الهامش
+      const margin = 15;     // الهامش
 
       const maxWidth = pdfWidth - (2 * margin);
-      const maxHeight = 100; // ارتفاع أقصى للجدول
+      const maxHeight = 110; // ارتفاع أقصى للجدول
 
       // حساب النسبة بين العرض والارتفاع
       const aspectRatio = table.offsetWidth / table.offsetHeight || 1;
@@ -97,7 +97,7 @@ const createSingleTable = (headers, rows, title = '', pageNum = 1, totalPages = 
   wrapper.style.cssText = `
     direction: rtl;
     font-family: 'Cairo', sans-serif;
-    width: 700px;
+    width: 800px;
     background-color: #ffffff;
     padding: 10px;
     box-sizing: border-box;
@@ -184,9 +184,34 @@ const createSingleTable = (headers, rows, title = '', pageNum = 1, totalPages = 
  */
 const splitTableIntoPages = (rows, itemsPerPage = 12) => {
   const pages = [];
+
+  // إذا كان عدد الصفوف أقل من الحد الأقصى، نضعها كلها في صفحة واحدة
+  if (rows.length <= itemsPerPage) {
+    pages.push(rows);
+    return pages;
+  }
+
+  // تقسيم الصفوف إلى صفحات
   for (let i = 0; i < rows.length; i += itemsPerPage) {
     pages.push(rows.slice(i, i + itemsPerPage));
   }
+
+  // معالجة الصفحة الأخيرة إذا كانت تحتوي على عدد قليل جداً من الصفوف
+  const lastPageIndex = pages.length - 1;
+  if (lastPageIndex > 0 && pages[lastPageIndex].length <= 3) {
+    // إذا كانت الصفحة الأخيرة تحتوي على 3 صفوف أو أقل، ندمجها مع الصفحة السابقة
+    const lastPage = pages.pop(); // إزالة الصفحة الأخيرة
+    const previousPage = pages[pages.length - 1]; // الصفحة قبل الأخيرة
+
+    // إذا كان مجموع الصفوف في الصفحتين أقل من أو يساوي 15 صف، ندمجهما
+    if (previousPage.length + lastPage.length <= 15) {
+      pages[pages.length - 1] = [...previousPage, ...lastPage];
+    } else {
+      // وإلا نعيد الصفحة الأخيرة كما هي
+      pages.push(lastPage);
+    }
+  }
+
   return pages;
 };
 

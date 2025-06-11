@@ -224,24 +224,27 @@
 
 /* Stats Cards */
 .statsCards {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-    gap: 18px;
-    margin-bottom: 28px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-bottom: 20px;
 }
 
 .statCard {
-    background-color: white;
+    flex: 1;
+    min-width: 200px;
+    background-color: #ffffff;
     border-radius: 8px;
-    padding: 18px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 15px;
     display: flex;
     align-items: center;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-    border: 1px solid #f0f0f0;
+    transition: transform 0.2s, box-shadow 0.2s;
 }
 
 .statCard:hover {
-    /* Removing hover effects */
+    transform: translateY(-3px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
 .statIcon {
@@ -383,6 +386,10 @@
         width: 100%;
         justify-content: space-between;
     }
+
+    .statCard {
+        min-width: 150px;
+    }
 }
 
 @media (max-width: 576px) {
@@ -402,4 +409,24 @@
     .container {
         padding: 0 10px;
     }
+}
+
+/* إضافة أنماط جديدة للأقسام والعناوين الفرعية */
+.statsSection {
+    margin-bottom: 25px;
+}
+
+.sectionSubTitle {
+    display: flex;
+    align-items: center;
+    font-size: 1.2rem;
+    color: #2c3e50;
+    margin-bottom: 15px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #f0f0f0;
+}
+
+.sectionIcon {
+    margin-left: 8px;
+    color: #5bbefa;
 }
