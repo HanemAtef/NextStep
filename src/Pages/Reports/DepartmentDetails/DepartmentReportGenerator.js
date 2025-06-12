@@ -58,10 +58,8 @@ const addTableToPDF = async (pdf, table, yPos, isNewPage = false) => {
       const maxWidth = pdfWidth - (2 * margin);
       const maxHeight = 110; // ارتفاع أقصى للجدول
 
-      // حساب النسبة بين العرض والارتفاع
       const aspectRatio = table.offsetWidth / table.offsetHeight || 1;
 
-      // حساب الأبعاد النهائية
       let finalWidth = maxWidth;
       let finalHeight = finalWidth / aspectRatio;
 
@@ -71,10 +69,8 @@ const addTableToPDF = async (pdf, table, yPos, isNewPage = false) => {
         finalWidth = finalHeight * aspectRatio;
       }
 
-      // حساب موضع X لتوسيط الجدول
       const xPos = (pdfWidth - finalWidth) / 2;
 
-      // إضافة الصورة إلى PDF
       pdf.addImage(image, 'PNG', xPos, yPos, finalWidth, finalHeight);
       return true;
     }
@@ -337,7 +333,7 @@ const loadImage = (src) => {
     img.onload = () => resolve(img);
     img.onerror = () => {
       console.warn(`فشل في تحميل الصورة: ${src}`);
-      resolve(null); // إرجاع null بدلاً من رفض الوعد
+      resolve(null); 
     };
     img.src = src;
   });
@@ -579,11 +575,9 @@ export const generateDepartmentReport = async (
         }
         pdf.addImage(processingTimeImage, 'JPEG', 35, 30, 140, 80);
 
-        // إضافة جدول تفصيلي للبيانات
         if (reportData?.processingTimeStats?.labels) {
           const timeHeaders = ['نوع الطلب', 'متوسط وقت المعالجة (ساعة)', 'عدد الطلبات المعالجة'];
 
-          // تقسيم البيانات إلى صفحات - 12 صف في كل صفحة
           const itemsPerPage = 12;
           const rows = reportData.processingTimeStats.labels.map((label, index) => [
             label,
@@ -593,7 +587,6 @@ export const generateDepartmentReport = async (
 
           const pages = splitTableIntoPages(rows, itemsPerPage);
 
-          // إضافة الصفحة الأولى من الجدول
           const timeTable = createSingleTable(
             timeHeaders,
             pages[0],
@@ -602,8 +595,6 @@ export const generateDepartmentReport = async (
             pages.length
           );
           await addTableToPDF(pdf, timeTable, 120);
-
-          // إضافة باقي الصفحات إن وجدت
           for (let i = 1; i < pages.length; i++) {
             pdf.addPage();
             const nextPageTable = createSingleTable(
@@ -775,14 +766,12 @@ export const generateDepartmentReport = async (
 
             const altImage = canvas.toDataURL('image/jpeg', 0.95);
 
-            // إضافة العنوان
             const timeAnalysisTitle = createTextElement('تطور أعداد الطلبات خلال السنة', 24);
             const timeAnalysisTitleImage = await elementToImage(timeAnalysisTitle);
             if (timeAnalysisTitleImage) {
               pdf.addImage(timeAnalysisTitleImage, 'PNG', 20, 10, 170, 15);
             }
 
-            // إضافة المخطط البديل بحجم أصغر
             pdf.addImage(altImage, 'JPEG', 35, 30, 140, 80);
           } catch (altError) {
             console.error('فشل في التقاط مخطط التحليل الزمني بالطريقة البديلة:', altError);
@@ -829,7 +818,6 @@ export const generateDepartmentReport = async (
       } catch (error) {
         console.error('خطأ في معالجة مخطط التحليل الزمني:', error);
 
-        // إضافة رسالة بديلة في حالة فشل التقاط المخطط
         const errorMessage = createTextElement('تعذر عرض مخطط تطور أعداد الطلبات خلال السنة', 18, true);
         const errorMessageImage = await elementToImage(errorMessage);
         if (errorMessageImage) {
