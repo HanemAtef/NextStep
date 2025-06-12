@@ -37,7 +37,7 @@ const EditRequest = () => {
 
   useEffect(() => {
     if (currentrequest) {
-      console.log("بيانات الطلب:", currentrequest);
+      // console.log("بيانات الطلب:", currentrequest);
       setRequest({
         id: currentrequest.id || '',
         description: currentrequest.description || '',
@@ -149,7 +149,6 @@ const EditRequest = () => {
       }))
     };
 
-    console.log("🚀 البيانات المرسلة:", formattedRequest);
 
     dispatch(updaterequest(formattedRequest));
     navigate('/admin/requests');

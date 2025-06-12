@@ -148,12 +148,12 @@ const AddRequest = () => {
       }))
     };
 
-    console.log(requestBody); 
+    // console.log(requestBody); 
 
     dispatch(addrequest(requestBody))
       .unwrap()
       .then((res) => {
-        console.log("Response after adding:", res);
+        // console.log("Response after adding:", res);
         alert(`تم إنشاء نوع الطلب "${request.name}" بنجاح`);
         navigate('/admin/requests');
       })

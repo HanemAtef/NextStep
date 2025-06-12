@@ -31,17 +31,14 @@ const ReportsDashboard = () => {
     const dispatch = useDispatch();
     const { stats, dateRange, loading, error, pieStatus, departmentStatus, departments, timeAnalysis, requestsCount, createdRequests } = useSelector(state => state.reportDashboard);
 
-    // تحويل سلاسل التواريخ إلى كائنات Date للاستخدام في DatePicker
     const [localDateRange, setLocalDateRange] = useState({
         startDate: dateRange.startDate ? new Date(dateRange.startDate) : null,
         endDate: dateRange.endDate ? new Date(dateRange.endDate) : null
     });
 
-    // تتبع حالة إعادة ضبط البيانات
     const [isResetting, setIsResetting] = useState(false);
     const [resetMessage, setResetMessage] = useState('');
 
-    // تسجيل البيانات المستلمة من Redux
     useEffect(() => {
         // console.log("📊 Redux State Data:", {
         //     stats: stats,
@@ -82,9 +79,7 @@ const ReportsDashboard = () => {
         }
     }, [stats, departmentStatus, departments, timeAnalysis, requestsCount, createdRequests, dateRange, pieStatus]);
 
-    // تحديث DatePicker عند تغيير نطاق التواريخ
     const handleDateChange = (update) => {
-        // لا نحتاج إلى تحديث Redux إذا لم يتغير التاريخ
         if (!update || !update[0]) return;
 
         const newDateRange = {
@@ -92,7 +87,6 @@ const ReportsDashboard = () => {
             endDate: update[1] || update[0]
         };
 
-        // تأكد من تضمين بداية ونهاية اليوم للتواريخ
         if (newDateRange.startDate) {
             const startDay = new Date(newDateRange.startDate);
             startDay.setHours(0, 0, 0, 0);
@@ -107,23 +101,18 @@ const ReportsDashboard = () => {
 
         setLocalDateRange(newDateRange);
 
-        // تحويل التواريخ إلى سلاسل نصية قبل إرسالها إلى Redux
         dispatch(setDateRange({
             startDate: newDateRange.startDate instanceof Date ? newDateRange.startDate.toISOString() : newDateRange.startDate,
             endDate: newDateRange.endDate instanceof Date ? newDateRange.endDate.toISOString() : newDateRange.endDate
         }));
 
-        // إعادة تحميل البيانات مع نطاق التاريخ الجديد
         refreshData(newDateRange);
     };
 
-    // إعادة تعيين نطاق التاريخ إلى القيمة الافتراضية
     const handleResetDateRange = () => {
-        // عرض مؤشر إعادة الضبط
         setIsResetting(true);
         setResetMessage('جاري إعادة تحميل البيانات الافتراضية...');
 
-        // إعداد تواريخ افتراضية - تاريخ اليوم فقط
         const currentDate = new Date();
         currentDate.setHours(0, 0, 0, 0);
 
@@ -134,13 +123,11 @@ const ReportsDashboard = () => {
 
         setLocalDateRange(defaultRange);
 
-        // تحويل التواريخ إلى سلاسل نصية قبل إرسالها إلى Redux
         dispatch(setDateRange({
             startDate: null,
             endDate: null
         }));
 
-        // إعادة تحميل جميع البيانات بدون معايير تصفية
         dispatch(fetchStats());
         dispatch(fetchDepartments());
         dispatch(fetchTimeAnalysis());
@@ -150,21 +137,17 @@ const ReportsDashboard = () => {
             status: pieStatus
         }));
 
-        // إخفاء مؤشر إعادة الضبط بعد 1.5 ثانية
         setTimeout(() => {
             setIsResetting(false);
             setResetMessage('تم إعادة ضبط البيانات بنجاح');
 
-            // إخفاء رسالة النجاح بعد 3 ثواني
             setTimeout(() => {
                 setResetMessage('');
             }, 3000);
         }, 1500);
     };
 
-    // تحديث البيانات
     const refreshData = (dates = localDateRange) => {
-        // تنسيق تواريخ العرض للتسجيل
         const displayStartDate = dates.startDate instanceof Date ?
             dates.startDate.toLocaleDateString() :
             dates.startDate ? new Date(dates.startDate).toLocaleDateString() : 'undefined';
@@ -174,7 +157,6 @@ const ReportsDashboard = () => {
             dates.endDate ? new Date(dates.endDate).toLocaleDateString() : 'undefined';
 
 
-        // تحويل التواريخ إلى سلاسل نصية
         const startDate = dates.startDate instanceof Date ? dates.startDate.toISOString() : dates.startDate;
         const endDate = dates.endDate instanceof Date ? dates.endDate.toISOString() : dates.endDate;
 
@@ -191,14 +173,11 @@ const ReportsDashboard = () => {
         }));
     };
 
-    // تحميل البيانات عند تحميل المكون
     useEffect(() => {
         refreshData();
     }, []);
 
-    // تحديث مخطط توزيع الإدارات عند تغيير حالة الفلتر
     useEffect(() => {
-        // تحويل التواريخ إلى سلاسل نصية
         const startDate = localDateRange.startDate instanceof Date ?
             localDateRange.startDate.toISOString() : localDateRange.startDate;
         const endDate = localDateRange.endDate instanceof Date ?
@@ -211,7 +190,6 @@ const ReportsDashboard = () => {
         }));
     }, [pieStatus, dispatch, localDateRange.startDate, localDateRange.endDate]);
 
-    // باليت الألوان الجديدة (نفس ألوان صفحة التفاصيل)
     const palette = [
         '#5bbefa',
         '#b6b6f7',
@@ -236,12 +214,10 @@ const ReportsDashboard = () => {
         dark: palette[6],
     };
 
-    // تحديث البيانات عند تحميل الصفحة
     useEffect(() => {
         dispatch(fetchStats());
         dispatch(fetchDepartments());
 
-        // تحميل البيانات الأولية مع نطاق التاريخ الافتراضي
         dispatch(fetchTimeAnalysis({
             startDate: dateRange.startDate,
             endDate: dateRange.endDate
@@ -254,7 +230,6 @@ const ReportsDashboard = () => {
             startDate: dateRange.startDate,
             endDate: dateRange.endDate
         }));
-        // جلب بيانات حالة الإدارات
         dispatch(fetchDepartmentStatus({
             status: pieStatus,
             startDate: dateRange.startDate,
@@ -262,16 +237,13 @@ const ReportsDashboard = () => {
         }));
     }, [dispatch]);
 
-    // تحديث البيانات عند تغيير نطاق التاريخ أو حالة الطلب المختارة للمخطط الدائري
     useEffect(() => {
         if (localDateRange.startDate && localDateRange.endDate) {
-            // تحديث Redux بنطاق التاريخ الجديد
             dispatch(setDateRange({
                 startDate: localDateRange.startDate instanceof Date ? localDateRange.startDate.toISOString() : localDateRange.startDate,
                 endDate: localDateRange.endDate instanceof Date ? localDateRange.endDate.toISOString() : localDateRange.endDate
             }));
 
-            // إعادة جلب البيانات بناءً على نطاق التاريخ الجديد
             dispatch(fetchTimeAnalysis({
                 startDate: localDateRange.startDate instanceof Date ? localDateRange.startDate.toISOString() : localDateRange.startDate,
                 endDate: localDateRange.endDate instanceof Date ? localDateRange.endDate.toISOString() : localDateRange.endDate
@@ -284,7 +256,6 @@ const ReportsDashboard = () => {
                 startDate: localDateRange.startDate instanceof Date ? localDateRange.startDate.toISOString() : localDateRange.startDate,
                 endDate: localDateRange.endDate instanceof Date ? localDateRange.endDate.toISOString() : localDateRange.endDate
             }));
-            // جلب بيانات حالة الإدارات
             dispatch(fetchDepartmentStatus({
                 status: pieStatus,
                 startDate: localDateRange.startDate instanceof Date ? localDateRange.startDate.toISOString() : localDateRange.startDate,
@@ -293,14 +264,11 @@ const ReportsDashboard = () => {
         }
     }, [localDateRange.startDate, localDateRange.endDate, pieStatus, dispatch]);
 
-    // معالج تغيير حالة مخطط الدائرة
     const handlePieStatusChange = (e) => {
         const newStatus = e.target.value;
 
-        // تحديث الحالة في Redux
         dispatch(setPieStatus(newStatus));
 
-        // إعادة تحميل بيانات المخطط الدائري مع الحالة الجديدة
         dispatch(fetchDepartmentStatus({
             status: newStatus,
             startDate: localDateRange.startDate,
@@ -308,7 +276,6 @@ const ReportsDashboard = () => {
         }));
     };
 
-    // تحديث ألوان الكروت بنفس الترتيب
     const statsCards = [
         { id: 1, title: 'إجمالي عدد الطلبات', value: stats.totalRequests, icon: <FaFileAlt />, color: palette[0] },
         { id: 2, title: 'قيد التنفيذ', value: stats.pendingRequests, icon: <FaRegClock />, color: palette[3] },
@@ -317,9 +284,7 @@ const ReportsDashboard = () => {
         { id: 5, title: 'مرفوض', value: stats.rejectedRequests, icon: <FaTimesCircle />, color: palette[4] },
     ];
 
-    // إعداد بيانات مخطط الدائرة بناءً على البيانات من API فقط
     const getPieChartData = () => {
-        // قائمة الإدارات (استخدم الإدارات الفعلية إذا كانت متوفرة)
         const departmentNames = departments.length ? departments
             .filter(d => {
                 const deptName = d.name || '';
@@ -327,7 +292,6 @@ const ReportsDashboard = () => {
             })
             .map(d => d.name) : [];
 
-        // تحقق مما إذا كانت البيانات متوفرة
         if (!departmentStatus || !departmentStatus.data) {
             return {
                 labels: [],
@@ -340,11 +304,9 @@ const ReportsDashboard = () => {
             };
         }
 
-        // تعديل البيانات إذا كانت الحالة هي "قيد التنفيذ"
         let displayLabels = departmentStatus.labels || departmentNames;
         let displayValues = [...(departmentStatus.data || [])];
 
-        // فلترة البيانات لإزالة إدارة التقارير
         const filteredData = displayLabels.reduce((acc, label, index) => {
             if (!label.includes('إدارة التقارير') && !label.includes('اداره التقارير')) {
                 acc.labels.push(label);
@@ -465,7 +427,6 @@ const ReportsDashboard = () => {
             return acc;
         }, { labels: [], values: [] });
 
-        // تخصيص ألوان للإدارات
         const departmentColors = filteredData.labels.map((_, index) => palette[index % palette.length]);
 
         return {
@@ -672,7 +633,7 @@ const ReportsDashboard = () => {
         { value: 'pending', label: 'قيد التنفيذ' },
     ];
 
-    // دالة توليد التقرير
+    //  توليد التقرير
     const handleGenerateReport = async () => {
         try {
             const chartRefs = {
@@ -682,7 +643,6 @@ const ReportsDashboard = () => {
                 timeLineChartRef
             };
 
-            // جمع البيانات اللازمة للتقرير
             const reportData = {
                 departments: departments,
                 stats: stats,
@@ -692,10 +652,8 @@ const ReportsDashboard = () => {
                 departmentStatus: departmentStatus
             };
 
-            // إنشاء دالة لتغيير الحالة
             const handleStatusChange = async (status) => {
                 dispatch(setPieStatus(status));
-                // انتظار لتحديث البيانات
                 await dispatch(fetchDepartmentStatus({ dateRange: localDateRange, status }));
             };
 
@@ -712,7 +670,6 @@ const ReportsDashboard = () => {
         }
     };
 
-    // عرض شاشة التحميل
     const isLoading = loading.stats || loading.departments || loading.timeAnalysis ||
         loading.requestsCount || loading.createdRequests;
 

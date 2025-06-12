@@ -12,17 +12,6 @@ import { FaPlus, FaExclamationTriangle, FaCheckCircle } from "react-icons/fa";
 import styles from "./CreateReq.module.css";
 import { useNavigate } from "react-router-dom";
 
-/**
- * Note: This implementation assumes the existence of a backend API endpoint:
- * GET /api/Applications/check-national-id?nationalId=XXX&studentName=YYY
- * 
- * The API should:
- * 1. Return 200 OK if the national ID is not used or is used with the same student name
- * 2. Return 409 Conflict if the national ID is used with a different student name
- * 
- * If the API doesn't exist, it needs to be implemented on the backend.
- */
-
 const CreateReq = () => {
     const dispatch = useDispatch();
     const {
@@ -60,6 +49,12 @@ const CreateReq = () => {
         }
         if (!formData.studentName) {
             errors.studentName = "اسم الطالب مطلوب";
+        } else {
+            // التحقق من أن الاسم رباعي (يحتوي على 3 مسافات على الأقل)
+            const namePartsCount = formData.studentName.trim().split(/\s+/).filter(part => part.length > 0).length;
+            if (namePartsCount < 4) {
+                errors.studentName = "يجب إدخال الاسم الرباعي بالكامل";
+            }
         }
         if (!formData.studentPhone) {
             errors.studentPhone = "رقم الهاتف مطلوب";
@@ -95,19 +90,31 @@ const CreateReq = () => {
             if (/^\d*$/.test(value)) {
                 dispatch(updateField({ field: name, value }));
 
-                // مسح رسالة الخطأ إذا تم تغيير الرقم
                 if (studentIdError) {
                     setStudentIdError("");
                 }
 
-                // لا نتحقق من الرقم القومي هنا، سنتحقق فقط عند الإرسال
             } else {
                 setStudentIdError("الرجاء إدخال أرقام فقط");
             }
         } else if (name === "studentName") {
             dispatch(updateField({ field: name, value }));
 
-            // لا نتحقق من الرقم القومي هنا، سنتحقق فقط عند الإرسال
+            // التحقق من الاسم الرباعي عند الكتابة
+            if (value) {
+                const namePartsCount = value.trim().split(/\s+/).filter(part => part.length > 0).length;
+                if (namePartsCount < 4) {
+                    setFormErrors(prev => ({
+                        ...prev,
+                        studentName: "يجب إدخال الاسم الرباعي بالكامل"
+                    }));
+                } else {
+                    setFormErrors(prev => ({
+                        ...prev,
+                        studentName: undefined
+                    }));
+                }
+            }
         } else if (name === "studentPhone") {
             dispatch(updateField({ field: name, value }));
         } else if (name === "attachment") {
@@ -144,24 +151,12 @@ const CreateReq = () => {
             return;
         }
 
-        // تم تعطيل التحقق من الرقم القومي مؤقتاً حتى يتم تنفيذ الـ API
-        // TODO: إعادة تفعيل التحقق عندما يتم تنفيذ الـ API
-        /*
-        if (formData.studentId && formData.studentName) {
-            try {
-                await dispatch(checkNationalId({
-                    nationalId: formData.studentId,
-                    studentName: formData.studentName
-                })).unwrap();
-
-                console.log("National ID validated successfully");
-            } catch (error) {
-                console.error("Error validating national ID:", error);
-                setErrorMessage(error || "حدث خطأ أثناء التحقق من الرقم القومي");
-                return;
-            }
+        // التحقق من أن الاسم رباعي
+        const namePartsCount = formData.studentName.trim().split(/\s+/).filter(part => part.length > 0).length;
+        if (namePartsCount < 4) {
+            setErrorMessage("يجب إدخال الاسم الرباعي بالكامل");
+            return;
         }
-        */
 
         const hasSelectedCondition = conditions.some(condition => condition.checked);
         if (!hasSelectedCondition) {
@@ -184,7 +179,6 @@ const CreateReq = () => {
                 return;
             }
 
-            // إضافة البيانات بالضبط كما في Swagger
             formDataToSubmit.append("ApplicationTypeID", applicationTypeId);
             formDataToSubmit.append("StudentNaid", formData.studentId.trim());
             formDataToSubmit.append("StudentName", formData.studentName.trim());
@@ -195,7 +189,7 @@ const CreateReq = () => {
             }
 
             const result = await dispatch(submitApplication(formDataToSubmit)).unwrap();
-            console.log("Response:", result);
+            // console.log("Response:", result);
 
             setSuccessMessage("تم إرسال الطلب بنجاح");
             dispatch(resetForm());
@@ -209,7 +203,6 @@ const CreateReq = () => {
             }, 2000);
         } catch (error) {
             console.error("حدث خطأ أثناء إرسال الطلب", error);
-            // إذا كانت الرسالة سلسلة نصية مباشرة من Redux
             setErrorMessage(error);
         }
     };
@@ -296,7 +289,7 @@ const CreateReq = () => {
                             {formErrors.studentId && !studentIdError && <div className={styles.errorText}>{formErrors.studentId}</div>}
                         </div>
                         <div className={styles.formGroup}>
-                            <label htmlFor="studentName" className={styles.formLabel}>اسم الطالب *</label>
+                            <label htmlFor="studentName" className={styles.formLabel}>اسم الطالب الرباعي *</label>
                             <input
                                 type="text"
                                 id="studentName"
@@ -305,7 +298,7 @@ const CreateReq = () => {
                                 value={formData.studentName || ""}
                                 onChange={handleChange}
                                 disabled={loading}
-                                placeholder="أدخل اسم الطالب بالكامل"
+                                placeholder="أدخل الاسم الرباعي بالكامل (الاسم الأول والأوسط والعائلة واللقب)"
                             />
                             {formErrors.studentName && <div className={styles.errorText}>{formErrors.studentName}</div>}
                         </div>

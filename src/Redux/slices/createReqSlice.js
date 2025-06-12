@@ -4,7 +4,6 @@ import axios from "axios";
 
 const API_URL = "https://nextstep.runasp.net/api";
 
-// Get token from sessionStorage
 const getAuthToken = () => {
     const token = sessionStorage.getItem("token");
     if (!token) {
@@ -66,7 +65,6 @@ export const submitApplication = createAsyncThunk(
                 return rejectWithValue("No token found");
             }
 
-            // تحويل ApplicationTypeID إلى رقم
             const applicationTypeId = parseInt(formData.get("ApplicationTypeID"));
             if (!applicationTypeId) {
                 return rejectWithValue("نوع الطلب غير صالح");
@@ -75,7 +73,6 @@ export const submitApplication = createAsyncThunk(
             const nationalId = formData.get("StudentNaid");
             const studentName = formData.get("StudentName");
 
-            // إنشاء FormData جديد
             const newFormData = new FormData();
             newFormData.append("ApplicationTypeID", applicationTypeId);
             newFormData.append("StudentNaid", nationalId);
@@ -86,7 +83,6 @@ export const submitApplication = createAsyncThunk(
                 newFormData.append("Notes", formData.get("Notes"));
             }
 
-            // طباعة البيانات للتحقق
             console.log("Sending data:", {
                 ApplicationTypeID: applicationTypeId,
                 StudentNaid: nationalId,
@@ -112,12 +108,10 @@ export const submitApplication = createAsyncThunk(
         } catch (error) {
             console.error("Error in submitApplication:", error);
 
-            // التعامل مع خطأ عدم تطابق الرقم القومي مع اسم الطالب
             if (error.response?.status === 409) {
                 const errorData = error.response.data;
                 const errorMessage = typeof errorData === 'string' ? errorData : errorData?.message;
 
-                // فحص نوع الخطأ من الرسالة أو كود إضافي من الخادم
                 if (errorMessage?.includes("مشابه") || errorData?.errorCode === "SimilarApplicationExists") {
                     return rejectWithValue("يوجد طلب مشابه بالفعل حالته قيد التنفيذ أو مقبول. لا يمكن تقديم طلب جديد من نفس النوع.");
                 } else {

@@ -21,8 +21,8 @@ const DashLayout = ({ title }) => {
 
     setCanCreateRequests(role.includes("موظف") && !isCommitteeOrCouncil);
 
-    console.log("DashLayout - User Role:", role);
-    console.log("DashLayout - Can Create Requests:", role.includes("موظف") && !isCommitteeOrCouncil);
+    // console.log("DashLayout - User Role:", role);
+    // console.log("DashLayout - Can Create Requests:", role.includes("موظف") && !isCommitteeOrCouncil);
   }, []);
 
   return (

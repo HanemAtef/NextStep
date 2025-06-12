@@ -91,7 +91,7 @@ const EditUser = () => {
       updatedUser.departmentID = parseInt(user.departmentID);
     }
 
-    console.log("Sending data to API:", updatedUser);
+    // console.log("Sending data to API:", updatedUser);
     dispatch(updateUser({ id, updatedUser }))
       .then((result) => {
         if (result.meta.requestStatus === 'fulfilled') {

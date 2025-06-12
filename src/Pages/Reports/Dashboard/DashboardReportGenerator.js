@@ -2,9 +2,7 @@ import { jsPDF } from 'jspdf';
 import 'jspdf-autotable';
 import html2canvas from 'html2canvas';
 
-/**
- * وظيفة مساعدة لتحويل عنصر HTML إلى صورة بدقة عالية
- */
+
 const elementToImage = async (element, scale = 4) => {
   try {
     const container = document.createElement('div');

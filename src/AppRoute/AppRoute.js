@@ -46,8 +46,8 @@ export default function AppRoutes() {
         const token = sessionStorage.getItem('token');
         const userRole = sessionStorage.getItem("role");
 
-        console.log("AppRoutes: Token exists:", !!token);
-        console.log("AppRoutes: User role:", userRole);
+        // console.log("AppRoutes: Token exists:", !!token);
+        // console.log("AppRoutes: User role:", userRole);
 
         if (!token) {
             navigate('/login');
@@ -88,20 +88,16 @@ export default function AppRoutes() {
                 </Route>
             </Route>
 
-            {/* مسار مباشر لصفحة المستخدم */}
             <Route path="/user-direct" element={<UserInfo />} />
 
-            {/* مسارات إدارة التقارير - مستقلة مثل الأدمن */}
             <Route element={<ProtectedRoute allowedRole="مدير التقارير" />}>
                 <Route path="/reports" element={<ReportsDash title=" إدارة التقارير " />}>
                     <Route index element={<ReportsDashboard />} />
                     <Route path="department/:id" element={<DepartmentDetails />} />
                 </Route>
-                {/* صفحة المستخدم لمدير التقارير - مع شريط التنقل فقط */}
                 <Route path="/reports/user" element={<UserPageWithNav />} />
             </Route>
 
-            {/* مسار مباشر لصفحة تقارير الإدارة للتأكد من أنها تعمل */}
             <Route path="/reports-direct" element={<ReportsDashboard />} />
 
             <Route element={<ProtectedRoute allowedRole="Employee" />}>
@@ -115,14 +111,12 @@ export default function AppRoutes() {
                 </Route>
             </Route>
 
-            {/* مسار إنشاء الطلبات - متاح فقط للموظفين ماعدا لجنة الدراسات العليا ومجلس الكلية */}
             <Route element={<ProtectedRoute allowedRole="RegularEmployee" />}>
                 <Route element={<DashLayout title={userRole} />}>
                     <Route path="/create" element={<CreateReq />} />
                 </Route>
             </Route>
 
-            {/* 404 Route */}
             <Route path="/NotFound" element={<NotFound />} />
             <Route path="*" element={<Navigate to="/NotFound" replace />} />
         </Routes>
