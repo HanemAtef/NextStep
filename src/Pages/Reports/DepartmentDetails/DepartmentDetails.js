@@ -781,7 +781,7 @@ const DepartmentDetails = () => {
         <div className={styles.actionsGroup}>
           <button
             className={styles.refreshButton}
-            // onClick={handleRefreshData}
+            onClick={handleRefreshData}
             disabled={loading?.department || loading?.stats}
             title="تحديث البيانات"
           >
@@ -794,7 +794,7 @@ const DepartmentDetails = () => {
 
           <button
             className={styles.generateReportButton}
-            onClick={handleGenerateReport}
+            // onClick={handleGenerateReport}
             disabled={
               !department ||
               isGeneratingReport ||
