@@ -6,6 +6,22 @@ const ProtectedRoute = ({ allowedRole, redirectPath = "/login" }) => {
   const userRole = sessionStorage.getItem("role");
   const location = useLocation();
 
+  const isKnownRole = (role) => {
+    const knownRoles = [
+      "ادمن",
+      "مدير التقارير",
+      "اداره التقارير",
+      "مجلس الكليه",
+      "ذكاء اصطناعي",
+      "علوم حاسب",
+      "نظم المعلومات",
+      "لجنه الدرسات العليا",
+      "حسابات علميه",
+      "إدارة الدرسات العليا"
+    ];
+    return knownRoles.includes(role);
+  };
+
   useEffect(() => {
     // console.log("ProtectedRoute: Current Role:", userRole);
     // console.log("ProtectedRoute: Allowed Role:", allowedRole);
@@ -16,32 +32,45 @@ const ProtectedRoute = ({ allowedRole, redirectPath = "/login" }) => {
     return <Navigate to={redirectPath} replace />;
   }
 
+  // Check if role is known
+  if (!isKnownRole(userRole)) {
+    return <Navigate to="/" replace />;
+  }
+
   if (allowedRole) {
     if (allowedRole === "ادمن" && userRole !== "ادمن") {
+      // console.log("Role mismatch: User is not an Admin");
       return <Navigate to="/inbox" replace />;
     }
 
     if (allowedRole === "Employee") {
-      const userRoles = JSON.parse(sessionStorage.getItem("roles") || "[]");
-      const restrictedRoles = ["مجلس الكليه", "لجنه الدرسات العليا"];
+      const allowedRoles = [
+        "مجلس الكليه",
+        "ذكاء اصطناعي",
+        "علوم حاسب",
+        "نظم المعلومات",
+        "لجنه الدرسات العليا",
+        "حسابات علميه",
+        "إدارة الدرسات العليا",
+      ];
 
-      if (location.pathname === "/create") {
-        if (userRoles.some(role => restrictedRoles.includes(role))) {
-          return <Navigate to="/inbox" replace />;
-        }
+      if (!userRole || !allowedRoles.includes(userRole)) {
+        // console.log("Role mismatch: User is not an Employee");
+        const defaultPath = userRole === "ادمن" ? "/admin" : "/login";
+        return <Navigate to={defaultPath} replace />;
       }
-
       return <Outlet />;
     }
 
     if (allowedRole === "ReportsManager") {
       if (userRole !== "مدير التقارير" && userRole !== "اداره التقارير") {
+        // console.log("Role mismatch: User is not a Reports Manager");
         const defaultPath =
           userRole === "ادمن"
             ? "/admin"
             : userRole?.includes("موظف")
-              ? "/inbox"
-              : "/login";
+            ? "/inbox"
+            : "/login";
         return <Navigate to={defaultPath} replace />;
       }
       return <Outlet />;
@@ -53,8 +82,8 @@ const ProtectedRoute = ({ allowedRole, redirectPath = "/login" }) => {
           userRole === "ادمن"
             ? "/admin"
             : userRole?.includes("موظف")
-              ? "/inbox"
-              : "/login";
+            ? "/inbox"
+            : "/login";
         return <Navigate to={defaultPath} replace />;
       }
       return <Outlet />;
@@ -64,12 +93,15 @@ const ProtectedRoute = ({ allowedRole, redirectPath = "/login" }) => {
       const userRoles = JSON.parse(sessionStorage.getItem("roles") || "[]");
       const restrictedRoles = ["مجلس الكليه", "لجنه الدرسات العليا"];
 
+      // If trying to access create request page
       if (location.pathname === "/create") {
-        if (userRoles.some(role => restrictedRoles.includes(role))) {
+        // Check if user has any restricted role
+        if (userRoles.some((role) => restrictedRoles.includes(role))) {
           return <Navigate to="/inbox" replace />;
         }
       }
 
+      // For other pages, allow access if user has any role
       return <Outlet />;
     }
 

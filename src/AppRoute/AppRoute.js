@@ -36,6 +36,38 @@ const UserPageWithNav = () => (
   </>
 );
 
+// مكون صفحة الرول غير المعروف
+const UnknownRole = () => (
+  <div
+    style={{
+      textAlign: "center",
+      padding: "50px",
+      direction: "rtl",
+    }}
+  >
+    <h1 style={{ color: "#dc3545" }}>دور غير معروف</h1>
+    <p>عذراً، الدور الخاص بك غير معروف في النظام.</p>
+    <p>يرجى التواصل مع المسؤول لإصلاح هذه المشكلة.</p>
+    <button
+      onClick={() => {
+        sessionStorage.clear();
+        window.location.href = "/login";
+      }}
+      style={{
+        padding: "10px 20px",
+        backgroundColor: "#dc3545",
+        color: "white",
+        border: "none",
+        borderRadius: "5px",
+        cursor: "pointer",
+        marginTop: "20px",
+      }}
+    >
+      تسجيل الخروج
+    </button>
+  </div>
+);
+
 export default function AppRoutes() {
   const navigate = useNavigate();
   const [role, setRole] = useState(null);
@@ -77,7 +109,25 @@ export default function AppRoutes() {
   const canCreateRequest = () => {
     const roles = JSON.parse(sessionStorage.getItem("roles") || "[]");
     const restrictedRoles = ["مجلس الكليه", "لجنه الدرسات العليا"];
-    return roles.length > 0 && !roles.some(role => restrictedRoles.includes(role));
+    return (
+      roles.length > 0 && !roles.some((role) => restrictedRoles.includes(role))
+    );
+  };
+
+  const isKnownRole = (role) => {
+    const knownRoles = [
+      "ادمن",
+      "مدير التقارير",
+      "اداره التقارير",
+      "مجلس الكليه",
+      "ذكاء اصطناعي",
+      "علوم حاسب",
+      "نظم المعلومات",
+      "لجنه الدرسات العليا",
+      "حسابات علميه",
+      "إدارة الدرسات العليا",
+    ];
+    return knownRoles.includes(role);
   };
 
   return (
@@ -88,7 +138,9 @@ export default function AppRoutes() {
         path="/"
         element={
           role ? (
-            role === "ادمن" ? (
+            !isKnownRole(role) ? (
+              <UnknownRole />
+            ) : role === "ادمن" ? (
               <Navigate to="/admin" replace />
             ) : role === "مدير التقارير" || role === "اداره التقارير" ? (
               <Navigate to="/reports" replace />
