@@ -10,19 +10,11 @@ const DashLayout = ({ title }) => {
   const [canCreateRequests, setCanCreateRequests] = useState(false);
 
   useEffect(() => {
+    const roles = JSON.parse(sessionStorage.getItem("roles") || "[]");
+    const restrictedRoles = ["مجلس الكليه", "لجنه الدرسات العليا"];
 
-    const role = sessionStorage.getItem("role") || "";
-    setUserRole(role);
-
-
-    const isCommitteeOrCouncil =
-      (role.includes("لجنه") || role.includes("لجنة")) ||
-      role.includes("مجلس");
-
-    setCanCreateRequests(role.includes("موظف") && !isCommitteeOrCouncil);
-
-    // console.log("DashLayout - User Role:", role);
-    // console.log("DashLayout - Can Create Requests:", role.includes("موظف") && !isCommitteeOrCouncil);
+    // Set canCreateRequests to true if user has any role that is not restricted
+    setCanCreateRequests(roles.length > 0 && !roles.some(role => restrictedRoles.includes(role)));
   }, []);
 
   return (

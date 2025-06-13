@@ -7,7 +7,7 @@ import { useNavigate } from "react-router-dom";
 import ApplicationHistory from "../ApplicationHistory/ApplicationHistory";
 import ApplicationPreview from "../ApplicationPreview/ApplicationPreview";
 import styles from "./Inbox.module.css";
-import CustomSelect from '../../../Component/CustomSelect/CustomSelect';
+import CustomSelect from "../../../Component/CustomSelect/CustomSelect";
 
 import {
   fetchInboxRequests,
@@ -23,51 +23,59 @@ import {
   selectInboxPage,
   selectInboxPageSize,
   selectInboxTotalCount,
-  selectInboxFilters
+  selectInboxFilters,
 } from "../../../Redux/slices/inboxSlice";
 
 const APPLICATION_TYPES = [
   { id: 2, name: "طلب الالتحاق الخاص بقسم نظم المعلومات" },
-  { id: 3, name: "طلب الالتحاق الخاص بقسم الحسابات العلمية" },
+  { id: 3, name: "طلب الالتحاق الخاص بقسم حسابات علميه" },
   { id: 4, name: "طلب الالتحاق الخاص بقسم ذكاء اصطناعي" },
   { id: 6, name: "طلب مد الخاص بقسم نظم المعلومات" },
   { id: 8, name: "طلب مد الخاص بقسم ذكاء اصطناعي" },
-  { id: 9, name: "ايقاف قيد الخاص بقسم علوم الحاسب" },
+  { id: 9, name: "ايقاف قيد الخاص بقسم علوم حاسب" },
   { id: 10, name: "ايقاف قيد الخاص بقسم نظم المعلومات" },
-  { id: 11, name: "ايقاف قيد الخاص بقسم الحسابات العلمية" },
+  { id: 11, name: "ايقاف قيد الخاص بقسم حسابات علميه" },
   { id: 12, name: "ايقاف قيد الخاص بقسم ذكاء اصطناعي" },
-  { id: 17, name: "سيمنار 1 تعيين لجنة الاشراف والخطة البحثية الخاص بقسم علوم الحاسب" },
-  { id: 18, name: "سيمنار 1 تعيين لجنة الاشراف والخطة البحثية الخاص بقسم نظم المعلومات" },
-  { id: 19, name: "سيمنار 1 تعيين لجنة الاشراف والخطة البحثية الخاص بقسم الحسابات العلمية" },
-  { id: 20, name: "سيمنار 1 تعيين لجنة الاشراف والخطة البحثية الخاص بقسم ذكاء اصطناعي" },
-  { id: 21, name: "سيمنار 2 صلاحية الخاص بقسم علوم الحاسب" },
+  {
+    id: 17,
+    name: "سيمنار 1 تعيين لجنة الاشراف والخطه البحثيه الخاص بقسم علوم حاسب",
+  },
+  {
+    id: 18,
+    name: "سيمنار 1 تعيين لجنة الاشراف والخطه البحثيه الخاص بقسم نظم المعلومات",
+  },
+  {
+    id: 19,
+    name: "سيمنار 1 تعيين لجنة الاشراف والخطه البحثيه الخاص بقسم حسابات علميه",
+  },
+  {
+    id: 20,
+    name: "سيمنار 1 تعيين لجنة الاشراف والخطه البحثيه الخاص بقسم ذكاء اصطناعي",
+  },
+  { id: 21, name: "سيمنار 2 صلاحية الخاص بقسم علوم حاسب" },
   { id: 22, name: "سيمنار 2 صلاحية الخاص بقسم نظم المعلومات" },
-  { id: 23, name: "سيمنار 2 صلاحية الخاص بقسم الحسابات العلمية" },
+  { id: 23, name: "سيمنار 2 صلاحية الخاص بقسم حسابات علميه" },
   { id: 24, name: "سيمنار 2 صلاحية الخاص بقسم ذكاء اصطناعي" },
-  { id: 27, name: "تشكيل لجنة الحكم والمناقشة الخاص بقسم الحسابات العلمية" },
-  { id: 28, name: "تشكيل لجنة الحكم والمناقشة الخاص بقسم ذكاء اصطناعي" },
-  { id: 29, name: "سيمنار مناقشة الخاص بقسم علوم الحاسب" },
+  { id: 29, name: "سيمنار مناقشة الخاص بقسم علوم حاسب" },
   { id: 30, name: "سيمنار مناقشة الخاص بقسم نظم المعلومات" },
-  { id: 31, name: "سيمنار مناقشة الخاص بقسم الحسابات العلمية" },
+  { id: 31, name: "سيمنار مناقشة الخاص بقسم حسابات علميه" },
   { id: 32, name: "سيمنار مناقشة الخاص بقسم ذكاء اصطناعي" },
-  { id: 33, name: "منح الخاص بقسم علوم الحاسب" },
+  { id: 33, name: "منح الخاص بقسم علوم حاسب" },
   { id: 34, name: "منح الخاص بقسم نظم المعلومات" },
-  { id: 35, name: "منح الخاص بقسم الحسابات العلمية" },
+  { id: 35, name: "منح الخاص بقسم حسابات علميه" },
   { id: 36, name: "منح الخاص بقسم ذكاء اصطناعي" },
   { id: 108, name: "طلب الالتحاق الخاص بقسم علوم الحاسب" },
   { id: 109, name: "طلب مد الخاص بقسم علوم الحاسب" },
   { id: 110, name: "طلب مد الخاص بقسم الحسابات العلمية" },
   { id: 113, name: "الغاء تسجيل الخاص بقسم نظم المعلومات" },
   { id: 114, name: "الغاء تسجيل الخاص بقسم علوم الحاسب" },
-  { id: 115, name: "الغاء تسجيل الخاص بقسم ذكاء اصطناعي" },
+  { id: 115, name: "الغاء تسجيل الخاص بقسم ذكاء اصطناعى" },
   { id: 116, name: "الغاء تسجيل الخاص بقسم الحسابات العلمية" },
-  { id: 117, name: "تشكيل لجنة الحكم والمناقشة الخاص بقسم علوم الحاسب" },
+  { id: 117, name: "تشكيل لجنة الحكم والمناقشة الخاص بقسم علوم حاسب" },
   { id: 118, name: "تشكيل لجنة الحكم والمناقشة الخاص بقسم نظم المعلومات" },
-  { id: 119, name: "تشكيل لجنة الحكم والمناقشة الخاص بقسم ذكاء اصطناعي" },
-  { id: 120, name: "تشكيل لجنة الحكم والمناقشة الخاص بقسم الحسابات العلمية" }
+  { id: 119, name: "تشكيل لجنة الحكم والمناقشة الخاص بقسم ذكاء اصطناعى" },
+  { id: 120, name: "تشكيل لجنة الحكم والمناقشة الخاص بقسم حسابات علمية" },
 ];
-
-
 
 export default function Inbox() {
   const dispatch = useDispatch();
@@ -107,19 +115,20 @@ export default function Inbox() {
     let filtered = [...requests];
 
     if (statusFilter) {
-      filtered = filtered.filter(req => req.status === statusFilter);
+      filtered = filtered.filter((req) => req.status === statusFilter);
     }
 
     if (searchID) {
       const searchTerm = searchID.toLowerCase();
-      filtered = filtered.filter(req =>
-        req.id.toString().includes(searchTerm) ||
-        (req.type && req.type.toLowerCase().includes(searchTerm))
+      filtered = filtered.filter(
+        (req) =>
+          req.id.toString().includes(searchTerm) ||
+          (req.type && req.type.toLowerCase().includes(searchTerm))
       );
     }
 
     if (typeFilter) {
-      filtered = filtered.filter(req => {
+      filtered = filtered.filter((req) => {
         return req.applicationTypeId === parseInt(typeFilter);
       });
     }
@@ -130,25 +139,39 @@ export default function Inbox() {
   useEffect(() => {
     const loadData = async () => {
       try {
-        await dispatch(fetchInboxRequests({
-          page: currentPage,
-          pageSize,
-          searchID,
-          status: statusFilter,
-          type: typeFilter,
-          department: departmentName
-        }));
+        await dispatch(
+          fetchInboxRequests({
+            page: currentPage,
+            pageSize,
+            searchID,
+            status: statusFilter,
+            type: typeFilter,
+            department: departmentName,
+          })
+        );
       } catch (error) {
         // console.error('Error loading inbox data:', error);
       }
     };
     loadData();
-  }, [dispatch, currentPage, pageSize, searchID, statusFilter, typeFilter, departmentName]);
+  }, [
+    dispatch,
+    currentPage,
+    pageSize,
+    searchID,
+    statusFilter,
+    typeFilter,
+    departmentName,
+  ]);
 
   const formatDate = (dateString) => {
     if (!dateString) return "غير معروف";
     const date = new Date(dateString);
-    return date.toLocaleDateString('ar-EG', { year: 'numeric', month: 'short', day: 'numeric' });
+    return date.toLocaleDateString("ar-EG", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
   };
 
   const handleClearFilters = () => {
@@ -246,14 +269,18 @@ export default function Inbox() {
         <p>حدث خطأ أثناء تحميل البيانات: {error}</p>
         <button
           className={styles.retryButton}
-          onClick={() => dispatch(fetchInboxRequests({
-            page: currentPage,
-            pageSize,
-            searchID,
-            status: statusFilter,
-            requestType: typeFilter,
-            department: departmentName
-          }))}
+          onClick={() =>
+            dispatch(
+              fetchInboxRequests({
+                page: currentPage,
+                pageSize,
+                searchID,
+                status: statusFilter,
+                requestType: typeFilter,
+                department: departmentName,
+              })
+            )
+          }
         >
           إعادة المحاولة
         </button>
@@ -302,10 +329,7 @@ export default function Inbox() {
           </div>
           <div className={styles.filters}>
             <div className={styles.selectBox}>
-              <select
-                value={statusFilter}
-                onChange={handleStatusChange}
-              >
+              <select value={statusFilter} onChange={handleStatusChange}>
                 <option value="">كل الحالات</option>
                 <option value="قيد_التنفيذ">قيد التنفيذ</option>
                 <option value="مقبول">مقبول</option>
@@ -315,9 +339,9 @@ export default function Inbox() {
             </div>
             <div className={styles.selectBox}>
               <CustomSelect
-                options={APPLICATION_TYPES.map(type => ({
+                options={APPLICATION_TYPES.map((type) => ({
                   value: type.id,
-                  label: type.name
+                  label: type.name,
                 }))}
                 value={typeFilter}
                 onChange={handleTypeChange}
@@ -327,7 +351,10 @@ export default function Inbox() {
             </div>
           </div>
           {(searchID || statusFilter || typeFilter) && (
-            <button className={styles.clearFiltersBtn} onClick={handleClearFilters}>
+            <button
+              className={styles.clearFiltersBtn}
+              onClick={handleClearFilters}
+            >
               مسح الفلاتر
             </button>
           )}
@@ -342,7 +369,10 @@ export default function Inbox() {
           <h3>لا توجد طلبات متاحة</h3>
           {/* <p>لا توجد طلبات تطابق معايير البحث الحالية</p> */}
           {(searchID || statusFilter || typeFilter) && (
-            <button className={styles.clearFiltersBtn} onClick={handleClearFilters}>
+            <button
+              className={styles.clearFiltersBtn}
+              onClick={handleClearFilters}
+            >
               مسح معايير التصفية
             </button>
           )}
@@ -363,7 +393,11 @@ export default function Inbox() {
               </thead>
               <tbody>
                 {filteredRequests.map((req, index) => (
-                  <tr key={req.id} className={styles.tableRow} style={{ animationDelay: `${index * 0.05}s` }}>
+                  <tr
+                    key={req.id}
+                    className={styles.tableRow}
+                    style={{ animationDelay: `${index * 0.05}s` }}
+                  >
                     <td className={styles.idCell}>{req.id}</td>
                     <td className={styles.typeCell}>{req.type}</td>
                     <td>{req.from}</td>
@@ -395,7 +429,9 @@ export default function Inbox() {
           {totalCount > pageSize && (
             <div className={styles.pagination}>
               <button
-                className={`${styles.paginationButton} ${currentPage === 1 ? styles.disabled : ""}`}
+                className={`${styles.paginationButton} ${
+                  currentPage === 1 ? styles.disabled : ""
+                }`}
                 disabled={currentPage === 1}
                 onClick={() => dispatch(setPage(currentPage - 1))}
               >
@@ -404,11 +440,14 @@ export default function Inbox() {
               </button>
 
               <div className={styles.pageInfo}>
-                الصفحة <span className={styles.pageNumber}>{currentPage}</span> من {totalPages}
+                الصفحة <span className={styles.pageNumber}>{currentPage}</span>{" "}
+                من {totalPages}
               </div>
 
               <button
-                className={`${styles.paginationButton} ${currentPage === totalPages ? styles.disabled : ""}`}
+                className={`${styles.paginationButton} ${
+                  currentPage === totalPages ? styles.disabled : ""
+                }`}
                 disabled={currentPage === totalPages}
                 onClick={() => dispatch(setPage(currentPage + 1))}
               >

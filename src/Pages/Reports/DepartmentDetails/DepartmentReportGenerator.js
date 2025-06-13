@@ -1,11 +1,10 @@
-import { jsPDF } from 'jspdf';
-import 'jspdf-autotable';
-import html2canvas from 'html2canvas';
-
+import { jsPDF } from "jspdf";
+import "jspdf-autotable";
+import html2canvas from "html2canvas";
 
 const elementToImage = async (element, scale = 3) => {
   try {
-    const container = document.createElement('div');
+    const container = document.createElement("div");
     container.style.cssText = `
       position: fixed;
       left: -9999px;
@@ -26,21 +25,20 @@ const elementToImage = async (element, scale = 3) => {
         allowTaint: true,
         letterRendering: true,
         textRendering: true,
-        backgroundColor: '#ffffff'
+        backgroundColor: "#ffffff",
       });
 
-      return canvas.toDataURL('image/jpeg', 0.9);
+      return canvas.toDataURL("image/jpeg", 0.9);
     } finally {
       if (document.body.contains(container)) {
         document.body.removeChild(container);
       }
     }
   } catch (error) {
-    console.error('خطأ في تحويل العنصر إلى صورة:', error);
+    console.error("خطأ في تحويل العنصر إلى صورة:", error);
     return null;
   }
 };
-
 
 const addTableToPDF = async (pdf, table, yPos, isNewPage = false) => {
   try {
@@ -50,12 +48,11 @@ const addTableToPDF = async (pdf, table, yPos, isNewPage = false) => {
 
     const image = await elementToImage(table);
     if (image) {
-
-      const pdfWidth = 210;  // عرض A4
+      const pdfWidth = 210; // عرض A4
       const pdfHeight = 297; // ارتفاع A4
-      const margin = 15;     // الهامش
+      const margin = 15; // الهامش
 
-      const maxWidth = pdfWidth - (2 * margin);
+      const maxWidth = pdfWidth - 2 * margin;
       const maxHeight = 110; // ارتفاع أقصى للجدول
 
       const aspectRatio = table.offsetWidth / table.offsetHeight || 1;
@@ -63,7 +60,6 @@ const addTableToPDF = async (pdf, table, yPos, isNewPage = false) => {
       let finalWidth = maxWidth;
       let finalHeight = finalWidth / aspectRatio;
 
-    
       if (finalHeight > maxHeight) {
         finalHeight = maxHeight;
         finalWidth = finalHeight * aspectRatio;
@@ -71,19 +67,25 @@ const addTableToPDF = async (pdf, table, yPos, isNewPage = false) => {
 
       const xPos = (pdfWidth - finalWidth) / 2;
 
-      pdf.addImage(image, 'PNG', xPos, yPos, finalWidth, finalHeight);
+      pdf.addImage(image, "PNG", xPos, yPos, finalWidth, finalHeight);
       return true;
     }
     return false;
   } catch (error) {
-    console.error('خطأ في إضافة الجدول:', error);
+    console.error("خطأ في إضافة الجدول:", error);
     return false;
   }
 };
 
-
-const createSingleTable = (headers, rows, title = '', pageNum = 1, totalPages = 1, fontSize = 16) => {
-  const wrapper = document.createElement('div');
+const createSingleTable = (
+  headers,
+  rows,
+  title = "",
+  pageNum = 1,
+  totalPages = 1,
+  fontSize = 16
+) => {
+  const wrapper = document.createElement("div");
   wrapper.style.cssText = `
     direction: rtl;
     font-family: 'Cairo', sans-serif;
@@ -94,7 +96,7 @@ const createSingleTable = (headers, rows, title = '', pageNum = 1, totalPages = 
   `;
 
   if (title) {
-    const titleDiv = document.createElement('div');
+    const titleDiv = document.createElement("div");
     titleDiv.style.cssText = `
       margin-bottom: 15px;
       font-weight: bold;
@@ -103,11 +105,12 @@ const createSingleTable = (headers, rows, title = '', pageNum = 1, totalPages = 
       text-align: center;
       font-family: 'Cairo', sans-serif;
     `;
-    titleDiv.textContent = title + (totalPages > 1 ? ` (${pageNum}/${totalPages})` : '');
+    titleDiv.textContent =
+      title + (totalPages > 1 ? ` (${pageNum}/${totalPages})` : "");
     wrapper.appendChild(titleDiv);
   }
 
-  const table = document.createElement('table');
+  const table = document.createElement("table");
   table.style.cssText = `
     width: 100%;
     border-collapse: collapse;
@@ -119,11 +122,11 @@ const createSingleTable = (headers, rows, title = '', pageNum = 1, totalPages = 
     margin-bottom: 7px;
   `;
 
-  const thead = document.createElement('thead');
-  const headerRow = document.createElement('tr');
+  const thead = document.createElement("thead");
+  const headerRow = document.createElement("tr");
 
-  headers.forEach(header => {
-    const th = document.createElement('th');
+  headers.forEach((header) => {
+    const th = document.createElement("th");
     th.style.cssText = `
       padding: 12px;
       border: 1px solid #b6e3ff;
@@ -134,20 +137,20 @@ const createSingleTable = (headers, rows, title = '', pageNum = 1, totalPages = 
       background-color: #5bbefa;
       font-family: 'Cairo', sans-serif;
     `;
-    th.textContent = String(header || '');
+    th.textContent = String(header || "");
     headerRow.appendChild(th);
   });
 
   thead.appendChild(headerRow);
   table.appendChild(thead);
 
-  const tbody = document.createElement('tbody');
+  const tbody = document.createElement("tbody");
   rows.forEach((row, index) => {
-    const tr = document.createElement('tr');
-    tr.style.backgroundColor = index % 2 === 0 ? '#f8fcff' : '#ffffff';
+    const tr = document.createElement("tr");
+    tr.style.backgroundColor = index % 2 === 0 ? "#f8fcff" : "#ffffff";
 
-    row.forEach(cell => {
-      const td = document.createElement('td');
+    row.forEach((cell) => {
+      const td = document.createElement("td");
       td.style.cssText = `
         padding: 10px;
         border: 1px solid #b6e3ff;
@@ -156,7 +159,7 @@ const createSingleTable = (headers, rows, title = '', pageNum = 1, totalPages = 
         font-size: ${fontSize - 2}px;
         font-family: 'Cairo', sans-serif;
       `;
-      td.textContent = String(cell || '');
+      td.textContent = String(cell || "");
       tr.appendChild(td);
     });
 
@@ -199,11 +202,18 @@ const splitTableIntoPages = (rows, itemsPerPage = 12) => {
   return pages;
 };
 
-const createDataTable = async (pdf, headers, rows, title = '', startY = 40, fontSize = 20) => {
+const createDataTable = async (
+  pdf,
+  headers,
+  rows,
+  title = "",
+  startY = 40,
+  fontSize = 20
+) => {
   try {
     // التحقق من صحة المدخلات
     if (!Array.isArray(headers) || !Array.isArray(rows) || rows.length === 0) {
-      console.error('المدخلات غير صالحة');
+      console.error("المدخلات غير صالحة");
       return false;
     }
 
@@ -215,13 +225,25 @@ const createDataTable = async (pdf, headers, rows, title = '', startY = 40, font
         pdf.addPage();
       }
 
-      const table = createSingleTable(headers, pages[i], title, i + 1, pages.length, fontSize);
+      const table = createSingleTable(
+        headers,
+        pages[i],
+        title,
+        i + 1,
+        pages.length,
+        fontSize
+      );
 
       document.body.appendChild(table);
 
-      await new Promise(resolve => setTimeout(resolve, 100));
+      await new Promise((resolve) => setTimeout(resolve, 100));
 
-      const success = await addTableToPDF(pdf, table, i === 0 ? startY : 20, false);
+      const success = await addTableToPDF(
+        pdf,
+        table,
+        i === 0 ? startY : 20,
+        false
+      );
 
       document.body.removeChild(table);
 
@@ -232,14 +254,18 @@ const createDataTable = async (pdf, headers, rows, title = '', startY = 40, font
 
     return true;
   } catch (error) {
-    console.error('خطأ في إنشاء الجدول:', error);
+    console.error("خطأ في إنشاء الجدول:", error);
     return false;
   }
 };
 
-
-const createTextElement = (text, fontSize = 24, isBold = true, align = 'center') => {
-  const element = document.createElement('div');
+const createTextElement = (
+  text,
+  fontSize = 24,
+  isBold = true,
+  align = "center"
+) => {
+  const element = document.createElement("div");
   element.style.cssText = `
     direction: rtl;
     text-align: ${align};
@@ -248,7 +274,7 @@ const createTextElement = (text, fontSize = 24, isBold = true, align = 'center')
     background-color: #ffffff;
     font-family: 'Cairo', sans-serif;
     font-size: ${fontSize}px;
-    font-weight: ${isBold ? 'bold' : 'normal'};
+    font-weight: ${isBold ? "bold" : "normal"};
     color: #2c3e50;
     margin-bottom: 10px;
     line-height: 1.4;
@@ -257,10 +283,9 @@ const createTextElement = (text, fontSize = 24, isBold = true, align = 'center')
   return element;
 };
 
-
 const convertChartToImage = async (chartRef, scale = 2) => {
   if (!chartRef?.current) {
-    console.warn('المخطط البياني غير متاح');
+    console.warn("المخطط البياني غير متاح");
     return null;
   }
 
@@ -269,63 +294,66 @@ const convertChartToImage = async (chartRef, scale = 2) => {
 
     if (chartRef.current.canvas) {
       canvas = chartRef.current.canvas;
-    }
-    else if (chartRef.current.querySelector && chartRef.current.querySelector('canvas')) {
-      canvas = chartRef.current.querySelector('canvas');
-    }
-    else {
+    } else if (
+      chartRef.current.querySelector &&
+      chartRef.current.querySelector("canvas")
+    ) {
+      canvas = chartRef.current.querySelector("canvas");
+    } else {
       // console.log('استخدام html2canvas لالتقاط المخطط البياني');
       try {
         const capturedCanvas = await html2canvas(chartRef.current, {
           scale: scale,
-          backgroundColor: '#ffffff',
+          backgroundColor: "#ffffff",
           logging: false,
           useCORS: true,
-          allowTaint: true
+          allowTaint: true,
         });
-        return capturedCanvas.toDataURL('image/jpeg', 0.95);
+        return capturedCanvas.toDataURL("image/jpeg", 0.95);
       } catch (html2canvasError) {
-        console.error('فشل في التقاط المخطط باستخدام html2canvas:', html2canvasError);
+        console.error(
+          "فشل في التقاط المخطط باستخدام html2canvas:",
+          html2canvasError
+        );
         return null;
       }
     }
 
     if (!canvas) {
-      console.warn('لم يتم العثور على عنصر canvas');
+      console.warn("لم يتم العثور على عنصر canvas");
       return null;
     }
 
-    const newCanvas = document.createElement('canvas');
-    const ctx = newCanvas.getContext('2d');
+    const newCanvas = document.createElement("canvas");
+    const ctx = newCanvas.getContext("2d");
 
     newCanvas.width = canvas.width;
     newCanvas.height = canvas.height;
 
-    ctx.fillStyle = '#ffffff';
+    ctx.fillStyle = "#ffffff";
     ctx.fillRect(0, 0, newCanvas.width, newCanvas.height);
 
     ctx.drawImage(canvas, 0, 0);
 
-    return newCanvas.toDataURL('image/jpeg', 0.95);
+    return newCanvas.toDataURL("image/jpeg", 0.95);
   } catch (error) {
-    console.error('خطأ في تحويل المخطط البياني:', error);
+    console.error("خطأ في تحويل المخطط البياني:", error);
 
     try {
       const capturedCanvas = await html2canvas(chartRef.current, {
         scale: scale,
-        backgroundColor: '#ffffff',
+        backgroundColor: "#ffffff",
         logging: false,
         useCORS: true,
-        allowTaint: true
+        allowTaint: true,
       });
-      return capturedCanvas.toDataURL('image/jpeg', 0.95);
+      return capturedCanvas.toDataURL("image/jpeg", 0.95);
     } catch (finalError) {
-      console.error('فشل نهائي في التقاط المخطط:', finalError);
+      console.error("فشل نهائي في التقاط المخطط:", finalError);
       return null;
     }
   }
 };
-
 
 const loadImage = (src) => {
   return new Promise((resolve, reject) => {
@@ -333,89 +361,84 @@ const loadImage = (src) => {
     img.onload = () => resolve(img);
     img.onerror = () => {
       console.warn(`فشل في تحميل الصورة: ${src}`);
-      resolve(null); 
+      resolve(null);
     };
     img.src = src;
   });
 };
 
-
 const formatDate = (date) => {
-  if (!date) return 'غير محدد';
+  if (!date) return "غير محدد";
 
   try {
     const d = new Date(date);
-    return d.toLocaleDateString('en-GB', {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit'
+    return d.toLocaleDateString("en-GB", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
     });
   } catch (error) {
-    return 'تاريخ غير صحيح';
+    return "تاريخ غير صحيح";
   }
 };
 
-
 const captureTimeAnalysisChart = async (chartRef) => {
   if (!chartRef?.current) {
-    console.error('مخطط التحليل الزمني غير متاح');
+    console.error("مخطط التحليل الزمني غير متاح");
     return null;
   }
-
 
   try {
     const chartElement = chartRef.current;
 
-    const canvas = chartElement.querySelector('canvas');
+    const canvas = chartElement.querySelector("canvas");
 
     if (canvas) {
-
-      const newCanvas = document.createElement('canvas');
-      const ctx = newCanvas.getContext('2d');
+      const newCanvas = document.createElement("canvas");
+      const ctx = newCanvas.getContext("2d");
 
       newCanvas.width = canvas.width * 2;
       newCanvas.height = canvas.height * 2;
 
-      ctx.fillStyle = '#ffffff';
+      ctx.fillStyle = "#ffffff";
       ctx.fillRect(0, 0, newCanvas.width, newCanvas.height);
 
       ctx.scale(2, 2);
       ctx.drawImage(canvas, 0, 0);
 
-      return newCanvas.toDataURL('image/png', 3.0);
+      return newCanvas.toDataURL("image/png", 3.0);
     }
   } catch (error) {
-    console.warn('فشل في الوصول المباشر إلى canvas:', error);
+    console.warn("فشل في الوصول المباشر إلى canvas:", error);
   }
 
   try {
-
     const chartClone = chartRef.current.cloneNode(true);
-    chartClone.style.position = 'fixed';
-    chartClone.style.top = '-9999px';
-    chartClone.style.left = '-9999px';
-    chartClone.style.width = '800px';
-    chartClone.style.height = '400px';
-    chartClone.style.backgroundColor = '#ffffff';
-    chartClone.style.padding = '20px';
+    chartClone.style.position = "fixed";
+    chartClone.style.top = "-9999px";
+    chartClone.style.left = "-9999px";
+    chartClone.style.width = "800px";
+    chartClone.style.height = "400px";
+    chartClone.style.backgroundColor = "#ffffff";
+    chartClone.style.padding = "20px";
     document.body.appendChild(chartClone);
 
     try {
-      await new Promise(resolve => setTimeout(resolve, 500));
+      await new Promise((resolve) => setTimeout(resolve, 500));
 
       const canvas = await html2canvas(chartClone, {
         scale: 3,
-        backgroundColor: '#ffffff',
+        backgroundColor: "#ffffff",
         logging: true,
         useCORS: true,
         allowTaint: true,
         letterRendering: true,
         foreignObjectRendering: false,
-        removeContainer: true
+        removeContainer: true,
       });
 
       document.body.removeChild(chartClone);
-      return canvas.toDataURL('image/png', 1.0);
+      return canvas.toDataURL("image/png", 1.0);
     } catch (e) {
       if (document.body.contains(chartClone)) {
         document.body.removeChild(chartClone);
@@ -423,25 +446,24 @@ const captureTimeAnalysisChart = async (chartRef) => {
       throw e;
     }
   } catch (error) {
-    console.warn('فشل في استخدام html2canvas المحسن:', error);
+    console.warn("فشل في استخدام html2canvas المحسن:", error);
   }
 
   try {
     const canvas = await html2canvas(chartRef.current, {
       scale: 2,
-      backgroundColor: '#ffffff',
+      backgroundColor: "#ffffff",
       logging: true,
       useCORS: true,
-      allowTaint: true
+      allowTaint: true,
     });
 
-    return canvas.toDataURL('image/png', 1.0);
+    return canvas.toDataURL("image/png", 1.0);
   } catch (error) {
-    console.error('فشل جميع محاولات التقاط المخطط:', error);
+    console.error("فشل جميع محاولات التقاط المخطط:", error);
     return null;
   }
 };
-
 
 export const generateDepartmentReport = async (
   department,
@@ -455,34 +477,38 @@ export const generateDepartmentReport = async (
     // console.log('المخططات المتاحة:', Object.keys(chartRefs || {}).filter(key => chartRefs[key]?.current));
 
     const pdf = new jsPDF({
-      orientation: 'portrait',
-      unit: 'mm',
-      format: 'a4'
+      orientation: "portrait",
+      unit: "mm",
+      format: "a4",
     });
 
     const [startDate, endDate] = dateRange || [];
 
     try {
-      const logoCollage = await loadImage('/logoCollage.jpg');
+      const logoCollage = await loadImage("/logoCollage.jpg");
       if (logoCollage) {
-        pdf.addImage(logoCollage, 'JPEG', 20, 10, 30, 30);
+        pdf.addImage(logoCollage, "JPEG", 20, 10, 30, 30);
       }
 
-      const logoUniversity = await loadImage('/logoUnivercity.png');
+      const logoUniversity = await loadImage("/logoUnivercity.png");
       if (logoUniversity) {
-        pdf.addImage(logoUniversity, 'PNG', 160, 10, 30, 30);
+        pdf.addImage(logoUniversity, "PNG", 160, 10, 30, 30);
       }
     } catch (logoError) {
-      console.warn('تعذر تحميل الشعارات:', logoError);
+      console.warn("تعذر تحميل الشعارات:", logoError);
     }
 
-    const title = createTextElement(`تقرير إدارة ${department?.name || 'الإدارة'}`, 28, true);
+    const title = createTextElement(
+      `تقرير إدارة ${department?.name || "الإدارة"}`,
+      28,
+      true
+    );
     const titleImage = await elementToImage(title);
     if (titleImage) {
-      pdf.addImage(titleImage, 'JPEG', 20, 45, 170, 20);
+      pdf.addImage(titleImage, "JPEG", 20, 45, 170, 20);
     }
 
-    let dateText = 'جميع الفترات';
+    let dateText = "جميع الفترات";
     if (startDate && endDate) {
       const formattedStartDate = formatDate(startDate);
       const formattedEndDate = formatDate(endDate);
@@ -491,106 +517,150 @@ export const generateDepartmentReport = async (
     const dateElement = createTextElement(dateText, 16, false);
     const dateImage = await elementToImage(dateElement);
     if (dateImage) {
-      pdf.addImage(dateImage, 'PNG', 20, 70, 170, 10);
+      pdf.addImage(dateImage, "PNG", 20, 70, 170, 10);
     }
 
     const reportDate = createTextElement(
-      `تاريخ إنشاء التقرير: ${new Date().toLocaleDateString('en-GB')}`,
+      `تاريخ إنشاء التقرير: ${new Date().toLocaleDateString("en-GB")}`,
       14,
       false
     );
     const reportDateImage = await elementToImage(reportDate);
     if (reportDateImage) {
-      pdf.addImage(reportDateImage, 'JPEG', 20, 85, 170, 10);
+      pdf.addImage(reportDateImage, "JPEG", 20, 85, 170, 10);
     }
 
     pdf.setDrawColor(52, 58, 64);
     pdf.setLineWidth(0.5);
     pdf.line(15, 95, 195, 95);
 
-    const statsHeaders = ['المؤشر', 'القيمة', 'النسبة المئوية'];
+    const statsHeaders = ["المؤشر", "القيمة"];
     const totalRequests = stats?.totalRequests || 0;
 
     const statsRows = [
-      ['إجمالي عدد الطلبات', totalRequests, '100%'],
-      ['الطلبات المنشأة من الإدارة (الإجمالي)', stats?.createdByDepartment?.total || 0, totalRequests > 0 ? Math.round(((stats?.createdByDepartment?.total || 0) / totalRequests) * 100) + '%' : '0%'],
-      ['الطلبات المنشأة قيد التنفيذ', stats?.createdByDepartment?.inProgress || 0, totalRequests > 0 ? Math.round(((stats?.createdByDepartment?.inProgress || 0) / totalRequests) * 100) + '%' : '0%'],
-      ['الطلبات المنشأة المتأخرة', stats?.createdByDepartment?.delayed || 0, totalRequests > 0 ? Math.round(((stats?.createdByDepartment?.delayed || 0) / totalRequests) * 100) + '%' : '0%'],
-      ['الطلبات المنشأة المقبولة من الآخرين', stats?.createdByDepartment?.acceptedByOthers || 0, totalRequests > 0 ? Math.round(((stats?.createdByDepartment?.acceptedByOthers || 0) / totalRequests) * 100) + '%' : '0%'],
-      ['الطلبات المنشأة المرفوضة من الآخرين', stats?.createdByDepartment?.rejectedByOthers || 0, totalRequests > 0 ? Math.round(((stats?.createdByDepartment?.rejectedByOthers || 0) / totalRequests) * 100) + '%' : '0%'],
-      ['الطلبات المستلمة قيد التنفيذ', stats?.receivedFromOthers?.inProgress || 0, totalRequests > 0 ? Math.round(((stats?.receivedFromOthers?.inProgress || 0) / totalRequests) * 100) + '%' : '0%'],
-      ['الطلبات المستلمة المتأخرة', stats?.receivedFromOthers?.delayed || 0, totalRequests > 0 ? Math.round(((stats?.receivedFromOthers?.delayed || 0) / totalRequests) * 100) + '%' : '0%'],
-      ['الطلبات المستلمة المقبولة من الإدارة', stats?.receivedFromOthers?.acceptedByDepartment || 0, totalRequests > 0 ? Math.round(((stats?.receivedFromOthers?.acceptedByDepartment || 0) / totalRequests) * 100) + '%' : '0%'],
-      ['الطلبات المستلمة المرفوضة من الإدارة', stats?.receivedFromOthers?.rejectedByDepartment || 0, totalRequests > 0 ? Math.round(((stats?.receivedFromOthers?.rejectedByDepartment || 0) / totalRequests) * 100) + '%' : '0%'],
+      ["إجمالي عدد الطلبات", totalRequests],
+      [
+        "الطلبات المنشأة من الإدارة (الإجمالي)",
+        stats?.createdByDepartment?.total || 0,
+      ],
+      [
+        "الطلبات المنشأة قيد التنفيذ",
+        stats?.createdByDepartment?.inProgress || 0,
+      ],
+      ["الطلبات المنشأة المتأخرة", stats?.createdByDepartment?.delayed || 0],
+      [
+        "الطلبات المنشأة المقبولة من الآخرين",
+        stats?.createdByDepartment?.acceptedByOthers || 0,
+      ],
+      [
+        "الطلبات المنشأة المرفوضة من الآخرين",
+        stats?.createdByDepartment?.rejectedByOthers || 0,
+      ],
+      [
+        "الطلبات المستلمة قيد التنفيذ",
+        stats?.receivedFromOthers?.inProgress || 0,
+      ],
+      ["الطلبات المستلمة المتأخرة", stats?.receivedFromOthers?.delayed || 0],
+      [
+        "الطلبات المستلمة المقبولة من الإدارة",
+        stats?.receivedFromOthers?.acceptedByDepartment || 0,
+      ],
+      [
+        "الطلبات المستلمة المرفوضة من الإدارة",
+        stats?.receivedFromOthers?.rejectedByDepartment || 0,
+      ],
     ];
 
-    const statsTable = createSingleTable(statsHeaders, statsRows, 'الإحصائيات العامة');
+    const statsTable = createSingleTable(
+      statsHeaders,
+      statsRows,
+      "الإحصائيات العامة"
+    );
     await addTableToPDF(pdf, statsTable, 100);
 
-/////////////////////////////////////////
+    /////////////////////////////////////////
     if (chartRefs?.pieChartRef?.current) {
       pdf.addPage();
       const pieChartImage = await convertChartToImage(chartRefs.pieChartRef);
       if (pieChartImage) {
-        const pieTitle = createTextElement('توزيع حالات الطلبات', 24);
+        const pieTitle = createTextElement("توزيع حالات الطلبات", 24);
         const pieTitleImage = await elementToImage(pieTitle);
         if (pieTitleImage) {
-          pdf.addImage(pieTitleImage, 'PNG', 20, 10, 170, 15);
+          pdf.addImage(pieTitleImage, "PNG", 20, 10, 170, 15);
         }
-        pdf.addImage(pieChartImage, 'PNG', 35, 30, 140, 80);
+        pdf.addImage(pieChartImage, "PNG", 35, 30, 140, 80);
 
-        const pieDataHeaders = ['الحالة', 'عدد الطلبات', 'النسبة المئوية'];
+        const pieDataHeaders = ["الحالة", "عدد الطلبات"];
         const pieDataRows = [
-          ['منشأة قيد التنفيذ', stats?.createdByDepartment?.inProgress || 0, totalRequests > 0 ? Math.round(((stats?.createdByDepartment?.inProgress || 0) / totalRequests) * 100) + '%' : '0%'],
-          ['منشأة متأخرة', stats?.createdByDepartment?.delayed || 0, totalRequests > 0 ? Math.round(((stats?.createdByDepartment?.delayed || 0) / totalRequests) * 100) + '%' : '0%'],
-          ['منشأة مقبولة', stats?.createdByDepartment?.acceptedByOthers || 0, totalRequests > 0 ? Math.round(((stats?.createdByDepartment?.acceptedByOthers || 0) / totalRequests) * 100) + '%' : '0%'],
-          ['منشأة مرفوضة', stats?.createdByDepartment?.rejectedByOthers || 0, totalRequests > 0 ? Math.round(((stats?.createdByDepartment?.rejectedByOthers || 0) / totalRequests) * 100) + '%' : '0%'],
-          ['مستلمة قيد التنفيذ', stats?.receivedFromOthers?.inProgress || 0, totalRequests > 0 ? Math.round(((stats?.receivedFromOthers?.inProgress || 0) / totalRequests) * 100) + '%' : '0%'],
-          ['مستلمة متأخرة', stats?.receivedFromOthers?.delayed || 0, totalRequests > 0 ? Math.round(((stats?.receivedFromOthers?.delayed || 0) / totalRequests) * 100) + '%' : '0%'],
-          ['مستلمة مقبولة', stats?.receivedFromOthers?.acceptedByDepartment || 0, totalRequests > 0 ? Math.round(((stats?.receivedFromOthers?.acceptedByDepartment || 0) / totalRequests) * 100) + '%' : '0%'],
-          ['مستلمة مرفوضة', stats?.receivedFromOthers?.rejectedByDepartment || 0, totalRequests > 0 ? Math.round(((stats?.receivedFromOthers?.rejectedByDepartment || 0) / totalRequests) * 100) + '%' : '0%']
+          ["منشأة قيد التنفيذ", stats?.createdByDepartment?.inProgress || 0],
+          ["منشأة متأخرة", stats?.createdByDepartment?.delayed || 0],
+          ["منشأة مقبولة", stats?.createdByDepartment?.acceptedByOthers || 0],
+          ["منشأة مرفوضة", stats?.createdByDepartment?.rejectedByOthers || 0],
+          ["مستلمة قيد التنفيذ", stats?.receivedFromOthers?.inProgress || 0],
+          ["مستلمة متأخرة", stats?.receivedFromOthers?.delayed || 0],
+          [
+            "مستلمة مقبولة",
+            stats?.receivedFromOthers?.acceptedByDepartment || 0,
+          ],
+          [
+            "مستلمة مرفوضة",
+            stats?.receivedFromOthers?.rejectedByDepartment || 0,
+          ],
         ];
 
         const pieDataTable = createSingleTable(
           pieDataHeaders,
           pieDataRows,
-          'تفاصيل توزيع حالات الطلبات'
+          "تفاصيل توزيع حالات الطلبات"
         );
         await addTableToPDF(pdf, pieDataTable, 120);
       } else {
-        console.warn('فشل في تحويل مخطط حالات الطلبات إلى صورة');
+        console.warn("فشل في تحويل مخطط حالات الطلبات إلى صورة");
       }
     } else {
-      console.warn('مخطط حالات الطلبات غير متاح');
+      console.warn("مخطط حالات الطلبات غير متاح");
     }
-///////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////
     if (chartRefs?.processingTimeChartRef?.current) {
       pdf.addPage();
-      const processingTimeImage = await convertChartToImage(chartRefs.processingTimeChartRef);
+      const processingTimeImage = await convertChartToImage(
+        chartRefs.processingTimeChartRef
+      );
       if (processingTimeImage) {
-        const barTitle = createTextElement('متوسط وقت المعالجة حسب نوع الطلب', 24);
+        const barTitle = createTextElement(
+          "متوسط وقت المعالجة حسب نوع الطلب",
+          24
+        );
         const barTitleImage = await elementToImage(barTitle);
         if (barTitleImage) {
-          pdf.addImage(barTitleImage, 'JPEG', 20, 10, 170, 15);
+          pdf.addImage(barTitleImage, "JPEG", 20, 10, 170, 15);
         }
-        pdf.addImage(processingTimeImage, 'JPEG', 35, 30, 140, 80);
+        pdf.addImage(processingTimeImage, "JPEG", 35, 30, 140, 80);
 
         if (reportData?.processingTimeStats?.labels) {
-          const timeHeaders = ['نوع الطلب', 'متوسط وقت المعالجة (ساعة)', 'عدد الطلبات المعالجة'];
+          const timeHeaders = [
+            "نوع الطلب",
+            "متوسط وقت المعالجة ",
+            "عدد الطلبات المعالجة",
+          ];
 
           const itemsPerPage = 12;
-          const rows = reportData.processingTimeStats.labels.map((label, index) => [
-            label,
-            (reportData.processingTimeStats.data[index] || 0).toFixed(1),
-            reportData.processingTimeStats.requestCounts ? reportData.processingTimeStats.requestCounts[index] || 0 : 0
-          ]);
+          const rows = reportData.processingTimeStats.labels.map(
+            (label, index) => [
+              label,
+              (reportData.processingTimeStats.data[index] || 0).toFixed(1),
+              reportData.processingTimeStats.requestCounts
+                ? reportData.processingTimeStats.requestCounts[index] || 0
+                : 0,
+            ]
+          );
 
           const pages = splitTableIntoPages(rows, itemsPerPage);
 
           const timeTable = createSingleTable(
             timeHeaders,
             pages[0],
-            'تفاصيل متوسط وقت المعالجة',
+            "تفاصيل متوسط وقت المعالجة",
             1,
             pages.length
           );
@@ -600,7 +670,7 @@ export const generateDepartmentReport = async (
             const nextPageTable = createSingleTable(
               timeHeaders,
               pages[i],
-              'تفاصيل متوسط وقت المعالجة',
+              "تفاصيل متوسط وقت المعالجة",
               i + 1,
               pages.length
             );
@@ -608,42 +678,47 @@ export const generateDepartmentReport = async (
           }
         }
       } else {
-        console.warn('فشل في تحويل مخطط متوسط وقت المعالجة إلى صورة');
+        console.warn("فشل في تحويل مخطط متوسط وقت المعالجة إلى صورة");
       }
     } else {
-      console.warn('مخطط متوسط وقت المعالجة غير متاح');
+      console.warn("مخطط متوسط وقت المعالجة غير متاح");
     }
 
-////////////////////////////////////////////////////    
+    ////////////////////////////////////////////////////
     if (chartRefs?.requestsCountChartRef?.current) {
       pdf.addPage();
-      const requestsCountImage = await convertChartToImage(chartRefs.requestsCountChartRef);
+      const requestsCountImage = await convertChartToImage(
+        chartRefs.requestsCountChartRef
+      );
       if (requestsCountImage) {
-        const lineTitle = createTextElement('عدد الطلبات التي وصلت للإدارة حسب النوع', 24);
+        const lineTitle = createTextElement(
+          "عدد الطلبات التي وصلت للإدارة حسب النوع",
+          24
+        );
         const lineTitleImage = await elementToImage(lineTitle);
         if (lineTitleImage) {
-          pdf.addImage(lineTitleImage, 'JPEG', 20, 10, 170, 15);
+          pdf.addImage(lineTitleImage, "JPEG", 20, 10, 170, 15);
         }
-        pdf.addImage(requestsCountImage, 'JPEG', 35, 30, 140, 80);
+        pdf.addImage(requestsCountImage, "JPEG", 35, 30, 140, 80);
 
         if (reportData?.requestsCountByType?.labels) {
-          const createdHeaders = ['نوع الطلب', 'عدد الطلبات', 'النسبة المئوية'];
-          const total = reportData.requestsCountByType.data.reduce((sum, val) => sum + (val || 0), 0);
+          const createdHeaders = ["نوع الطلب", "عدد الطلبات"];
 
           // تقسيم البيانات إلى صفحات - 12 صف في كل صفحة
           const itemsPerPage = 12;
-          const rows = reportData.requestsCountByType.labels.map((label, index) => {
-            const value = reportData.requestsCountByType.data[index] || 0;
-            const percentage = total > 0 ? ((value / total) * 100).toFixed(1) + '%' : '0%';
-            return [label, value, percentage];
-          });
+          const rows = reportData.requestsCountByType.labels.map(
+            (label, index) => {
+              const value = reportData.requestsCountByType.data[index] || 0;
+              return [label, value];
+            }
+          );
 
           const pages = splitTableIntoPages(rows, itemsPerPage);
 
           const createdTable = createSingleTable(
             createdHeaders,
             pages[0],
-            'تفاصيل عدد الطلبات حسب النوع',
+            "تفاصيل عدد الطلبات حسب النوع",
             1,
             pages.length
           );
@@ -654,7 +729,7 @@ export const generateDepartmentReport = async (
             const nextPageTable = createSingleTable(
               createdHeaders,
               pages[i],
-              'تفاصيل عدد الطلبات حسب النوع',
+              "تفاصيل عدد الطلبات حسب النوع",
               i + 1,
               pages.length
             );
@@ -662,41 +737,43 @@ export const generateDepartmentReport = async (
           }
         }
       } else {
-        console.warn('فشل في تحويل مخطط عدد الطلبات حسب النوع إلى صورة');
+        console.warn("فشل في تحويل مخطط عدد الطلبات حسب النوع إلى صورة");
       }
     } else {
-      console.warn('مخطط عدد الطلبات حسب النوع غير متاح');
+      console.warn("مخطط عدد الطلبات حسب النوع غير متاح");
     }
 
-/////////////////////////////////////////////////////////
+    /////////////////////////////////////////////////////////
     if (chartRefs?.rejectionChartRef?.current) {
       pdf.addPage();
-      const rejectionImage = await convertChartToImage(chartRefs.rejectionChartRef);
+      const rejectionImage = await convertChartToImage(
+        chartRefs.rejectionChartRef
+      );
       if (rejectionImage) {
-        const deptTitle = createTextElement('نسب أسباب رفض الطلبات', 24);
+        const deptTitle = createTextElement("نسب أسباب رفض الطلبات", 24);
         const deptTitleImage = await elementToImage(deptTitle);
         if (deptTitleImage) {
-          pdf.addImage(deptTitleImage, 'JPEG', 20, 10, 170, 15);
+          pdf.addImage(deptTitleImage, "JPEG", 20, 10, 170, 15);
         }
-        pdf.addImage(rejectionImage, 'JPEG', 35, 30, 140, 80);
+        pdf.addImage(rejectionImage, "JPEG", 35, 30, 140, 80);
 
         if (reportData?.rejectionReasons?.labels) {
-          const deptHeaders = ['سبب الرفض', 'عدد الطلبات', 'النسبة المئوية'];
-          const total = reportData.rejectionReasons.data.reduce((sum, val) => sum + (val || 0), 0);
+          const deptHeaders = ["سبب الرفض", "عدد الطلبات"];
 
           const itemsPerPage = 12;
-          const rows = reportData.rejectionReasons.labels.map((label, index) => {
-            const value = reportData.rejectionReasons.data[index] || 0;
-            const percentage = total > 0 ? ((value / total) * 100).toFixed(1) + '%' : '0%';
-            return [label, value, percentage];
-          });
+          const rows = reportData.rejectionReasons.labels.map(
+            (label, index) => {
+              const value = reportData.rejectionReasons.data[index] || 0;
+              return [label, value];
+            }
+          );
 
           const pages = splitTableIntoPages(rows, itemsPerPage);
 
           const deptTable = createSingleTable(
             deptHeaders,
             pages[0],
-            'تفاصيل أسباب رفض الطلبات',
+            "تفاصيل أسباب رفض الطلبات",
             1,
             pages.length
           );
@@ -707,7 +784,7 @@ export const generateDepartmentReport = async (
             const nextPageTable = createSingleTable(
               deptHeaders,
               pages[i],
-              'تفاصيل أسباب رفض الطلبات',
+              "تفاصيل أسباب رفض الطلبات",
               i + 1,
               pages.length
             );
@@ -715,78 +792,99 @@ export const generateDepartmentReport = async (
           }
         }
       } else {
-        console.warn('فشل في تحويل مخطط أسباب الرفض إلى صورة');
+        console.warn("فشل في تحويل مخطط أسباب الرفض إلى صورة");
       }
     } else {
-      console.warn('مخطط أسباب الرفض غير متاح');
+      console.warn("مخطط أسباب الرفض غير متاح");
     }
 
-////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////
     if (chartRefs?.timeAnalysisChartRef?.current) {
       pdf.addPage();
 
-
       try {
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        await new Promise((resolve) => setTimeout(resolve, 1000));
 
-        const timeAnalysisImage = await convertChartToImage(chartRefs.timeAnalysisChartRef, 2);
+        const timeAnalysisImage = await convertChartToImage(
+          chartRefs.timeAnalysisChartRef,
+          2
+        );
 
         if (timeAnalysisImage) {
-
-          const timeAnalysisTitle = createTextElement('تطور أعداد الطلبات خلال السنة', 24);
-          const timeAnalysisTitleImage = await elementToImage(timeAnalysisTitle);
+          const timeAnalysisTitle = createTextElement(
+            "تطور أعداد الطلبات  ",
+            24
+          );
+          const timeAnalysisTitleImage = await elementToImage(
+            timeAnalysisTitle
+          );
           if (timeAnalysisTitleImage) {
-            pdf.addImage(timeAnalysisTitleImage, 'PNG', 20, 10, 170, 15);
+            pdf.addImage(timeAnalysisTitleImage, "PNG", 20, 10, 170, 15);
           }
 
           try {
-            pdf.addImage(timeAnalysisImage, 'JPEG', 35, 30, 140, 80);
+            pdf.addImage(timeAnalysisImage, "JPEG", 35, 30, 140, 80);
           } catch (imgError) {
-            console.error('خطأ في إضافة مخطط التحليل الزمني:', imgError);
+            console.error("خطأ في إضافة مخطط التحليل الزمني:", imgError);
 
             try {
-              pdf.addImage(timeAnalysisImage, 'JPEG', 50, 30, 110, 70);
+              pdf.addImage(timeAnalysisImage, "JPEG", 50, 30, 110, 70);
             } catch (smallerError) {
-              console.error('فشل في إضافة مخطط التحليل الزمني حتى بحجم أصغر:', smallerError);
+              console.error(
+                "فشل في إضافة مخطط التحليل الزمني حتى بحجم أصغر:",
+                smallerError
+              );
             }
           }
         } else {
-          console.warn('فشل في تحويل مخطط التحليل الزمني إلى صورة');
+          console.warn("فشل في تحويل مخطط التحليل الزمني إلى صورة");
 
           try {
             const chartElement = chartRefs.timeAnalysisChartRef.current;
 
             const canvas = await html2canvas(chartElement, {
               scale: 2,
-              backgroundColor: '#ffffff',
+              backgroundColor: "#ffffff",
               logging: false,
               useCORS: true,
-              allowTaint: true
+              allowTaint: true,
             });
 
-            const altImage = canvas.toDataURL('image/jpeg', 0.95);
+            const altImage = canvas.toDataURL("image/jpeg", 0.95);
 
-            const timeAnalysisTitle = createTextElement('تطور أعداد الطلبات خلال السنة', 24);
-            const timeAnalysisTitleImage = await elementToImage(timeAnalysisTitle);
+            const timeAnalysisTitle = createTextElement(
+              "تطور أعداد الطلبات خلال السنة",
+              24
+            );
+            const timeAnalysisTitleImage = await elementToImage(
+              timeAnalysisTitle
+            );
             if (timeAnalysisTitleImage) {
-              pdf.addImage(timeAnalysisTitleImage, 'PNG', 20, 10, 170, 15);
+              pdf.addImage(timeAnalysisTitleImage, "PNG", 20, 10, 170, 15);
             }
 
-            pdf.addImage(altImage, 'JPEG', 35, 30, 140, 80);
+            pdf.addImage(altImage, "JPEG", 35, 30, 140, 80);
           } catch (altError) {
-            console.error('فشل في التقاط مخطط التحليل الزمني بالطريقة البديلة:', altError);
+            console.error(
+              "فشل في التقاط مخطط التحليل الزمني بالطريقة البديلة:",
+              altError
+            );
           }
         }
 
         if (reportData?.timeAnalysis?.labels) {
-          const timeAnalysisHeaders = ['الفترة', 'الطلبات المستلمة', 'الطلبات المعالجة', 'نسبة المعالجة'];
+          const timeAnalysisHeaders = [
+            "الفترة",
+            "الطلبات المستلمة",
+            "الطلبات المعالجة",
+          ];
 
           const itemsPerPage = 12;
           const rows = reportData.timeAnalysis.labels.map((label, index) => {
             const received = reportData.timeAnalysis.receivedData?.[index] || 0;
-            const processed = reportData.timeAnalysis.processedData?.[index] || 0;
-            const percentage = received > 0 ? Math.round((processed / received) * 100) + '%' : '0%';
-            return [label, received, processed, percentage];
+            const processed =
+              reportData.timeAnalysis.processedData?.[index] || 0;
+            return [label, received, processed];
           });
 
           const pages = splitTableIntoPages(rows, itemsPerPage);
@@ -794,7 +892,7 @@ export const generateDepartmentReport = async (
           const timeAnalysisTable = createSingleTable(
             timeAnalysisHeaders,
             pages[0],
-            'تفاصيل تطور أعداد الطلبات خلال السنة',
+            "تفاصيل تطور أعداد الطلبات  ",
             1,
             pages.length
           );
@@ -806,33 +904,41 @@ export const generateDepartmentReport = async (
             const nextPageTable = createSingleTable(
               timeAnalysisHeaders,
               pages[i],
-              'تفاصيل تطور أعداد الطلبات خلال السنة',
+              "تفاصيل تطور أعداد الطلبات خلال السنة",
               i + 1,
               pages.length
             );
             await addTableToPDF(pdf, nextPageTable, 20);
           }
         } else {
-          console.warn('بيانات مخطط تطور أعداد الطلبات غير متاحة');
+          console.warn("بيانات مخطط تطور أعداد الطلبات غير متاحة");
         }
       } catch (error) {
-        console.error('خطأ في معالجة مخطط التحليل الزمني:', error);
+        console.error("خطأ في معالجة مخطط التحليل الزمني:", error);
 
-        const errorMessage = createTextElement('تعذر عرض مخطط تطور أعداد الطلبات خلال السنة', 18, true);
+        const errorMessage = createTextElement(
+          "تعذر عرض مخطط تطور أعداد الطلبات خلال السنة",
+          18,
+          true
+        );
         const errorMessageImage = await elementToImage(errorMessage);
         if (errorMessageImage) {
-          pdf.addImage(errorMessageImage, 'JPEG', 20, 50, 170, 20);
+          pdf.addImage(errorMessageImage, "JPEG", 20, 50, 170, 20);
         }
 
         if (reportData?.timeAnalysis?.labels) {
-          const timeAnalysisHeaders = ['الفترة', 'الطلبات المستلمة', 'الطلبات المعالجة', 'نسبة المعالجة'];
+          const timeAnalysisHeaders = [
+            "الفترة",
+            "الطلبات المستلمة",
+            "الطلبات المعالجة",
+          ];
 
           const itemsPerPage = 12;
           const rows = reportData.timeAnalysis.labels.map((label, index) => {
             const received = reportData.timeAnalysis.receivedData?.[index] || 0;
-            const processed = reportData.timeAnalysis.processedData?.[index] || 0;
-            const percentage = received > 0 ? Math.round((processed / received) * 100) + '%' : '0%';
-            return [label, received, processed, percentage];
+            const processed =
+              reportData.timeAnalysis.processedData?.[index] || 0;
+            return [label, received, processed];
           });
 
           const pages = splitTableIntoPages(rows, itemsPerPage);
@@ -840,7 +946,7 @@ export const generateDepartmentReport = async (
           const timeAnalysisTable = createSingleTable(
             timeAnalysisHeaders,
             pages[0],
-            'تفاصيل تطور أعداد الطلبات خلال السنة',
+            "تفاصيل تطور أعداد الطلبات خلال السنة",
             1,
             pages.length
           );
@@ -852,7 +958,7 @@ export const generateDepartmentReport = async (
             const nextPageTable = createSingleTable(
               timeAnalysisHeaders,
               pages[i],
-              'تفاصيل تطور أعداد الطلبات خلال السنة',
+              "تفاصيل تطور أعداد الطلبات خلال السنة",
               i + 1,
               pages.length
             );
@@ -861,88 +967,83 @@ export const generateDepartmentReport = async (
         }
       }
     } else {
-      console.warn('مخطط تطور أعداد الطلبات خلال السنة غير متاح');
+      console.warn("مخطط تطور أعداد الطلبات خلال السنة غير متاح");
 
       pdf.addPage();
-      const missingMessage = createTextElement('مخطط تطور أعداد الطلبات خلال السنة غير متاح', 20, true);
+      const missingMessage = createTextElement(
+        "مخطط تطور أعداد الطلبات خلال السنة غير متاح",
+        20,
+        true
+      );
       const missingMessageImage = await elementToImage(missingMessage);
       if (missingMessageImage) {
-        pdf.addImage(missingMessageImage, 'JPEG', 20, 50, 170, 20);
+        pdf.addImage(missingMessageImage, "JPEG", 20, 50, 170, 20);
       }
     }
 
-////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////
     if (chartRefs?.performanceChartRef?.current) {
       pdf.addPage();
-      const perfImage = await convertChartToImage(chartRefs.performanceChartRef);
+      const perfImage = await convertChartToImage(
+        chartRefs.performanceChartRef
+      );
       if (perfImage) {
-        const perfTitle = createTextElement('مقارنة أداء معالجة الطلبات', 24);
+        const perfTitle = createTextElement("مقارنة أداء معالجة الطلبات", 24);
         const perfTitleImage = await elementToImage(perfTitle);
         if (perfTitleImage) {
-          pdf.addImage(perfTitleImage, 'JPEG', 20, 10, 170, 15);
+          pdf.addImage(perfTitleImage, "JPEG", 20, 10, 170, 15);
         }
-        pdf.addImage(perfImage, 'JPEG', 20, 30, 170, 100);
+        pdf.addImage(perfImage, "JPEG", 20, 30, 170, 100);
 
         if (reportData?.performanceComparison?.labels) {
-          const perfHeaders = ['الفترة', 'متوسط وقت المعالجة (ساعة)', 'عدد الطلبات المعالجة', 'معدل الكفاءة'];
-          const perfRows = reportData.performanceComparison.labels.map((label, index) => {
-            const avgTime = (reportData.performanceComparison.avgTimes[index] || 0).toFixed(1);
-            const count = reportData.performanceComparison.counts[index] || 0;
-            const efficiency = reportData.performanceComparison.efficiency ?
-              (reportData.performanceComparison.efficiency[index] || 0).toFixed(1) + '%' : '-';
-            return [label, avgTime, count, efficiency];
-          });
-          const perfTable = createSingleTable(perfHeaders, perfRows, 'تفاصيل مقارنة أداء معالجة الطلبات');
+          const perfHeaders = [
+            "الفترة",
+            "متوسط وقت المعالجة (ساعة)",
+            "عدد الطلبات المعالجة",
+          ];
+          const perfRows = reportData.performanceComparison.labels.map(
+            (label, index) => {
+              const avgTime = (
+                reportData.performanceComparison.avgTimes[index] || 0
+              ).toFixed(1);
+              const count = reportData.performanceComparison.counts[index] || 0;
+              return [label, avgTime, count];
+            }
+          );
+          const perfTable = createSingleTable(
+            perfHeaders,
+            perfRows,
+            "تفاصيل مقارنة أداء معالجة الطلبات"
+          );
           await addTableToPDF(pdf, perfTable, 140);
         }
       }
     }
 
-///////////////////////////////////////////////
-    if (chartRefs?.priorityChartRef?.current) {
-      pdf.addPage();
-      const priorityImage = await convertChartToImage(chartRefs.priorityChartRef);
-      if (priorityImage) {
-        const priorityTitle = createTextElement('توزيع الطلبات حسب الأولوية', 24);
-        const priorityTitleImage = await elementToImage(priorityTitle);
-        if (priorityTitleImage) {
-          pdf.addImage(priorityTitleImage, 'JPEG', 20, 10, 170, 15);
-        }
-        pdf.addImage(priorityImage, 'JPEG', 20, 30, 170, 100);
-
-        if (reportData?.priorityDistribution?.labels) {
-          const priorityHeaders = ['الأولوية', 'عدد الطلبات', 'النسبة المئوية', 'متوسط وقت المعالجة (ساعة)'];
-          const total = reportData.priorityDistribution.data.reduce((sum, val) => sum + (val || 0), 0);
-          const priorityRows = reportData.priorityDistribution.labels.map((label, index) => {
-            const value = reportData.priorityDistribution.data[index] || 0;
-            const percentage = total > 0 ? ((value / total) * 100).toFixed(1) + '%' : '0%';
-            const avgTime = reportData.priorityDistribution.avgTimes ?
-              (reportData.priorityDistribution.avgTimes[index] || 0).toFixed(1) : '-';
-            return [label, value, percentage, avgTime];
-          });
-          const priorityTable = createSingleTable(priorityHeaders, priorityRows, 'تفاصيل توزيع الطلبات حسب الأولوية');
-          await addTableToPDF(pdf, priorityTable, 140);
-        }
-      }
-    }
-
+    ////////////////////////////////////////////////////////////////
     const pageCount = pdf.internal.getNumberOfPages();
     for (let i = 1; i <= pageCount; i++) {
       pdf.setPage(i);
-      const pageNumberElement = createTextElement(`الصفحة ${i} من ${pageCount}`, 14, false);
+      const pageNumberElement = createTextElement(
+        `الصفحة ${i} من ${pageCount}`,
+        14,
+        false
+      );
       const pageNumberImage = await elementToImage(pageNumberElement);
       if (pageNumberImage) {
-        pdf.addImage(pageNumberImage, 'JPEG', 70, 280, 70, 10);
+        pdf.addImage(pageNumberImage, "JPEG", 70, 280, 70, 10);
       }
     }
 
-    const fileName = `تقرير_${department?.name?.replace(/[^a-zA-Z0-9\u0600-\u06FF]/g, '_') || 'الادارة'}_${new Date().toISOString().split('T')[0]}.pdf`;
+    const fileName = `تقرير_${
+      department?.name?.replace(/[^a-zA-Z0-9\u0600-\u06FF]/g, "_") || "الادارة"
+    }_${new Date().toISOString().split("T")[0]}.pdf`;
     pdf.save(fileName);
     // console.log('تم إنشاء التقرير بنجاح:', fileName);
 
     return true;
   } catch (error) {
-    console.error('خطأ في إنشاء التقرير:', error);
+    console.error("خطأ في إنشاء التقرير:", error);
     return false;
   }
 };

@@ -212,7 +212,7 @@ const splitTableIntoPages = (rows, itemsPerPage = 12) => {
 
       if (previousPage.length + lastPage.length <= 15) {
         pages[lastPageIndex - 1] = [...previousPage, ...lastPage];
-        pages.pop(); 
+        pages.pop();
       }
     }
   }
@@ -232,8 +232,8 @@ const createDataTable = async (
   fontSize = 20
 ) => {
   try {
-    console.log(`بدء إنشاء جدول: ${title}`);
-    console.log(`عدد الصفوف الإجمالي: ${rows.length}`);
+    // console.log(`بدء إنشاء جدول: ${title}`);
+    // console.log(`عدد الصفوف الإجمالي: ${rows.length}`);
 
     // التحقق من صحة المدخلات
     if (!Array.isArray(headers) || !Array.isArray(rows) || rows.length === 0) {
@@ -244,17 +244,17 @@ const createDataTable = async (
     const itemsPerPage = 12;
     const pages = splitTableIntoPages(rows, itemsPerPage);
 
-    console.log(`تم تقسيم الجدول إلى ${pages.length} صفحة`);
+    // console.log(`تم تقسيم الجدول إلى ${pages.length} صفحة`);
     pages.forEach((page, index) => {
-      console.log(`الصفحة ${index + 1}: ${page.length} صف`);
+      // console.log(`الصفحة ${index + 1}: ${page.length} صف`);
     });
 
     for (let pageIndex = 0; pageIndex < pages.length; pageIndex++) {
-      console.log(`معالجة الصفحة ${pageIndex + 1} من ${pages.length}`);
+      // console.log(`معالجة الصفحة ${pageIndex + 1} من ${pages.length}`);
 
       if (pageIndex > 0) {
         pdf.addPage();
-        console.log("تمت إضافة صفحة جديدة");
+        // console.log("تمت إضافة صفحة جديدة");
       }
 
       const table = createSingleTable(
@@ -282,10 +282,10 @@ const createDataTable = async (
         return false;
       }
 
-      console.log(`تمت معالجة الصفحة ${pageIndex + 1} بنجاح`);
+      // console.log(`تمت معالجة الصفحة ${pageIndex + 1} بنجاح`);
     }
 
-    console.log(`تم إنشاء جدول ${title} بنجاح`);
+    // console.log(`تم إنشاء جدول ${title} بنجاح`);
     return true;
   } catch (error) {
     console.error("خطأ في إنشاء الجدول:", error);
@@ -568,7 +568,7 @@ export const generateDashboardReport = async (
     for (const status of statuses) {
       if (chartRefs.pieChartRef?.current) {
         try {
-          console.log(`معالجة الحالة: ${status}`);
+          // console.log(`معالجة الحالة: ${status}`);
 
           if (onStatusChange) {
             await onStatusChange(status);
@@ -633,23 +633,16 @@ export const generateDashboardReport = async (
             if (pieTitleImage) {
               pdf.addImage(pieTitleImage, "PNG", 20, 10, 170, 15);
             }
-            // تقليل حجم الرسم البياني لإفساح المجال للجدول
             pdf.addImage(pieChartImage, "PNG", 20, 30, 170, 80);
 
-            const pieDataHeaders = ["الإدارة", "عدد الطلبات", "النسبة المئوية"];
-            const total = filteredData.data.reduce(
-              (sum, val) => sum + (val || 0),
-              0
-            );
+            const pieDataHeaders = ["الإدارة", "عدد الطلبات"];
             const pieDataRows = filteredData.labels.map((label, index) => {
               const value = filteredData.data[index] || 0;
-              const percentage =
-                total > 0 ? ((value / total) * 100).toFixed(1) + "%" : "0%";
-              return [label, value, percentage];
+              return [label, value];
             });
 
-            console.log(`بدء إنشاء جدول بيانات للحالة: ${status}`);
-            console.log(`عدد الصفوف: ${pieDataRows.length}`);
+            // console.log(`بدء إنشاء جدول بيانات للحالة: ${status}`);
+            // console.log(`عدد الصفوف: ${pieDataRows.length}`);
 
             await createDataTable(
               pdf,
@@ -682,7 +675,7 @@ export const generateDashboardReport = async (
         pdf.addImage(barChartImage, "JPEG", 20, 30, 170, 80);
 
         if (chartsData.timeAnalysis && chartsData.timeAnalysis.labels) {
-          const timeHeaders = ["الإدارة", "متوسط وقت المعالجة (ساعة)"];
+          const timeHeaders = ["الإدارة", "متوسط وقت المعالجة "];
           const timeRows = chartsData.timeAnalysis.labels
             .filter(
               (label) =>
@@ -694,7 +687,7 @@ export const generateDashboardReport = async (
               (chartsData.timeAnalysis.data[index] || 0).toFixed(1),
             ]);
 
-          console.log("بدء إنشاء جدول تحليل الوقت");
+          // console.log("بدء إنشاء جدول تحليل الوقت");
           await createDataTable(
             pdf,
             timeHeaders,
@@ -723,23 +716,16 @@ export const generateDashboardReport = async (
         pdf.addImage(lineChartImage, "JPEG", 20, 30, 170, 80);
 
         if (chartsData.createdRequests && chartsData.createdRequests.labels) {
-          const createdHeaders = ["التاريخ", "عدد الطلبات", "نسبة التغيير"];
+          // إزالة عمود نسبة التغيير
+          const createdHeaders = ["التاريخ", "عدد الطلبات"];
           const createdRows = chartsData.createdRequests.labels.map(
             (label, index) => {
               const currentValue = chartsData.createdRequests.data[index] || 0;
-              const prevValue =
-                index > 0 ? chartsData.createdRequests.data[index - 1] || 0 : 0;
-              const change =
-                prevValue === 0
-                  ? "-"
-                  : (((currentValue - prevValue) / prevValue) * 100).toFixed(
-                      1
-                    ) + "%";
-              return [label, currentValue, change];
+              return [label, currentValue];
             }
           );
 
-          console.log("بدء إنشاء جدول الطلبات المنشأة");
+          // console.log("بدء إنشاء جدول الطلبات المنشأة");
           await createDataTable(
             pdf,
             createdHeaders,
@@ -766,11 +752,8 @@ export const generateDashboardReport = async (
         pdf.addImage(timeLineChartImage, "JPEG", 20, 30, 170, 80);
 
         if (chartsData.requestsCount && chartsData.requestsCount.labels) {
-          const deptHeaders = ["الإدارة", "عدد الطلبات", "النسبة المئوية"];
-          const total = chartsData.requestsCount.data.reduce(
-            (sum, val) => sum + (val || 0),
-            0
-          );
+          // إزالة عمود النسبة المئوية
+          const deptHeaders = ["الإدارة", "عدد الطلبات"];
           const deptRows = chartsData.requestsCount.labels
             .filter(
               (label) =>
@@ -779,9 +762,7 @@ export const generateDashboardReport = async (
             )
             .map((label, index) => {
               const value = chartsData.requestsCount.data[index] || 0;
-              const percentage =
-                total > 0 ? ((value / total) * 100).toFixed(1) + "%" : "0%";
-              return [label, value, percentage];
+              return [label, value];
             });
 
           await createDataTable(

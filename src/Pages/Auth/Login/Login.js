@@ -10,7 +10,9 @@ import { FaEye, FaEyeSlash } from "react-icons/fa";
 const Login = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { email, password } = useSelector((state) => state.application.formData);
+  const { email, password } = useSelector(
+    (state) => state.application.formData
+  );
   const { errors } = useSelector((state) => state.application);
   const [showPassword, setShowPassword] = useState(false);
 
@@ -19,7 +21,6 @@ const Login = () => {
     const role = sessionStorage.getItem("role");
 
     if (token) {
-      // console.log("Token found in storage, redirecting...");
       if (role === "ادمن") {
         navigate("/admin");
       } else if (role === "اداره التقارير" || role === "مدير التقارير") {
@@ -56,13 +57,19 @@ const Login = () => {
         const response = await apiService.login(email, password);
 
         if (response.status === 200) {
-          const { role, token } = response.data;
-          sessionStorage.setItem("token", token);
-          sessionStorage.setItem("role", role);
+          const { roles, token } = response.data;
 
-          if (role === "ادمن") {
+          // Store token and roles
+          sessionStorage.setItem("token", token);
+          sessionStorage.setItem("roles", JSON.stringify(roles));
+
+          // Get the first role for navigation
+          const firstRole = roles[0];
+          sessionStorage.setItem("role", firstRole);
+
+          if (firstRole === "ادمن") {
             navigate("/admin");
-          } else if (role === "اداره التقارير" || role === "مدير التقارير") {
+          } else if (firstRole === "اداره التقارير" || firstRole === "مدير التقارير") {
             navigate("/reports");
           } else {
             navigate("/inbox");
@@ -72,7 +79,9 @@ const Login = () => {
         }
       } catch (error) {
         if (error.response && error.response.status === 401) {
-          dispatch(setErrors({ email: "البريد الإلكتروني أو كلمة المرور غير صحيحة." }));
+          dispatch(
+            setErrors({ email: "البريد الإلكتروني أو كلمة المرور غير صحيحة." })
+          );
         } else {
           console.error("Error logging in:", error);
           dispatch(setErrors({ email: "حدث خطأ غير متوقع." }));
@@ -93,37 +102,52 @@ const Login = () => {
             <h3 className={styles.title}>تسجيل الدخول</h3>
             <form onSubmit={handleSubmit}>
               <div className={styles.formGroup}>
-                <label htmlFor="email" className={styles.label}>البريد الإلكتروني</label>
+                <label htmlFor="email" className={styles.label}>
+                  البريد الإلكتروني
+                </label>
                 <input
                   type="email"
                   id="email"
-                  className={`${styles.inputt} ${errors.email ? styles.invalid : ""}`}
+                  className={`${styles.inputt} ${errors.email ? styles.invalid : ""
+                    }`}
                   placeholder="أدخل بريدك"
                   value={email || ""}
                   onChange={handleChange}
                 />
-                {errors.email && <div className={styles.error}>{errors.email}</div>}
+                {errors.email && (
+                  <div className={styles.error}>{errors.email}</div>
+                )}
               </div>
 
               <div className={styles.formGroup}>
-                <label htmlFor="password" className={styles.label}>كلمة المرور</label>
+                <label htmlFor="password" className={styles.label}>
+                  كلمة المرور
+                </label>
                 <div className={styles.passwordInputContainer}>
                   <input
                     type={showPassword ? "text" : "password"}
                     id="password"
-                    className={`${styles.inputt} ${errors.password ? styles.invalid : ""}`}
+                    className={`${styles.inputt} ${errors.password ? styles.invalid : ""
+                      }`}
                     placeholder="*********"
                     value={password || ""}
                     onChange={handleChange}
                   />
-                  <span className={styles.togglePassword} onClick={() => setShowPassword(!showPassword)}>
+                  <span
+                    className={styles.togglePassword}
+                    onClick={() => setShowPassword(!showPassword)}
+                  >
                     {showPassword ? <FaEyeSlash /> : <FaEye />}
                   </span>
                 </div>
-                {errors.password && <div className={styles.error}>{errors.password}</div>}
+                {errors.password && (
+                  <div className={styles.error}>{errors.password}</div>
+                )}
               </div>
 
-              <button type="submit" className={styles.submitButton}>تسجيل الدخول</button>
+              <button type="submit" className={styles.submitButton}>
+                تسجيل الدخول
+              </button>
             </form>
           </div>
         </div>

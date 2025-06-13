@@ -3,13 +3,11 @@ import { Link } from 'react-router-dom';
 import styles from './Nav.module.css';
 import navlogo from './navLogo.png';
 import logo from './logoCollage.jpg';
-import logo2 from './logoUnivercity.png';
 import user from './image.png';
 
 export default function Nav() {
   const userRole = sessionStorage.getItem("role");
 
-  // تحديد مسار الملف الشخصي حسب دور المستخدم
   const userProfilePath =
     userRole === "ادمن" ? "/admin/user" :
       userRole === "مدير التقارير" || userRole === "اداره التقارير" ? "/reports/user" :

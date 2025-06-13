@@ -62,18 +62,7 @@ export default function Sidebar({ canCreate }) {
           )}
         </ul>
 
-        {/* <div className={styles.sectionTitle}>الأدوات</div>
-        <ul className={styles.sidebarMenu}>
-          <li>
-            <Link
-              to="/reports"
-              className={`${styles.sidebarItem} ${path.includes("/reports") ? styles.active : ""}`}
-            >
-              <FaChartBar className={styles.sidebarIcon} />
-              <span>إدارة التقارير</span>
-            </Link>
-          </li>
-        </ul> */}
+        
       </div>
     </>
   );
