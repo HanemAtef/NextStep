@@ -1051,7 +1051,7 @@ const ReportsDashboard = () => {
 
         <button
           className={styles.generateReportButton}
-        //   onClick={handleGenerateReport} // تم تعطيل دالة توليد التقرير مؤقتًا29
+          // onClick={handleGenerateReport} //
           disabled={isResetting}
         >
           <FaFileExport className={styles.buttonIcon} /> توليد تقرير

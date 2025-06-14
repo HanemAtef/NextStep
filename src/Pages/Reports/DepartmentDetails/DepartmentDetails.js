@@ -96,9 +96,9 @@ const DepartmentDetails = () => {
     state.departmentDetails
       ? selectDateRange(state)
       : {
-        startDate: null,
-        endDate: null,
-      }
+          startDate: null,
+          endDate: null,
+        }
   );
   const loading = useSelector((state) =>
     state.departmentDetails ? selectLoading(state) : {}
@@ -344,7 +344,10 @@ const DepartmentDetails = () => {
 
   // بيانات مخطط أوقات المعالجة
   const processingTimeData = {
-    labels: processingTimeStats?.labels?.map(label => label.replace('الخاص بـ', '').trim()) || [],
+    labels:
+      processingTimeStats?.labels?.map((label) =>
+        label.replace("الخاص بـ", "").trim()
+      ) || [],
     datasets: [
       {
         label: "متوسط وقت المعالجة (بالأيام)",
@@ -358,7 +361,10 @@ const DepartmentDetails = () => {
 
   // بيانات مخطط عدد الطلبات لكل نوع
   const requestsCountData = {
-    labels: requestsCountByType?.labels?.map(label => label.replace('الخاص بـ', '').trim()) || [],
+    labels:
+      requestsCountByType?.labels?.map((label) =>
+        label.replace("الخاص بـ", "").trim()
+      ) || [],
     datasets: [
       {
         label: "عدد الطلبات",
@@ -372,7 +378,10 @@ const DepartmentDetails = () => {
 
   // بيانات مخطط أسباب الرفض
   const rejectionData = {
-    labels: rejectionReasons?.labels?.map(label => label.replace('الخاص بـ', '').trim()) || [],
+    labels:
+      rejectionReasons?.labels?.map((label) =>
+        label.replace("الخاص بـ", "").trim()
+      ) || [],
     datasets: [
       {
         data: rejectionReasons?.data || [],
@@ -390,7 +399,10 @@ const DepartmentDetails = () => {
 
   // بيانات مخطط التحليل الزمني
   const timeAnalysisData = {
-    labels: timeAnalysis?.labels?.map(label => label.replace('الخاص بـ', '').trim()) || [],
+    labels:
+      timeAnalysis?.labels?.map((label) =>
+        label.replace("الخاص بـ", "").trim()
+      ) || [],
     datasets: [
       {
         label: "الطلبات المستلمة",
@@ -452,22 +464,22 @@ const DepartmentDetails = () => {
           text: "متوسط وقت المعالجة",
           font: {
             size: 15,
-            weight: 'bold'
-          }
+            weight: "bold",
+          },
         },
         ticks: {
           font: {
             size: 13,
-            weight: 'bold'
+            weight: "bold",
           },
-          padding: 10
-        }
+          padding: 10,
+        },
       },
       x: {
         ticks: {
           font: {
             size: 13,
-            weight: 'bold'
+            weight: "bold",
           },
           maxRotation: 45,
           minRotation: 45,
@@ -475,53 +487,53 @@ const DepartmentDetails = () => {
           autoSkip: false,
           callback: function (value, index, values) {
             const label = this.getLabelForValue(value);
-            const parts = label.split(' - ');
+            const parts = label.split(" - ");
             if (parts.length > 1) {
               return parts[1];
             }
             return label;
-          }
+          },
         },
         grid: {
-          display: false
-        }
-      }
+          display: false,
+        },
+      },
     },
     plugins: {
       legend: {
-        display: false
+        display: false,
       },
       tooltip: {
-        backgroundColor: 'rgba(0, 0, 0, 0.9)',
+        backgroundColor: "rgba(0, 0, 0, 0.9)",
         padding: 12,
         titleFont: {
           size: 13,
-          weight: 'bold'
+          weight: "bold",
         },
         bodyFont: {
           size: 13,
-          weight: 'bold'
+          weight: "bold",
         },
         callbacks: {
           title: function (tooltipItems) {
             const label = tooltipItems[0].label;
-            const parts = label.split(' - ');
+            const parts = label.split(" - ");
             if (parts.length > 1) {
               return parts[1];
             }
             return label;
-          }
-        }
-      }
+          },
+        },
+      },
     },
     layout: {
       padding: {
         left: 15,
         right: 15,
         top: 15,
-        bottom: 40
-      }
-    }
+        bottom: 40,
+      },
+    },
   };
 
   // خيارات مخطط عدد الطلبات
@@ -536,22 +548,22 @@ const DepartmentDetails = () => {
           text: "عدد الطلبات",
           font: {
             size: 15,
-            weight: 'bold'
-          }
+            weight: "bold",
+          },
         },
         ticks: {
           font: {
             size: 13,
-            weight: 'bold'
+            weight: "bold",
           },
-          padding: 10
-        }
+          padding: 10,
+        },
       },
       x: {
         ticks: {
           font: {
             size: 13,
-            weight: 'bold'
+            weight: "bold",
           },
           maxRotation: 45,
           minRotation: 45,
@@ -559,53 +571,53 @@ const DepartmentDetails = () => {
           autoSkip: false,
           callback: function (value, index, values) {
             const label = this.getLabelForValue(value);
-            const parts = label.split(' - ');
+            const parts = label.split(" - ");
             if (parts.length > 1) {
               return parts[1];
             }
             return label;
-          }
+          },
         },
         grid: {
-          display: false
-        }
-      }
+          display: false,
+        },
+      },
     },
     plugins: {
       legend: {
-        display: false
+        display: false,
       },
       tooltip: {
-        backgroundColor: 'rgba(0, 0, 0, 0.9)',
+        backgroundColor: "rgba(0, 0, 0, 0.9)",
         padding: 12,
         titleFont: {
           size: 13,
-          weight: 'bold'
+          weight: "bold",
         },
         bodyFont: {
           size: 13,
-          weight: 'bold'
+          weight: "bold",
         },
         callbacks: {
           title: function (tooltipItems) {
             const label = tooltipItems[0].label;
-            const parts = label.split(' - ');
+            const parts = label.split(" - ");
             if (parts.length > 1) {
               return parts[1];
             }
             return label;
-          }
-        }
-      }
+          },
+        },
+      },
     },
     layout: {
       padding: {
         left: 15,
         right: 15,
         top: 15,
-        bottom: 40
-      }
-    }
+        bottom: 40,
+      },
+    },
   };
 
   // خيارات مخطط أسباب الرفض
@@ -617,12 +629,12 @@ const DepartmentDetails = () => {
         labels: {
           font: {
             size: 13,
-            weight: 'bold'
+            weight: "bold",
           },
-          padding: 15
-        }
-      }
-    }
+          padding: 15,
+        },
+      },
+    },
   };
 
   // خيارات مخطط التحليل الزمني
@@ -637,27 +649,27 @@ const DepartmentDetails = () => {
           text: "عدد الطلبات",
           font: {
             size: 15,
-            weight: 'bold'
-          }
+            weight: "bold",
+          },
         },
         ticks: {
           font: {
             size: 13,
-            weight: 'bold'
-          }
-        }
+            weight: "bold",
+          },
+        },
       },
       x: {
         ticks: {
           font: {
             size: 13,
-            weight: 'bold'
+            weight: "bold",
           },
           maxRotation: 45,
           minRotation: 45,
-          padding: 15
-        }
-      }
+          padding: 15,
+        },
+      },
     },
     plugins: {
       legend: {
@@ -665,12 +677,12 @@ const DepartmentDetails = () => {
         labels: {
           font: {
             size: 13,
-            weight: 'bold'
+            weight: "bold",
           },
-          padding: 15
-        }
-      }
-    }
+          padding: 15,
+        },
+      },
+    },
   };
 
   const quickStats = [
@@ -1118,7 +1130,11 @@ const DepartmentDetails = () => {
           <h3 className={styles.chartTitle}>
             <FaChartPie className={styles.chartIcon} /> حالات الطلبات
           </h3>
-          <div className={styles.chartWrapper} style={{ height: "400px" }} ref={pieChartRef}>
+          <div
+            className={styles.chartWrapper}
+            style={{ height: "400px" }}
+            ref={pieChartRef}
+          >
             {loading?.statusPieChart ? (
               <div className={styles.chartLoading}>
                 <div className={styles.loader}></div>
@@ -1137,7 +1153,11 @@ const DepartmentDetails = () => {
           <h3 className={styles.chartTitle}>
             <FaChartBar className={styles.chartIcon} /> متوسط وقت المعالجة
           </h3>
-          <div className={styles.chartWrapper} style={{ height: "400px" }} ref={processingTimeChartRef}>
+          <div
+            className={styles.chartWrapper}
+            style={{ height: "400px" }}
+            ref={processingTimeChartRef}
+          >
             {loading?.processingTime ? (
               <div className={styles.chartLoading}>
                 <div className={styles.loader}></div>
@@ -1150,9 +1170,14 @@ const DepartmentDetails = () => {
         </div>
         <div className={styles.chartCard}>
           <h3 className={styles.chartTitle}>
-            <FaChartBar className={styles.chartIcon} /> عدد الطلبات التي وصلت للإدارة
+            <FaChartBar className={styles.chartIcon} /> عدد الطلبات التي وصلت
+            للإدارة
           </h3>
-          <div className={styles.chartWrapper} style={{ height: "400px" }} ref={requestsCountChartRef}>
+          <div
+            className={styles.chartWrapper}
+            style={{ height: "400px" }}
+            ref={requestsCountChartRef}
+          >
             {loading?.requestsCount ? (
               <div className={styles.chartLoading}>
                 <div className={styles.loader}></div>
@@ -1167,7 +1192,11 @@ const DepartmentDetails = () => {
           <h3 className={styles.chartTitle}>
             <FaChartPie className={styles.chartIcon} /> نسب أسباب الرفض
           </h3>
-          <div className={styles.chartWrapper} style={{ height: "400px" }} ref={rejectionChartRef}>
+          <div
+            className={styles.chartWrapper}
+            style={{ height: "400px" }}
+            ref={rejectionChartRef}
+          >
             {loading?.rejectionReasons ? (
               <div className={styles.chartLoading}>
                 <div className={styles.loader}></div>
@@ -1185,7 +1214,11 @@ const DepartmentDetails = () => {
         <h3 className={styles.chartTitle}>
           <FaChartLine className={styles.chartIcon} /> تطور أعداد الطلبات
         </h3>
-        <div className={styles.chartWrapper} style={{ height: "400px" }} ref={timeAnalysisChartRef}>
+        <div
+          className={styles.chartWrapper}
+          style={{ height: "400px" }}
+          ref={timeAnalysisChartRef}
+        >
           {loading?.timeAnalysis ? (
             <div className={styles.chartLoading}>
               <div className={styles.loader}></div>
@@ -1201,4 +1234,3 @@ const DepartmentDetails = () => {
 };
 
 export default DepartmentDetails;
-
