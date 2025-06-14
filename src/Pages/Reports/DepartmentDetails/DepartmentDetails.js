@@ -673,7 +673,6 @@ const DepartmentDetails = () => {
     }
   };
 
-  // البيانات السريعة في بطاقات
   const quickStats = [
     {
       id: 1,

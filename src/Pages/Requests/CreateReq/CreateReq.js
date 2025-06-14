@@ -242,9 +242,8 @@ const CreateReq = () => {
               <select
                 id="applicationType"
                 name="applicationType"
-                className={`${styles.formSelect} ${
-                  formErrors.applicationType ? styles.error : ""
-                }`}
+                className={`${styles.formSelect} ${formErrors.applicationType ? styles.error : ""
+                  }`}
                 value={formData.applicationType || ""}
                 onChange={handleTypeChange}
                 disabled={loading}
@@ -301,9 +300,8 @@ const CreateReq = () => {
                 type="text"
                 id="studentId"
                 name="studentId"
-                className={`${styles.formControl} ${
-                  formErrors.studentId || studentIdError ? styles.error : ""
-                }`}
+                className={`${styles.formControl} ${formErrors.studentId || studentIdError ? styles.error : ""
+                  }`}
                 value={formData.studentId || ""}
                 maxLength={14}
                 onChange={handleChange}
@@ -325,9 +323,8 @@ const CreateReq = () => {
                 type="text"
                 id="studentName"
                 name="studentName"
-                className={`${styles.formControl} ${
-                  formErrors.studentName ? styles.error : ""
-                }`}
+                className={`${styles.formControl} ${formErrors.studentName ? styles.error : ""
+                  }`}
                 value={formData.studentName || ""}
                 onChange={handleChange}
                 disabled={loading}
@@ -347,9 +344,8 @@ const CreateReq = () => {
                 type="text"
                 id="studentPhone"
                 name="studentPhone"
-                className={`${styles.formControl} ${
-                  formErrors.studentPhone ? styles.error : ""
-                }`}
+                className={`${styles.formControl} ${formErrors.studentPhone ? styles.error : ""
+                  }`}
                 value={formData.studentPhone || ""}
                 onChange={handleChange}
                 disabled={loading}

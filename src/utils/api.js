@@ -1,12 +1,9 @@
 import axios from 'axios';
 
-// Base API URL
 const BASE_URL = 'https://nextstep.runasp.net/api';
 
-// CORS proxy URL for development
 const CORS_PROXY = 'https://thingproxy.freeboard.io/fetch/';
 
-// Create axios instance with default configuration
 const api = axios.create({
 
     baseURL: process.env.NODE_ENV === 'development'
@@ -17,7 +14,6 @@ const api = axios.create({
     }
 });
 
-// Add request interceptor to include token for authorized requests
 api.interceptors.request.use(
     (config) => {
         const token = sessionStorage.getItem('token');
