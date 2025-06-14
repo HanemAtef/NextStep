@@ -32,7 +32,6 @@ const ProtectedRoute = ({ allowedRole, redirectPath = "/login" }) => {
     return <Navigate to={redirectPath} replace />;
   }
 
-  // Check if role is known
   if (!isKnownRole(userRole)) {
     return <Navigate to="/" replace />;
   }
@@ -93,15 +92,12 @@ const ProtectedRoute = ({ allowedRole, redirectPath = "/login" }) => {
       const userRoles = JSON.parse(sessionStorage.getItem("roles") || "[]");
       const restrictedRoles = ["مجلس الكليه", "لجنه الدرسات العليا"];
 
-      // If trying to access create request page
       if (location.pathname === "/create") {
-        // Check if user has any restricted role
         if (userRoles.some((role) => restrictedRoles.includes(role))) {
           return <Navigate to="/inbox" replace />;
         }
       }
 
-      // For other pages, allow access if user has any role
       return <Outlet />;
     }
 

@@ -16,13 +16,6 @@ export const fetchDepartments = createAsyncThunk(
     async () => {
         try {
             const res = await axios.get(API_URL, { headers: getHeaders() });
-            // console.log("✅ Department API response:", res.data);
-            // console.log("✅ Department data structure:", {
-            //     isArray: Array.isArray(res.data),
-            //     length: res.data.length,
-            //     firstItem: res.data.length > 0 ? res.data[0] : null,
-            //     keys: res.data.length > 0 ? Object.keys(res.data[0]) : []
-            // });
             return res.data;
         } catch (error) {
             console.error('Error fetching departments:', error.response || error.message);

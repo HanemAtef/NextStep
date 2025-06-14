@@ -13,7 +13,6 @@ const DashLayout = ({ title }) => {
     const roles = JSON.parse(sessionStorage.getItem("roles") || "[]");
     const restrictedRoles = ["مجلس الكليه", "لجنه الدرسات العليا"];
 
-    // Set canCreateRequests to true if user has any role that is not restricted
     setCanCreateRequests(roles.length > 0 && !roles.some(role => restrictedRoles.includes(role)));
   }, []);
 

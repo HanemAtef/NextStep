@@ -20,8 +20,6 @@ import { Chart, registerables } from "chart.js";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { generateDashboardReport } from "./DashboardReportGenerator";
-
-// استيراد actions من Redux slice
 import {
   fetchStats,
   fetchDepartments,
@@ -36,7 +34,6 @@ import {
 // تسجيل جميع مكونات Chart.js
 Chart.register(...registerables);
 
-// Make sure Chart.js is properly configured
 Chart.defaults.scale.ticks.display = true;
 
 const ReportsDashboard = () => {
@@ -63,42 +60,8 @@ const ReportsDashboard = () => {
   const [resetMessage, setResetMessage] = useState("");
 
   useEffect(() => {
-    // console.log("📊 Redux State Data:", {
-    //     stats: stats,
-    //     dateRange: dateRange,
-    //     pieStatus: pieStatus,
-    //     departmentStatus: departmentStatus,
-    //     departments: departments ? `${departments.length} items` : 'No departments',
-    //     timeAnalysis: timeAnalysis,
-    //     requestsCount: requestsCount,
-    //     createdRequests: createdRequests,
-    // });
 
-    // فحص بيانات الإدارات بالتفصيل
-    // if (departments && departments.length > 0) {
-    //     console.log("📊 Departments data detailed:", {
-    //         firstDepartment: departments[0],
-    //         keys: Object.keys(departments[0]),
-    //         departmentNames: departments.map(d => d.departmentName || d.name),
-    //         departmentIds: departments.map(d => d.id)
-    //     });
-    // } else {
-    //     console.log("📊 No departments data available");
-    // }
-
-    // التحقق من بنية البيانات المستلمة من API
     if (departmentStatus) {
-      // console.log("📊 Department Status Structure:",
-      //     {
-      //         hasLabels: Boolean(departmentStatus.labels),
-      //         labelsType: departmentStatus.labels ? typeof departmentStatus.labels : 'undefined',
-      //         isLabelsArray: Array.isArray(departmentStatus.labels),
-      //         labelsLength: departmentStatus.labels ? departmentStatus.labels.length : 0,
-      //         hasData: Boolean(departmentStatus.data),
-      //         dataType: departmentStatus.data ? typeof departmentStatus.data : 'undefined',
-      //         isDataArray: Array.isArray(departmentStatus.data),
-      //         dataLength: departmentStatus.data ? departmentStatus.data.length : 0,
-      //     });
     }
   }, [
     stats,
@@ -485,7 +448,6 @@ const ReportsDashboard = () => {
     };
   };
 
-  // إعداد بيانات مخطط الأعمدة لمتوسط وقت المعالجة
   const getProcessingTimeData = () => {
     if (!departments.length || !timeAnalysis.data) {
       return {
@@ -501,7 +463,6 @@ const ReportsDashboard = () => {
       };
     }
 
-    // فلترة البيانات لإزالة إدارة التقارير
     const filteredData = timeAnalysis.labels.reduce(
       (acc, label, index) => {
         if (
@@ -516,7 +477,6 @@ const ReportsDashboard = () => {
       { labels: [], values: [] }
     );
 
-    // تخصيص ألوان للإدارات
     const departmentColors = filteredData.labels.map(
       (_, index) => palette[index % palette.length]
     );
@@ -534,7 +494,6 @@ const ReportsDashboard = () => {
     };
   };
 
-  // إعداد بيانات مخطط الخط للطلبات المنشأة
   const getCreatedRequestsLineData = () => {
     if (!createdRequests.labels || !createdRequests.data) {
       return {
@@ -621,7 +580,7 @@ const ReportsDashboard = () => {
           label: "عدد الطلبات",
           data: filteredData.values,
           backgroundColor: departmentColors,
-          borderColor: departmentColors.map((color) => color + "80"), // إضافة حدود شفافة
+          borderColor: departmentColors.map((color) => color + "80"),
           borderWidth: 1,
         },
       ],
@@ -1051,7 +1010,7 @@ const ReportsDashboard = () => {
 
         <button
           className={styles.generateReportButton}
-          // onClick={handleGenerateReport} //
+          onClick={handleGenerateReport} //
           disabled={isResetting}
         >
           <FaFileExport className={styles.buttonIcon} /> توليد تقرير

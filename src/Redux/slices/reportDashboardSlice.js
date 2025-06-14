@@ -7,7 +7,6 @@ const formatDateForAPI = (date) => {
   if (!date) return "";
 
   try {
-    // If it's already a Date object
     const d = date instanceof Date ? date : new Date(date);
     const year = d.getFullYear();
     const month = String(d.getMonth() + 1).padStart(2, "0");
@@ -168,7 +167,6 @@ export const fetchRequestsCount = createAsyncThunk(
       let url = `${API_URL}/Reports/departments/requests-count`;
 
       if (startDate && endDate) {
-        // Format dates properly
         const formattedStartDate = formatDateForAPI(startDate);
         const formattedEndDate = formatDateForAPI(endDate);
         url += `?startDate=${formattedStartDate}&endDate=${formattedEndDate}`;
@@ -202,7 +200,6 @@ export const fetchCreatedRequests = createAsyncThunk(
       let url = `${API_URL}/Reports/requests/created`;
 
       if (startDate && endDate) {
-        // Format dates properly
         const formattedStartDate = formatDateForAPI(startDate);
         const formattedEndDate = formatDateForAPI(endDate);
         url += `?startDate=${formattedStartDate}&endDate=${formattedEndDate}`;

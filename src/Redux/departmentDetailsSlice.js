@@ -12,10 +12,10 @@ const initialState = {
         receivedRequests: 0
     },
     rejectionReasons: {
-        paperwork: 40, // نقص في الأوراق
-        deadline: 25,  // انتهاء معاد القيد
-        failed: 20,    // لم يجتاز
-        other: 15      // أسباب أخرى
+        // paperwork: 40, // نقص في الأوراق
+        // deadline: 25,  // انتهاء معاد القيد
+        // failed: 20,    // لم يجتاز
+        // other: 15      // أسباب أخرى
     },
     dateRange: [null, null],
     loading: false,

@@ -12,12 +12,8 @@ const Details = ({ id }) => {
   const dispatch = useDispatch();
   const [lastFetchedId, setLastFetchedId] = useState(null);
 
-  // Use URL ID as fallback if prop ID is not provided
   const effectiveId = id || urlId;
 
-  // console.log("Details Component - Prop ID:", id);
-  // console.log("Details Component - URL ID:", urlId);
-  // console.log("Details Component - Effective ID being used:", effectiveId);
 
   const {
     data: request,

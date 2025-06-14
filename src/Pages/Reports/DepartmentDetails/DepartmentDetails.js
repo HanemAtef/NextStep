@@ -936,7 +936,7 @@ const DepartmentDetails = () => {
 
           <button
             className={styles.generateReportButton}
-            // onClick={handleGenerateReport}
+            onClick={handleGenerateReport}
             disabled={
               !department ||
               isGeneratingReport ||

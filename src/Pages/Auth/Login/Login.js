@@ -59,11 +59,9 @@ const Login = () => {
         if (response.status === 200) {
           const { roles, token } = response.data;
 
-          // Store token and roles
           sessionStorage.setItem("token", token);
           sessionStorage.setItem("roles", JSON.stringify(roles));
 
-          // Get the first role for navigation
           const firstRole = roles[0];
           sessionStorage.setItem("role", firstRole);
 

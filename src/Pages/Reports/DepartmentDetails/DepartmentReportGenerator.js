@@ -980,47 +980,7 @@ export const generateDepartmentReport = async (
         pdf.addImage(missingMessageImage, "JPEG", 20, 50, 170, 20);
       }
     }
-
-    ////////////////////////////////////////////////////////////////
-    if (chartRefs?.performanceChartRef?.current) {
-      pdf.addPage();
-      const perfImage = await convertChartToImage(
-        chartRefs.performanceChartRef
-      );
-      if (perfImage) {
-        const perfTitle = createTextElement("مقارنة أداء معالجة الطلبات", 24);
-        const perfTitleImage = await elementToImage(perfTitle);
-        if (perfTitleImage) {
-          pdf.addImage(perfTitleImage, "JPEG", 20, 10, 170, 15);
-        }
-        pdf.addImage(perfImage, "JPEG", 20, 30, 170, 100);
-
-        if (reportData?.performanceComparison?.labels) {
-          const perfHeaders = [
-            "الفترة",
-            "متوسط وقت المعالجة (ساعة)",
-            "عدد الطلبات المعالجة",
-          ];
-          const perfRows = reportData.performanceComparison.labels.map(
-            (label, index) => {
-              const avgTime = (
-                reportData.performanceComparison.avgTimes[index] || 0
-              ).toFixed(1);
-              const count = reportData.performanceComparison.counts[index] || 0;
-              return [label, avgTime, count];
-            }
-          );
-          const perfTable = createSingleTable(
-            perfHeaders,
-            perfRows,
-            "تفاصيل مقارنة أداء معالجة الطلبات"
-          );
-          await addTableToPDF(pdf, perfTable, 140);
-        }
-      }
-    }
-
-    ////////////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////
     const pageCount = pdf.internal.getNumberOfPages();
     for (let i = 1; i <= pageCount; i++) {
       pdf.setPage(i);

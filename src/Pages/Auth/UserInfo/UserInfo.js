@@ -126,7 +126,6 @@ function UserInfo() {
     navigate('/reports');
   };
 
-  // Check if user belongs to reports department
   const isReportsDepartment = userData.department &&
     (userData.department.includes('تقارير') ||
       userData.department.includes('احصائيات') ||

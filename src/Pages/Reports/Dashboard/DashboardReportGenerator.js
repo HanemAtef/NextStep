@@ -712,11 +712,9 @@ export const generateDashboardReport = async (
         if (lineTitleImage) {
           pdf.addImage(lineTitleImage, "JPEG", 20, 10, 170, 15);
         }
-        // تقليل حجم الرسم البياني لإفساح المجال للجدول
         pdf.addImage(lineChartImage, "JPEG", 20, 30, 170, 80);
 
         if (chartsData.createdRequests && chartsData.createdRequests.labels) {
-          // إزالة عمود نسبة التغيير
           const createdHeaders = ["التاريخ", "عدد الطلبات"];
           const createdRows = chartsData.createdRequests.labels.map(
             (label, index) => {
@@ -752,7 +750,6 @@ export const generateDashboardReport = async (
         pdf.addImage(timeLineChartImage, "JPEG", 20, 30, 170, 80);
 
         if (chartsData.requestsCount && chartsData.requestsCount.labels) {
-          // إزالة عمود النسبة المئوية
           const deptHeaders = ["الإدارة", "عدد الطلبات"];
           const deptRows = chartsData.requestsCount.labels
             .filter(

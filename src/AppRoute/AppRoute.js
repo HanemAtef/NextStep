@@ -26,7 +26,6 @@ import DepartmentDetails from "../Pages/Reports/DepartmentDetails/DepartmentDeta
 import ReportsDash from "../Pages/Dashboards/Reports/Dashboard/ReportsDash";
 import Nav from "../Component/Nav/Nav";
 
-// مكون مستقل لصفحة المستخدم مع شريط التنقل فقط
 const UserPageWithNav = () => (
   <>
     <Nav />
@@ -36,7 +35,6 @@ const UserPageWithNav = () => (
   </>
 );
 
-// مكون صفحة الرول غير المعروف
 const UnknownRole = () => (
   <div
     style={{
