@@ -150,10 +150,17 @@ export default function Inbox() {
           })
         );
       } catch (error) {
-        // console.error('Error loading inbox data:', error);
+        // console.error("Error loading inbox data:", error);
       }
     };
+
     loadData();
+
+    const intervalId = setInterval(() => {
+      loadData();
+    }, 10000); // 10000 ملي ثانية = 10 ثانية
+
+    return () => clearInterval(intervalId);
   }, [
     dispatch,
     currentPage,

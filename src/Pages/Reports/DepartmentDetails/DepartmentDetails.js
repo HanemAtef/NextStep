@@ -218,6 +218,14 @@ const DepartmentDetails = () => {
     }
   }, [dispatch, startDate, endDate]);
 
+  useEffect(() => {
+    const interval = setInterval(() => {
+      handleRefreshData();
+    }, 30000); // كل 30 ثانية
+
+    return () => clearInterval(interval);
+  }, [id, startDate, endDate]);
+  
   const statusData = useMemo(
     () => ({
       labels: [

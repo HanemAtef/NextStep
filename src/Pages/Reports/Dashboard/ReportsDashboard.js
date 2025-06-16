@@ -60,7 +60,6 @@ const ReportsDashboard = () => {
   const [resetMessage, setResetMessage] = useState("");
 
   useEffect(() => {
-
     if (departmentStatus) {
     }
   }, [
@@ -192,9 +191,14 @@ const ReportsDashboard = () => {
     );
   };
 
+  // التحديث التلقائي كل 10 ثانية
   useEffect(() => {
-    refreshData();
-  }, []);
+    const intervalId = setInterval(() => {
+      refreshData();
+    }, 10000); // 10 ثانية
+
+    return () => clearInterval(intervalId); 
+  }, [localDateRange.startDate, localDateRange.endDate, pieStatus]);
 
   useEffect(() => {
     const startDate =
