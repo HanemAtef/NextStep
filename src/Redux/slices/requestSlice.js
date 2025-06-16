@@ -3,7 +3,6 @@ import axios from 'axios';
 
 const API_URL = 'https://nextstep.runasp.net/api/ApplicationTypes';
 
-// ✅ تعديل هنا: التوكن يُجلب داخل الدالة
 const getHeaders = () => {
     const token = sessionStorage.getItem('token');
     if (!token) {
@@ -31,11 +30,11 @@ export const addrequest = createAsyncThunk(
     'request/add',
     async (newrequest) => {
         try {
-            console.log("Adding request:", JSON.stringify(newrequest, null, 2));
+            // console.log("Adding request:", JSON.stringify(newrequest, null, 2));
             const res = await axios.post(API_URL, newrequest, {
                 headers: getHeaders()
             });
-            console.log("Add request response:", res.data);
+            // console.log("Add request response:", res.data);
             return res.data;
         } catch (error) {
             console.error('API Error:', error.response?.data || error.message);
@@ -48,11 +47,11 @@ export const updaterequest = createAsyncThunk(
     'request/update',
     async (updatedrequest) => {
         try {
-            console.log("Updating request:", JSON.stringify(updatedrequest, null, 2));
+            // console.log("Updating request:", JSON.stringify(updatedrequest, null, 2));
             const res = await axios.put(API_URL, updatedrequest, {
                 headers: getHeaders()
             });
-            console.log("Update request response:", res.data);
+            // console.log("Update request response:", res.data);
             return res.data;
         } catch (error) {
             console.error('API Error:', error.response?.data || error.message);

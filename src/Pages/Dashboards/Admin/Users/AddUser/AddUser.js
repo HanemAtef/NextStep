@@ -76,7 +76,9 @@ const AddUser = () => {
   return (
     <div className={styles.container}>
       <div className={styles.header}>
-        <h2 className={styles.title}><FaUser /> إضافة مستخدم جديد</h2>
+        <h2 className={styles.title}>
+          <FaUser /> إضافة مستخدم جديد
+        </h2>
         <button onClick={goBack} className={styles.backButton}>
           <FaArrowRight /> العودة للقائمة
         </button>
@@ -111,8 +113,6 @@ const AddUser = () => {
           />
         </div>
 
-       
-
         <div className={styles.formGroup}>
           <label htmlFor="password">كلمة المرور</label>
           <input
@@ -146,6 +146,7 @@ const AddUser = () => {
             <option value="5">علوم حاسب</option>
             <option value="6">نظم المعلومات</option>
             <option value="7">إدارة الدرسات العليا</option>
+            <option value="8">اداره التقارير </option>
           </select>
         </div>
 
@@ -155,7 +156,11 @@ const AddUser = () => {
           <button type="submit" className={styles.saveButton}>
             <FaSave /> إضافة المستخدم
           </button>
-          <button type="button" className={styles.cancelButton} onClick={goBack}>
+          <button
+            type="button"
+            className={styles.cancelButton}
+            onClick={goBack}
+          >
             <FaTimes /> إلغاء
           </button>
         </div>

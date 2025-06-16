@@ -4,7 +4,7 @@ import { FaTimes } from 'react-icons/fa';
 import { FiEdit, FiTrash2 } from 'react-icons/fi';
 import styles from "./RequestList.module.css";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchrequests, deleterequest } from "../../../../../Redux/slices/requestSlice"; // التأكد من استيراد الأكشن
+import { fetchrequests, deleterequest } from "../../../../../Redux/slices/requestSlice";
 
 export default function RequestList() {
     const navigate = useNavigate();
@@ -31,10 +31,9 @@ export default function RequestList() {
             setRequestToDelete(null);
         }
     };
-
-    const goToAddRequest = () => {
+    const goToAddRequest=()=>{
         navigate("/admin/requests/add");
-    };
+    }
 
     const goToEditRequest = (id) => {
         navigate(`/admin/requests/edit/${id}`);

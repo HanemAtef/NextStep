@@ -17,7 +17,8 @@ const AddRequest = () => {
     { id: 4, name: "ذكاء اصطناعي" },
     { id: 5, name: "علوم حاسب" },
     { id: 6, name: "نظم المعلومات" },
-    { id: 7, name: "إدارة الدرسات العليا" }
+    { id: 7, name: "إدارة الدرسات العليا" },
+    { id: 8, name: "اداره التقارير" }
   ];
 
   const [request, setRequest] = useState({
@@ -50,6 +51,7 @@ const AddRequest = () => {
       requierments: newRequirements
     }));
   };
+
 
   const addRequirement = () => {
     setRequest(prevRequest => ({

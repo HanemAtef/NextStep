@@ -193,13 +193,13 @@ const ReportsDashboard = () => {
   };
 
   // التحديث التلقائي كل 10 ثانية
-  useEffect(() => {
-    const intervalId = setInterval(() => {
-      refreshData();
-    }, 30000); // 30 ثانية
+  // useEffect(() => {
+  //   const intervalId = setInterval(() => {
+  //     refreshData();
+  //   }, 30000); // 30 ثانية
 
-    return () => clearInterval(intervalId);
-  }, [localDateRange.startDate, localDateRange.endDate, pieStatus]);
+  //   return () => clearInterval(intervalId);
+  // }, [localDateRange.startDate, localDateRange.endDate, pieStatus]);
 
   useEffect(() => {
     const startDate =
