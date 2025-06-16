@@ -310,8 +310,17 @@
     transition: background-color 0.3s ease;
 }
 
-.generateReportButton:hover {
+.generateReportButton:hover:not(:disabled) {
     background-color: #4aa8e8;
+}
+
+.generateReportButton:active:not(:disabled) {
+    transform: translateY(1px);
+}
+
+.generateReportButton:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
 }
 
 .generateReportButton svg {

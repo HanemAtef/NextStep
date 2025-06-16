@@ -941,7 +941,7 @@ const DepartmentDetails = () => {
               }
             />
           </button>
-
+          
           <button
             className={styles.generateReportButton}
             onClick={handleGenerateReport}

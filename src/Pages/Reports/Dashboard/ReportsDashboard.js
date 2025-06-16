@@ -58,6 +58,7 @@ const ReportsDashboard = () => {
 
   const [isResetting, setIsResetting] = useState(false);
   const [resetMessage, setResetMessage] = useState("");
+  const [isGeneratingReport, setIsGeneratingReport] = useState(false);
 
   useEffect(() => {
     if (departmentStatus) {
@@ -197,7 +198,7 @@ const ReportsDashboard = () => {
       refreshData();
     }, 30000); // 30 ثانية
 
-    return () => clearInterval(intervalId); 
+    return () => clearInterval(intervalId);
   }, [localDateRange.startDate, localDateRange.endDate, pieStatus]);
 
   useEffect(() => {
@@ -786,6 +787,7 @@ const ReportsDashboard = () => {
   //  توليد التقرير
   const handleGenerateReport = async () => {
     try {
+      setIsGeneratingReport(true);
       const chartRefs = {
         pieChartRef,
         barChartRef,
@@ -819,6 +821,8 @@ const ReportsDashboard = () => {
       );
     } catch (error) {
       console.error("خطأ في توليد التقرير:", error);
+    } finally {
+      setIsGeneratingReport(false);
     }
   };
 
@@ -1014,8 +1018,8 @@ const ReportsDashboard = () => {
 
         <button
           className={styles.generateReportButton}
-          onClick={handleGenerateReport} //
-          disabled={isResetting}
+          onClick={handleGenerateReport}
+          disabled={isResetting || isGeneratingReport}
         >
           <FaFileExport className={styles.buttonIcon} /> توليد تقرير
         </button>
