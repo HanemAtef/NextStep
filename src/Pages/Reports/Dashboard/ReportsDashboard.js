@@ -195,7 +195,7 @@ const ReportsDashboard = () => {
   useEffect(() => {
     const intervalId = setInterval(() => {
       refreshData();
-    }, 10000); // 10 ثانية
+    }, 30000); // 30 ثانية
 
     return () => clearInterval(intervalId); 
   }, [localDateRange.startDate, localDateRange.endDate, pieStatus]);
